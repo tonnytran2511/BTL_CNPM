@@ -329,6 +329,61 @@ test(
         },
       );
       await t.test(
+        "current account role and activation take effect on an existing session",
+        async () => {
+          try {
+            await pool.query("UPDATE users SET role='student' WHERE id=$1", [
+              operator.body.id,
+            ]);
+            const denied = await request("/network/overview", {
+              cookie: operator.cookie,
+            });
+            assert.equal(denied.status, 403);
+            assert.equal(denied.body.statusCode, 403);
+            assert.equal(denied.body.code, "HTTP_403");
+            assert.equal(typeof denied.body.message, "string");
+            assert.equal(
+              (await request("/auth/me", { cookie: operator.cookie })).body
+                .role,
+              "student",
+            );
+            await pool.query("UPDATE users SET active=false WHERE id=$1", [
+              operator.body.id,
+            ]);
+            assert.equal(
+              (await request("/auth/me", { cookie: operator.cookie })).status,
+              401,
+            );
+            assert.equal(
+              (await request("/hubs", { cookie: operator.cookie })).status,
+              401,
+            );
+            assert.equal(
+              (
+                await request("/auth/login", {
+                  method: "POST",
+                  body: {
+                    email: env.SEED_OPERATOR_EMAIL,
+                    password: env.SEED_OPERATOR_PASSWORD,
+                  },
+                })
+              ).status,
+              401,
+            );
+          } finally {
+            await pool.query(
+              "UPDATE users SET role='operator', active=true WHERE id=$1",
+              [operator.body.id],
+            );
+          }
+          assert.equal(
+            (await request("/network/overview", { cookie: operator.cookie }))
+              .status,
+            200,
+          );
+        },
+      );
+      await t.test(
         "cross-origin mutations rejected; logout revokes existing token immediately",
         async () => {
           assert.equal(

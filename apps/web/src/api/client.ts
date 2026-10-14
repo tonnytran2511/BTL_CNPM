@@ -10,6 +10,7 @@ export class RequestError extends Error {
   constructor(
     message: string,
     readonly status: number,
+    readonly code: string = `HTTP_${status}`,
   ) {
     super(message);
   }
@@ -47,6 +48,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
         ? String((body as ApiError).message)
         : "Yêu cầu thất bại.",
       response.status,
+      body &&
+        typeof body === "object" &&
+        "code" in body &&
+        typeof body.code === "string"
+        ? body.code
+        : undefined,
     );
   return body as T;
 }
