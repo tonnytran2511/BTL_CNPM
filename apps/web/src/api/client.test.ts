@@ -38,3 +38,78 @@ it("preserves cancellation instead of presenting an offline error", async () => 
   vi.stubGlobal("fetch", vi.fn().mockRejectedValue(aborted));
   await expect(api.hubs()).rejects.toBe(aborted);
 });
+
+it("aborts a hung mutation at the configured deadline without automatically replaying it", async () => {
+  vi.useFakeTimers();
+  const fetchMock = vi.fn(
+    (_path, options: RequestInit) =>
+      new Promise((_resolve, reject) => {
+        options.signal?.addEventListener(
+          "abort",
+          () => reject(new DOMException("Aborted", "AbortError")),
+          { once: true },
+        );
+      }),
+  );
+  vi.stubGlobal("fetch", fetchMock);
+  const pending = expect(api.logout()).rejects.toMatchObject({
+    status: 0,
+    code: "REQUEST_TIMEOUT",
+  });
+  await vi.advanceTimersByTimeAsync(1000);
+  await pending;
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+  expect(vi.getTimerCount()).toBe(0);
+  vi.useRealTimers();
+});
+
+it("applies the same deadline while reading a stalled response body", async () => {
+  vi.useFakeTimers();
+  vi.stubGlobal(
+    "fetch",
+    vi.fn((_path, options: RequestInit) =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () =>
+          new Promise((_resolve, reject) => {
+            options.signal?.addEventListener(
+              "abort",
+              () => reject(new DOMException("Aborted", "AbortError")),
+              { once: true },
+            );
+          }),
+      }),
+    ),
+  );
+  const pending = expect(api.hubs()).rejects.toMatchObject({
+    code: "REQUEST_TIMEOUT",
+  });
+  await vi.advanceTimersByTimeAsync(1000);
+  await pending;
+  vi.useRealTimers();
+});
+
+it("forwards caller cancellation and clears its deadline", async () => {
+  vi.useFakeTimers();
+  const controller = new AbortController();
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(
+      (_path, options: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          options.signal?.addEventListener(
+            "abort",
+            () => reject(options.signal?.reason),
+            { once: true },
+          );
+        }),
+    ),
+  );
+  const reason = new DOMException("Selection changed", "AbortError");
+  const pending = expect(api.hubs(controller.signal)).rejects.toBe(reason);
+  controller.abort(reason);
+  await pending;
+  expect(vi.getTimerCount()).toBe(0);
+  vi.useRealTimers();
+});

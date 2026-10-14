@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
@@ -92,6 +92,7 @@ test(
         status: response.status,
         body: await response.json(),
         cookie: response.headers.get("set-cookie")?.split(";")[0],
+        headers: response.headers,
       };
     };
     try {
@@ -381,6 +382,142 @@ test(
               .status,
             200,
           );
+        },
+      );
+      await t.test(
+        "login rotates the current session and stores only a token hash",
+        async () => {
+          const body = {
+            email: env.SEED_STUDENT_EMAIL,
+            password: env.SEED_STUDENT_PASSWORD,
+          };
+          const first = await request("/auth/login", { method: "POST", body });
+          const second = await request("/auth/login", {
+            method: "POST",
+            body,
+            cookie: first.cookie,
+          });
+          assert.equal(first.status, 201);
+          assert.equal(second.status, 201);
+          assert.notEqual(first.cookie, second.cookie);
+          assert.equal(
+            (await request("/auth/me", { cookie: first.cookie })).status,
+            401,
+          );
+          assert.equal(
+            (await request("/auth/me", { cookie: second.cookie })).status,
+            200,
+          );
+          const rawToken = second.cookie.slice("session=".length);
+          const hashes = (
+            await pool.query(
+              "SELECT token_hash FROM sessions WHERE user_id=$1",
+              [second.body.id],
+            )
+          ).rows.map((row) => row.token_hash);
+          assert.ok(
+            hashes.includes(
+              createHash("sha256").update(rawToken).digest("hex"),
+            ),
+          );
+          assert.ok(!hashes.includes(rawToken));
+          const cookieHeader = second.headers.get("set-cookie");
+          assert.match(cookieHeader, /HttpOnly/i);
+          assert.match(cookieHeader, /SameSite=Strict/i);
+          assert.match(cookieHeader, /Path=\/api/i);
+          assert.match(
+            cookieHeader,
+            new RegExp(`Max-Age=${env.SESSION_TTL_SECONDS}(?:;|$)`, "i"),
+          );
+          const logout = await request("/auth/logout", {
+            method: "POST",
+            cookie: second.cookie,
+          });
+          assert.match(logout.headers.get("set-cookie"), /Path=\/api/i);
+          assert.equal(
+            (await request("/auth/me", { cookie: second.cookie })).status,
+            401,
+          );
+        },
+      );
+      await t.test(
+        "login rate limit and Secure cookie config enforced on an isolated API instance",
+        async () => {
+          const isolatedPort = await freePort();
+          const isolatedBase = `http://127.0.0.1:${isolatedPort}/api`;
+          const limited = spawn(process.execPath, ["apps/api/dist/main.js"], {
+            cwd: root,
+            env: {
+              ...env,
+              API_PORT: String(isolatedPort),
+              COOKIE_SECURE: "true",
+              LOGIN_MAX_ATTEMPTS: "2",
+            },
+            stdio: ["ignore", "pipe", "pipe"],
+          });
+          let output = "";
+          limited.stdout.on("data", (chunk) => {
+            output += chunk;
+          });
+          limited.stderr.on("data", (chunk) => {
+            output += chunk;
+          });
+          try {
+            let ready = false;
+            for (let attempt = 0; attempt < 100; attempt++) {
+              if (limited.exitCode !== null) throw new Error(output);
+              try {
+                if ((await fetch(isolatedBase + "/health")).ok) {
+                  ready = true;
+                  break;
+                }
+              } catch {}
+              await new Promise((resolve) => setTimeout(resolve, 100));
+            }
+            assert.ok(ready, "Isolated API should start");
+            const login = (password) =>
+              fetch(isolatedBase + "/auth/login", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Origin: env.WEB_ORIGIN,
+                },
+                body: JSON.stringify({
+                  email: env.SEED_OPERATOR_EMAIL,
+                  password,
+                }),
+              });
+            const valid = await login(env.SEED_OPERATOR_PASSWORD);
+            assert.equal(valid.status, 201);
+            const cookie = valid.headers.get("set-cookie");
+            assert.match(cookie, /; Secure(?:;|$)/i);
+            assert.match(cookie, /HttpOnly/i);
+            assert.match(cookie, /SameSite=Strict/i);
+            await valid.json();
+            const count = Number(
+              (await pool.query("SELECT count(*) FROM sessions")).rows[0].count,
+            );
+            const invalid = await login("wrong");
+            assert.equal(invalid.status, 401);
+            await invalid.json();
+            const blocked = await login(env.SEED_OPERATOR_PASSWORD);
+            assert.equal(blocked.status, 429);
+            assert.equal((await blocked.json()).code, "HTTP_429");
+            assert.ok(Number(blocked.headers.get("retry-after")) > 0);
+            assert.equal(blocked.headers.get("set-cookie"), null);
+            assert.equal(
+              Number(
+                (await pool.query("SELECT count(*) FROM sessions")).rows[0]
+                  .count,
+              ),
+              count,
+            );
+          } finally {
+            if (limited.exitCode === null) {
+              limited.kill("SIGTERM");
+              await once(limited, "exit");
+            }
+          }
         },
       );
       await t.test(

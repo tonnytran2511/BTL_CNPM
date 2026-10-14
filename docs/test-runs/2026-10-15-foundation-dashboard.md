@@ -32,3 +32,17 @@ Test mới nằm trong `apps/web/src/hooks/dashboard.test.ts`, `apps/web/src/api
 Đây là regression test nền tảng, không phải kết quả chạy đủ 36 case trong `docs/integration-test-plan.md` (tài liệu ở PR #1). IT-01/02/03/04 có bằng chứng cho các điều kiện được fixture hiện tại kiểm tra; chưa đánh dấu pass toàn bộ các case nhiều điều kiện. IT-05 mới có kiểm tra riêng phía hooks và biến đổi dữ liệu API; đã smoke-test Chrome với API local thật: mở dashboard operator, mở chi tiết Hub và làm mới vẫn giữ panel/dữ liệu. Các nhánh mất mạng/phục hồi/401 mới được kiểm tra bằng hooks/API tests, chưa chạy toàn bộ IT-05 bằng trình duyệt. IT-06 hết hạn reservation và IT-07 trở đi phụ thuộc module thành viên, chưa chạy.
 
 Chưa đo tải/latency, chưa chạy test trên deployment, chưa demo xuyên module, chưa review fix của thành viên. T15/T29 chưa đủ điều kiện đánh dấu hoàn thành toàn bộ.
+
+## Lần chạy mở rộng — deadline và bảo mật session
+
+Cùng ngày/môi trường, tiếp tục trên branch `feat/dashboard-reliability`:
+
+- `npm run build`: pass API/web.
+- `npm test`: **13 nhóm API con + 1 parent (14 tests)** pass trên PostgreSQL/HTTP thật; **16 tests frontend** pass trong 3 file.
+- Thêm kiểm tra API: session rotation vô hiệu token cũ, DB chỉ có SHA-256 của token, cookie HttpOnly/SameSite/Path/Max-Age; một API instance riêng với cookie Secure và giới hạn 2 lượt login, lượt thứ ba 429 và không tạo thêm session. Instance này dừng trong cleanup; không đổi cấu hình API vận hành.
+- Thêm kiểm tra frontend: request mutation treo bị hủy đúng deadline mà không tự replay; deadline áp dụng cả khi đọc body; caller cancellation dọn timer; hook dùng API client thật phục hồi sau timeout. Fetch được mô phỏng trong các test này.
+- Chrome + API local thật: dùng tab kiểm thử riêng, tạm đặt offline bằng CDP. Làm mới hiển thị lỗi, giữ số liệu/thời gian trước đó và panel Hub. Khôi phục online rồi làm mới: lỗi biến mất, timestamp tăng, vẫn đúng user/panel. Mạng được trả lại bình thường sau kiểm thử.
+
+Các bằng chứng trên mở rộng nhánh lỗi/phục hồi của IT-05 và bảo mật IT-01/02/03; không tự đánh dấu hoàn thành các case tổng hợp hoặc module chưa có code.
+
+Chrome kiểm tra thêm deadline thật: tạm giữ riêng request `/api/network/overview`, không giữ Document navigation. Sau deadline cấu hình, UI báo “Máy chủ phản hồi quá lâu”, giữ số liệu cũ và bật lại nút Làm mới. Gỡ rule, giải phóng request còn giữ và làm mới: lỗi biến mất, timestamp tăng, nút trở lại bình thường. Network emulation và interception đã được gỡ. Một thử nghiệm latency trên toàn tab trước đó bị gián đoạn do trang reload khi Vite config đổi, không dùng lần đó làm bằng chứng timeout.

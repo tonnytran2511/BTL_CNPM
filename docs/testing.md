@@ -34,3 +34,5 @@ Docker daemon không chạy trên máy tại thời điểm thực hiện; đã 
 `npm test` hiện chạy cả API và frontend. Lần chạy mới pass 11 nhóm API với PostgreSQL/HTTP thật (Node đếm 12 tests bao gồm parent) và 12 test frontend với Vitest/jsdom/API mocks. Frontend kiểm tra polling, tránh request chồng, lỗi/phục hồi, phiên hết hạn, phản hồi cũ và retry chi tiết Hub. API thêm kiểm tra thay đổi quyền/active trên session hiện có. Build pass.
 
 Execution chi tiết và giới hạn: [test-runs/2026-10-15-foundation-dashboard.md](test-runs/2026-10-15-foundation-dashboard.md). Test frontend không thay thế kiểm thử toàn luồng trình duyệt–API–DB; 36 case tích hợp vẫn chưa chạy đủ.
+
+Lần mở rộng cùng ngày: API **13 nhóm con + 1 parent = 14 tests**, frontend **16 tests** pass. Bổ sung deadline request/body, recovery qua API client thật trong jsdom; session rotation/token hash/cookie và login rate limit trên API instance riêng. Chrome đã kiểm tra mất mạng/online phục hồi bằng network emulation riêng cho tab. Xem execution log ở trên.
