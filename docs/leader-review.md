@@ -42,4 +42,8 @@ PR nhỏ theo một luồng, không đợi hết module mới ghép. Chủ modul
 
 Main chứa bản chạy được; branch feature/<module>-<task> dùng cho triển khai. Mở PR vào main, dùng PR template, CI pass và ít nhất một người review trước merge. Chưa cấu hình branch protection trên GitHub; phải kiểm tra cài đặt repo sau khi tạo, không coi đây là rule server đã được bật.
 
-Remote/CI URL và bằng chứng clone sạch được cập nhật sau khi publish. Không đưa .env, cluster local, build output hay hai PDF đề bài vào repo public.
+Repository public: https://github.com/tonnytran2511/BTL_CNPM. Remote local dùng SSH; README có URL HTTPS để clone.
+
+CI commit nền tảng `2f22bef` đã pass trên Ubuntu/Node 22: checkout, npm ci, setup env, format, build và integration test. Bằng chứng: https://github.com/tonnytran2511/BTL_CNPM/actions/runs/38594291555.
+
+Danh sách publish đã được kiểm tra không chứa mật khẩu `.env`; .env, cluster local, build output và hai PDF đề bài được giữ ngoài repo public. Chưa có branch protection hoặc lời mời thành viên; chờ username để mời đúng người.

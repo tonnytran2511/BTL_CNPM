@@ -2,7 +2,7 @@
 
 ## Phần đã có
 
-Nhóm trưởng đã dựng workspace, auth/session/role guard, danh sách/chi tiết Hub, overview, polling, schema cốt lõi, migration/seed và snapshot. Chưa đánh dấu các task được review/merge vì repository chưa có remote/PR.
+Nhóm trưởng đã dựng workspace, auth/session/role guard, danh sách/chi tiết Hub, overview, polling, schema cốt lõi, migration/seed và snapshot. Source đã lên repository public `tonnytran2511/BTL_CNPM`; commit nền tảng đã pass CI. Chưa đánh dấu task được peer review vì chưa có bằng chứng review của thành viên.
 
 ## Cách bổ sung module
 
