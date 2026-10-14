@@ -7,7 +7,7 @@
     "packages/*"
   ],
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.13.0"
   },
   "scripts": {
     "setup:env": "node scripts/setup-env.mjs",
@@ -16,9 +16,11 @@
     "db:seed": "node scripts/seed.mjs",
     "build": "npm run build -w @emobility/api && npm run build -w @emobility/web",
     "dev": "npm run build -w @emobility/api && concurrently -k -n api,types,web \"npm run dev -w @emobility/api\" \"npm run watch -w @emobility/api\" \"npm run dev -w @emobility/web\"",
-    "test": "npm run build -w @emobility/api && node --test tests/foundation.test.mjs",
+    "test": "npm run test:api && npm run test:web",
     "format": "prettier --write apps packages scripts tests docs AGENTS.md README.md package.json compose.yaml .github/workflows",
-    "format:check": "prettier --check apps packages scripts tests docs AGENTS.md README.md package.json compose.yaml .github/workflows"
+    "format:check": "prettier --check apps packages scripts tests docs AGENTS.md README.md package.json compose.yaml .github/workflows",
+    "test:api": "npm run build -w @emobility/api && node --test tests/foundation.test.mjs",
+    "test:web": "npm run test -w @emobility/web"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",

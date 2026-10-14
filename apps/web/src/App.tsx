@@ -6,7 +6,11 @@ import { HubDetailPanel } from "./components/HubDetailPanel";
 import { formatNumber, formatTime } from "./utils/format";
 export function App() {
   const model = useFoundation();
-  const hub = useHubDetail(model.user?.id, model.updatedAt);
+  const hub = useHubDetail(
+    model.user?.id,
+    model.updatedAt,
+    model.sessionExpired,
+  );
   if (model.booting)
     return (
       <main className="center-state" role="status">
@@ -132,6 +136,7 @@ export function App() {
             loading={hub.loading}
             error={hub.error}
             onClose={hub.close}
+            onRetry={hub.retry}
           />
         )}
         <footer className="page-footer">
