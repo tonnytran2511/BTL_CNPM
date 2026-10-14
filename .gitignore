@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.local/
+coverage/
+*.log
+*.tsbuildinfo
+.DS_Store
+# Assignment source files remain local; public repo contains group-owned code/docs.
+/Assignment_SoftwareEngineering_HK261.pdf
+/Guideline and Rubric.pdf
