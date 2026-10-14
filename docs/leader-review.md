@@ -13,6 +13,8 @@
 
 Nhóm trưởng đọc theo thứ tự: README → DESIGN → business-rules → api → architecture. Mỗi thành viên chỉ cần review BR và contract của module mình trong một buổi ngắn.
 
+Review tiếp `docs/use-cases.md` và testcase của module tại `docs/integration-test-plan.md`. Có 15 UC, hai sơ đồ UML source và 36 case kế hoạch; chưa ghi nhận các case này đã chạy. Chủ module xác nhận các quyết định mở và phản hồi expectation trước khi tích hợp.
+
 | Người  | Cần phản hồi cụ thể                                                    | Bằng chứng chốt                                             |
 | ------ | ---------------------------------------------------------------------- | ----------------------------------------------------------- |
 | Leader | Ranh giới module, auth, transaction, cách giữ chỗ khi nhận/trả         | Comment/PR hoặc biên bản quyết định trong repo              |

@@ -1,0 +1,29 @@
+@startuml
+left to right direction
+actor "Sinh viên" as Student
+rectangle "Smart E-Mobility Hub — luồng sinh viên" {
+  usecase "UC-01\nĐăng nhập / đăng xuất" as UC01
+  usecase "UC-02\nXem Hub và tài nguyên" as UC02
+  usecase "UC-03\nTìm xe thuê phù hợp" as UC03
+  usecase "UC-04\nĐặt / hủy đặt xe" as UC04
+  usecase "UC-05\nNhận xe" as UC05
+  usecase "UC-06\nTrả xe" as UC06
+  usecase "UC-07\nĐăng ký xe cá nhân" as UC07
+  usecase "UC-08\nĐặt / sử dụng chỗ đỗ" as UC08
+  usecase "UC-09\nYêu cầu sạc xe cá nhân" as UC09
+}
+Student --> UC01
+Student --> UC02
+Student --> UC03
+Student --> UC04
+Student --> UC05
+Student --> UC06
+Student --> UC07
+Student --> UC08
+Student --> UC09
+note bottom of UC04
+  Đặt xe không giữ chỗ trả ở đích.
+  Đăng nhập là tiền điều kiện,
+  không được include ở mọi thao tác.
+end note
+@enduml
