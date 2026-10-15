@@ -5,6 +5,7 @@ import { AuthGuard, Public } from "./auth/auth.guard";
 import { AuthModule } from "./auth/auth.module";
 import { HubsModule } from "./hubs/hubs.module";
 import { config } from "./config";
+import { MobilityModule } from "./mobility/mobility.module";
 @Controller()
 class AppController {
   constructor(@Inject(Database) private readonly db: Database) {}
@@ -17,7 +18,7 @@ class AppController {
   }
 }
 @Module({
-  imports: [DatabaseModule, AuthModule, HubsModule],
+  imports: [DatabaseModule, AuthModule, HubsModule, MobilityModule],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],
 })

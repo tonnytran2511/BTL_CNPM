@@ -1,5 +1,6 @@
 export type Role = "student" | "operator";
 export type * from "./planned";
+export type * from "./mobility";
 export interface User {
   id: string;
   email: string;

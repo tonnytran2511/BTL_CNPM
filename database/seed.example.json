@@ -1,5 +1,5 @@
 {
-  "settings": { "lowBatteryThreshold": 25 },
+  "settings": { "lowBatteryThreshold": 25, "maximumParkingDurationMinutes": 1440 },
   "hubs": [
     {
       "code": "METRO", "name": "Hub ga Metro", "location": "Khu vực ga Metro ĐHQG",
