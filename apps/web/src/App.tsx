@@ -4,9 +4,12 @@ import { LoginForm } from "./components/LoginForm";
 import { HubCard } from "./components/HubCard";
 import { HubDetailPanel } from "./components/HubDetailPanel";
 import { formatNumber, formatTime } from "./utils/format";
+import { useMobility } from "./hooks/useMobility";
+import { MobilityPanel } from "./components/MobilityPanel";
 export function App() {
   const model = useFoundation();
   const hub = useHubDetail(model.user?.id, model.updatedAt);
+  const mobility = useMobility(model.user, model.refresh);
   if (model.booting)
     return (
       <main className="center-state" role="status">
@@ -126,6 +129,7 @@ export function App() {
             ))}
           </div>
         </section>
+        <MobilityPanel model={mobility} hubs={model.hubs} />
         {hub.selectedId && (
           <HubDetailPanel
             detail={hub.detail}

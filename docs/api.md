@@ -37,10 +37,35 @@ Các endpoint dưới đây là đề xuất, **chưa tồn tại**; chủ modul
 | Chủ module | Đề xuất                                                                                                                                         |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | TV2        | GET /vehicles; POST /vehicle-reservations; POST /vehicle-reservations/:id/cancel; POST /vehicle-reservations/:id/pickup; POST /trips/:id/return |
-| TV3        | POST /private-vehicles; POST /parking-reservations; POST /charging-requests; GET /charging-queue                                                |
+| TV3        | Đã triển khai local các endpoint `/mobility` bên dưới; scheduler/phiên sạc còn chờ tuần 2.                                                      |
 | TV4        | POST/PATCH /hubs; POST /incidents; POST /redistributions và lệnh chuyển trạng thái                                                              |
 | TV5        | POST /simulations; GET /simulations/:id; GET /simulations                                                                                       |
 
 Không thêm endpoint success giả hoặc dữ liệu mẫu trong component để thay phần chưa triển khai.
+
+## Mai Anh — API đỗ/sạc tuần 1
+
+Tất cả endpoint `/mobility` yêu cầu session. POST yêu cầu header `Idempotency-Key` dài 1–128 ký tự; lưu kết quả cùng transaction. Cùng actor/operation/key và payload chuẩn hóa trả response cũ; khác payload trả 409. Không có TTL tự xóa key trong bản tuần 1.
+
+| Method / path                                 | Input                         | Response / quyền                                                              |
+| --------------------------------------------- | ----------------------------- | ----------------------------------------------------------------------------- |
+| GET /mobility/private-vehicles                | —                             | `PrivateVehicle[]` của người đăng nhập                                        |
+| POST /mobility/private-vehicles               | `{code,type,batteryPercent}`  | `PrivateVehicle`; owner lấy từ session                                        |
+| GET /mobility/parking/availability            | query `hubId,startsAt,endsAt` | `ParkingAvailability`                                                         |
+| GET /mobility/parking/bookings                | —                             | `ParkingBooking[]` của người đăng nhập                                        |
+| POST /mobility/parking/bookings               | `ReserveParkingRequest`       | `ParkingBooking`                                                              |
+| POST /mobility/parking/bookings/:id/cancel    | `{}`                          | `ParkingBooking`; chỉ chủ lịch, trạng thái reserved                           |
+| POST /mobility/parking/bookings/:id/check-in  | `{}`                          | `ParkingBooking`; chỉ chủ lịch, trong giờ đặt và chỗ vật lý trống             |
+| POST /mobility/parking/bookings/:id/check-out | `{}`                          | `ParkingBooking`; chỉ chủ lịch, trạng thái checked_in                         |
+| GET /mobility/charging/requests               | —                             | `ChargingQueueEntry[]`; sinh viên chỉ thấy yêu cầu mình, operator thấy tất cả |
+| POST /mobility/charging/requests              | `ChargingRequestInput`        | `{id,status:"queued"}`                                                        |
+
+GET trả 200; POST trả 201. 400: DTO/time/pin/key sai; 401: chưa đăng nhập; 403: sai chủ sở hữu/quyền; 404: ID tài nguyên không tồn tại; 409: Hub ngừng, hết chỗ, lịch/xe/yêu cầu trùng, sai trạng thái hoặc key dùng lại khác nội dung. TypeScript interfaces tại `packages/contracts/mobility.ts`, request dùng lại `ReserveParkingRequest` và `ChargingRequestInput` trong planned.ts; các request này nay có implementation như bảng trên.
+
+`type` là electric_bicycle/electric_motorcycle. Pin xe cá nhân do chủ xe khai báo khi đăng ký; xe cũ có pin null phải có dữ liệu pin trước khi gửi yêu cầu. Backend không tự giả định pin.
+
+Lịch đỗ tương lai không thay đổi parking_spaces. So sánh `[startsAt,endsAt)`; yêu cầu timezone, bắt đầu ở tương lai, thời lượng không vượt settings.maximumParkingDurationMinutes. Seed mẫu chọn 1440 phút cho demo; không fallback trong service. Chỗ đang occupied hoặc held còn hạn bị loại vì chưa biết thời điểm rời. Chỗ có lịch tiếp giáp vẫn đặt được. Trả xe thuê chưa có thời gian rời nên không chiếm chỗ đã cam kết cho một lịch tương lai. Xem các giới hạn này tại tài liệu bàn giao trước khi review baseline.
+
+Xe cá nhân phải đỗ thực tế tại đúng Hub khi yêu cầu sạc; target lớn hơn pin hiện tại, không quá 100. Xe thuê chỉ operator được yêu cầu và xe phải available tại Hub. Chỉ một yêu cầu queued/allocated cho một xe. Bản tuần 1 ghi hàng chờ FIFO theo thời điểm gửi/ID, không phân bổ cổng hay chạy sạc. Check-out hủy yêu cầu queued của xe; nếu đã allocated thì chặn, chờ workflow phiên sạc tuần 2.
 
 Kiểu payload baseline tại `packages/contracts/planned.ts`; quy tắc và testcase tại `docs/business-rules.md`. Endpoint mới cần request validation, response type và mã lỗi nghiệp vụ được review; hiện `ApiError.code` mới có HTTP_<status>. Không công bố mã lỗi nghiệp vụ như đã triển khai khi chưa có controller/service tương ứng.

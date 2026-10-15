@@ -38,6 +38,8 @@ Xác thực: session opaque, token ngẫu nhiên chỉ nằm trong cookie HttpOn
 
 Hợp đồng endpoint đã triển khai tại `docs/api.md`; ERD/kiến trúc tại `docs/architecture.md`; hướng dẫn mở rộng tại `docs/guides/CONTRIBUTING.md`.
 
+15/10 — phần Mai Anh tuần 1 có implementation local tại MobilityModule; chưa có xác nhận peer review/merge. AllocationPort có provider thực, nhận cùng PoolClient của caller. Lịch tương lai tách khỏi trạng thái vật lý. Chính sách bảo thủ: chỗ đang bị chiếm/giữ còn hạn không được hứa cho lịch tương lai khi chưa biết giờ rời; trả xe thuê không chiếm chỗ có lịch tương lai còn hiệu lực. Chỗ quá giờ chưa check-out vẫn occupied và chặn check-in sau; không tự xóa xe khỏi chỗ. Nhóm cần review chính sách này trước tích hợp. Pin cá nhân là dữ liệu khai báo lúc đăng ký, xe cũ không có pin giữ null. Bản tuần 1 hỗ trợ check-in/check-out để xác nhận vị trí trước yêu cầu sạc; chưa chạy phiên/scheduler. Hợp đồng API tại `docs/api.md`; kết quả kiểm tra tại `docs/testing.md`.
+
 ### Lý do chọn stack
 
 Người dùng đã xác nhận frontend/backend và cho phép triển khai PostgreSQL cùng simulation TypeScript:

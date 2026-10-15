@@ -10,7 +10,9 @@ Nền tảng bài tập lớn CNPM HK261, nhóm 5 người. Frontend React/TypeS
 - Snapshot nhất quán chỉ đọc để TV5 xây simulation.
 - Seed giả lập từ JSON; migration, kiểm thử PostgreSQL riêng và kiểu API dùng chung.
 
-Thuê xe, đặt đỗ/sạc, quản trị tài nguyên, sự cố/điều chuyển và engine simulation chưa được triển khai; đó là phần của TV2–TV5. Endpoint snapshot chưa phải chức năng What-if Simulation hoàn chỉnh.
+Phần Mai Anh tuần 1 đã có code local: đăng ký xe cá nhân, tra cứu/đặt/hủy lịch đỗ, check-in/check-out, gửi/xem yêu cầu sạc và provider AllocationPort cho thuê xe/điều chuyển. Hợp đồng API tại `docs/api.md`; còn chờ review/tích hợp của nhóm.
+
+Thuê xe, quản trị tài nguyên, sự cố/điều chuyển và engine simulation chưa được triển khai. Scheduler và chạy phiên sạc thuộc tuần 2; endpoint snapshot chưa phải chức năng What-if Simulation hoàn chỉnh.
 
 ## Setup
 
