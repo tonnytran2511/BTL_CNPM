@@ -13,6 +13,7 @@ Prefix `/api`; JSON; ID UUID; thời gian ISO 8601 có timezone; pin và tỷ l�
 | GET /hubs/:id            | Đăng nhập | `HubDetail`                      | 200; ID sai 400; không tồn tại/Hub inactive với sinh viên 404 |
 | GET /network/overview    | Operator  | `NetworkOverview`                | 200; sinh viên 403                                            |
 | GET /simulation/snapshot | Operator  | `SimulationSnapshot`             | 200; sinh viên 403                                            |
+| GET /vehicles            | Đăng nhập | `VehicleSearchResult`            | 200; query sai 400; chưa đăng nhập 401                        |
 
 Login body: `{email: string, password: string}`. Không nhận role từ client; field ngoài DTO bị từ chối. Response user chỉ gồm `id,email,name,role`.
 
@@ -44,3 +45,7 @@ Các endpoint dưới đây là đề xuất, **chưa tồn tại**; chủ modul
 Không thêm endpoint success giả hoặc dữ liệu mẫu trong component để thay phần chưa triển khai.
 
 Kiểu payload baseline tại `packages/contracts/planned.ts`; quy tắc và testcase tại `docs/business-rules.md`. Endpoint mới cần request validation, response type và mã lỗi nghiệp vụ được review; hiện `ApiError.code` mới có HTTP_<status>. Không công bố mã lỗi nghiệp vụ như đã triển khai khi chưa có controller/service tương ứng.
+
+## GET /vehicles (T06, đã triển khai)
+
+Query tùy chọn: `hubId` (UUID), `type` (`electric_bicycle` | `electric_motorcycle`), `minBatteryPercent` (0–100). Chỉ trả xe `available` ở Hub `active` có pin không thấp hơn `minimumRentalBatteryPercent` trong bảng `settings`; bộ lọc của người dùng chỉ có thể nâng ngưỡng này lên. Response: `{minimumBatteryPercent, vehicles: RentableVehicle[]}` sắp xếp theo pin giảm dần. Chưa phân trang.
