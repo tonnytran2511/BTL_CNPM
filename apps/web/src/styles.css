@@ -563,3 +563,51 @@ progress::-webkit-progress-value {
     font-size: 1.3rem;
   }
 }
+
+/* T06: vehicle search */
+.vehicle-search {
+  margin-top: 2rem;
+}
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+.filter-bar label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+.filter-bar select,
+.filter-bar input {
+  min-width: 11rem;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+}
+.vehicle-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+.vehicle-item {
+  display: grid;
+  grid-template-columns: 1.2fr 1.6fr 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgb(0 0 0 / 10%);
+  border-radius: 0.75rem;
+}
+.vehicle-item small {
+  display: block;
+  opacity: 0.7;
+}
+@media (max-width: 720px) {
+  .vehicle-item {
+    grid-template-columns: 1fr;
+  }
+}

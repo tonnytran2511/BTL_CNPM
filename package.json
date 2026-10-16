@@ -16,7 +16,7 @@
     "db:seed": "node scripts/seed.mjs",
     "build": "npm run build -w @emobility/api && npm run build -w @emobility/web",
     "dev": "npm run build -w @emobility/api && concurrently -k -n api,types,web \"npm run dev -w @emobility/api\" \"npm run watch -w @emobility/api\" \"npm run dev -w @emobility/web\"",
-    "test": "npm run build -w @emobility/api && node --test tests/foundation.test.mjs",
+    "test": "npm run build -w @emobility/api && node --test tests/foundation.test.mjs tests/rental-rules.test.mjs tests/rental-search.test.mjs",
     "format": "prettier --write apps packages scripts tests docs AGENTS.md README.md package.json compose.yaml .github/workflows",
     "format:check": "prettier --check apps packages scripts tests docs AGENTS.md README.md package.json compose.yaml .github/workflows"
   },

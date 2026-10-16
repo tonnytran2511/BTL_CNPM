@@ -50,6 +50,7 @@ test(
       persistent: false,
       authMethod: "scram-sha-256",
       postgresFlags: ["-h", "127.0.0.1"],
+      initdbFlags: ["--encoding=UTF8"],
       onLog: () => {},
       onError: () => {},
     });
