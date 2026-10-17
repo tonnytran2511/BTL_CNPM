@@ -35,3 +35,25 @@ export interface Trip {
   startBatteryPercent: number;
   endBatteryPercent: number | null;
 }
+
+export type VehicleReservationState =
+  | "active"
+  | "cancelled"
+  | "expired"
+  | "fulfilled";
+
+/** Một lượt giữ xe của chính người dùng. Thời gian là ISO 8601 (UTC). */
+export interface VehicleReservationView {
+  id: string;
+  status: VehicleReservationState;
+  createdAt: string;
+  expiresAt: string;
+  closedAt: string | null;
+  vehicle: {
+    id: string;
+    code: string;
+    type: RentalVehicleType;
+    batteryPercent: number;
+  };
+  hub: { id: string; name: string; location: string };
+}

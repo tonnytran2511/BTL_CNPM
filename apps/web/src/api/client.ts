@@ -6,6 +6,7 @@ import type {
   NetworkOverview,
   VehicleSearchQuery,
   VehicleSearchResult,
+  VehicleReservationView,
   ApiError,
 } from "@emobility/contracts";
 export class RequestError extends Error {
@@ -79,4 +80,16 @@ export const api = {
       signal,
     });
   },
+  reservations: (signal?: AbortSignal) =>
+    request<VehicleReservationView[]>("/vehicle-reservations", { signal }),
+  reserveVehicle: (vehicleId: string) =>
+    request<VehicleReservationView>("/vehicle-reservations", {
+      method: "POST",
+      body: JSON.stringify({ vehicleId }),
+    }),
+  cancelReservation: (id: string) =>
+    request<VehicleReservationView>(
+      `/vehicle-reservations/${encodeURIComponent(id)}/cancel`,
+      { method: "POST" },
+    ),
 };

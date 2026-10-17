@@ -15,6 +15,9 @@ interface Props {
   onType: (type: VehicleFilterState["type"]) => void;
   onMinBattery: (value: string) => void;
   onReset: () => void;
+  onReserve: (vehicleId: string) => void;
+  busyId: string | null;
+  reserveError: string;
 }
 export function VehicleSearch(props: Props) {
   const { filter, result } = props;
@@ -81,6 +84,11 @@ export function VehicleSearch(props: Props) {
           {props.error}
         </p>
       )}
+      {props.reserveError && (
+        <p className="notice error" role="alert">
+          {props.reserveError}
+        </p>
+      )}
       {props.loading && !result && <p role="status">Đang tìm xe…</p>}
       {result && result.vehicles.length === 0 && !props.error && (
         <p className="empty">Không có xe phù hợp với bộ lọc hiện tại.</p>
@@ -104,9 +112,19 @@ export function VehicleSearch(props: Props) {
                 value={vehicle.batteryPercent}
               />
             </div>
-            <span className={`badge ${vehicle.status}`}>
-              {statusLabel(vehicle.status)}
-            </span>
+            <div className="vehicle-actions">
+              <span className={`badge ${vehicle.status}`}>
+                {statusLabel(vehicle.status)}
+              </span>
+              <button
+                type="button"
+                className="primary compact"
+                disabled={props.busyId !== null}
+                onClick={() => props.onReserve(vehicle.id)}
+              >
+                {props.busyId === vehicle.id ? "Đang đặt…" : "Đặt xe"}
+              </button>
+            </div>
           </li>
         ))}
       </ul>

@@ -26,3 +26,10 @@ export function statusLabel(status: string): string {
   };
   return labels[status] ?? status;
 }
+export const formatDateTime = (value: string) =>
+  new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));

@@ -1,0 +1,81 @@
+/* T07: đặt xe của tôi. Dùng biến màu có sẵn trong styles.css. */
+.reservations {
+  margin-top: 2rem;
+}
+.reservation-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+.reservation-item {
+  display: grid;
+  grid-template-columns: 1.1fr 1.4fr 1.3fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+}
+.reservation-item.active {
+  border-left: 4px solid var(--green);
+}
+.reservation-item small {
+  display: block;
+  color: var(--muted);
+}
+.reservation-item small.overdue {
+  color: #924529;
+  font-weight: 600;
+}
+.reservation-actions {
+  display: grid;
+  justify-items: end;
+  gap: 0.5rem;
+}
+.reservation-confirm {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.reservation-history-title {
+  margin: 1.2rem 0 0.6rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.reservation-item:not(.active) {
+  opacity: 0.85;
+}
+.badge.cancelled {
+  background: #f1f1ee;
+  color: #5d6a64;
+}
+.badge.expired {
+  background: #fff0dd;
+  color: #8d551b;
+}
+.badge.fulfilled {
+  background: #e8f5de;
+  color: #375d26;
+}
+.primary.compact {
+  padding: 8px 14px;
+  font-size: 0.8rem;
+}
+.vehicle-actions {
+  display: grid;
+  justify-items: end;
+  gap: 0.5rem;
+}
+@media (max-width: 720px) {
+  .reservation-item {
+    grid-template-columns: 1fr;
+  }
+  .reservation-actions,
+  .vehicle-actions {
+    justify-items: start;
+  }
+}
