@@ -9,6 +9,11 @@ export const formatTime = (value: string) =>
   }).format(new Date(value));
 export const roleLabel = (role: Role) =>
   role === "operator" ? "Người vận hành" : "Sinh viên";
+export const formatDateTime = (value: string) =>
+  new Intl.DateTimeFormat("vi-VN", {
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(new Date(value));
 export function statusLabel(status: string): string {
   const labels: Record<string, string> = {
     active: "Đang hoạt động",

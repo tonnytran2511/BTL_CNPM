@@ -1,24 +1,66 @@
 {
-  "settings": { "lowBatteryThreshold": 25 },
+  "settings": {
+    "simulationMaximumSteps": 288,
+    "simulationMaximumArrivalsPerStep": 1000,
+    "lowBatteryThreshold": 25,
+    "maximumParkingDurationMinutes": 1440,
+    "reservationHoldMinutes": 15,
+    "minimumRentalBatteryPercent": 20
+  },
   "hubs": [
     {
-      "code": "METRO", "name": "Hub ga Metro", "location": "Khu vực ga Metro ĐHQG",
+      "code": "METRO",
+      "name": "Hub ga Metro",
+      "location": "Khu vực ga Metro ĐHQG",
       "parkingCapacity": 12,
       "vehicles": [
-        { "code": "METRO-B01", "type": "electric_bicycle", "batteryPercent": 82, "status": "available" },
-        { "code": "METRO-B02", "type": "electric_bicycle", "batteryPercent": 18, "status": "charging" },
-        { "code": "METRO-M01", "type": "electric_motorcycle", "batteryPercent": 65, "status": "reserved" }
+        {
+          "code": "METRO-B01",
+          "type": "electric_bicycle",
+          "batteryPercent": 82,
+          "status": "available"
+        },
+        {
+          "code": "METRO-B02",
+          "type": "electric_bicycle",
+          "batteryPercent": 18,
+          "status": "charging"
+        },
+        {
+          "code": "METRO-M01",
+          "type": "electric_motorcycle",
+          "batteryPercent": 65,
+          "status": "reserved"
+        }
       ],
-      "chargingPoints": [ { "code": "C01", "status": "occupied" }, { "code": "C02", "status": "available" } ]
+      "chargingPoints": [
+        { "code": "C01", "status": "occupied" },
+        { "code": "C02", "status": "available" }
+      ]
     },
     {
-      "code": "DORM", "name": "Hub ký túc xá", "location": "Khu ký túc xá ĐHQG",
+      "code": "DORM",
+      "name": "Hub ký túc xá",
+      "location": "Khu ký túc xá ĐHQG",
       "parkingCapacity": 8,
       "vehicles": [
-        { "code": "DORM-B01", "type": "electric_bicycle", "batteryPercent": 90, "status": "available" },
-        { "code": "DORM-M01", "type": "electric_motorcycle", "batteryPercent": 12, "status": "maintenance" }
+        {
+          "code": "DORM-B01",
+          "type": "electric_bicycle",
+          "batteryPercent": 90,
+          "status": "available"
+        },
+        {
+          "code": "DORM-M01",
+          "type": "electric_motorcycle",
+          "batteryPercent": 12,
+          "status": "maintenance"
+        }
       ],
-      "chargingPoints": [ { "code": "C01", "status": "available" }, { "code": "C02", "status": "failed" } ]
+      "chargingPoints": [
+        { "code": "C01", "status": "available" },
+        { "code": "C02", "status": "failed" }
+      ]
     }
   ]
 }
