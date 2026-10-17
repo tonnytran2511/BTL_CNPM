@@ -4,6 +4,9 @@ import type {
   HubSummary,
   HubDetail,
   NetworkOverview,
+  VehicleSearchQuery,
+  VehicleSearchResult,
+  VehicleReservationView,
   ApiError,
 } from "@emobility/contracts";
 export class RequestError extends Error {
@@ -66,4 +69,27 @@ export const api = {
     request<NetworkOverview>("/network/overview", { signal }),
   detail: (id: string, signal?: AbortSignal) =>
     request<HubDetail>(`/hubs/${encodeURIComponent(id)}`, { signal }),
+  vehicles: (query: VehicleSearchQuery, signal?: AbortSignal) => {
+    const params = new URLSearchParams();
+    if (query.hubId) params.set("hubId", query.hubId);
+    if (query.type) params.set("type", query.type);
+    if (query.minBatteryPercent !== undefined)
+      params.set("minBatteryPercent", String(query.minBatteryPercent));
+    const qs = params.toString();
+    return request<VehicleSearchResult>(`/vehicles${qs ? `?${qs}` : ""}`, {
+      signal,
+    });
+  },
+  reservations: (signal?: AbortSignal) =>
+    request<VehicleReservationView[]>("/vehicle-reservations", { signal }),
+  reserveVehicle: (vehicleId: string) =>
+    request<VehicleReservationView>("/vehicle-reservations", {
+      method: "POST",
+      body: JSON.stringify({ vehicleId }),
+    }),
+  cancelReservation: (id: string) =>
+    request<VehicleReservationView>(
+      `/vehicle-reservations/${encodeURIComponent(id)}/cancel`,
+      { method: "POST" },
+    ),
 };

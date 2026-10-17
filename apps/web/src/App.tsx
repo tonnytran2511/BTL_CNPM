@@ -1,12 +1,29 @@
 import { useFoundation } from "./hooks/useFoundation";
 import { useHubDetail } from "./hooks/useHubDetail";
+import { useVehicleSearch } from "./hooks/useVehicleSearch";
+import { useReservations } from "./hooks/useReservations";
 import { LoginForm } from "./components/LoginForm";
 import { HubCard } from "./components/HubCard";
 import { HubDetailPanel } from "./components/HubDetailPanel";
+import { VehicleSearch } from "./components/VehicleSearch";
+import { ReservationList } from "./components/ReservationList";
 import { formatNumber, formatTime } from "./utils/format";
 export function App() {
   const model = useFoundation();
   const hub = useHubDetail(model.user?.id, model.updatedAt);
+  const vehicles = useVehicleSearch(model.user?.id, model.updatedAt);
+  const reservations = useReservations(model.user?.id, model.updatedAt);
+  // Đặt hoặc hủy xong (kể cả bị từ chối vì xung đột) đều đọc lại danh sách xe và số liệu Hub.
+  const reserve = async (vehicleId: string) => {
+    await reservations.reserve(vehicleId);
+    vehicles.reload();
+    void model.refresh();
+  };
+  const cancel = async (reservationId: string) => {
+    await reservations.cancel(reservationId);
+    vehicles.reload();
+    void model.refresh();
+  };
   if (model.booting)
     return (
       <main className="center-state" role="status">
@@ -126,6 +143,31 @@ export function App() {
             ))}
           </div>
         </section>
+        <VehicleSearch
+          hubs={model.hubs}
+          filter={vehicles.filter}
+          result={vehicles.result}
+          loading={vehicles.loading}
+          error={vehicles.error}
+          onHub={vehicles.setHubId}
+          onType={vehicles.setType}
+          onMinBattery={vehicles.setMinBattery}
+          onReset={vehicles.reset}
+          onReserve={reserve}
+          busyId={reservations.busyId}
+          reserveError={reservations.reserveError}
+        />
+        <ReservationList
+          active={reservations.active}
+          history={reservations.history}
+          loaded={reservations.loaded}
+          loading={reservations.loading}
+          error={reservations.error}
+          cancelError={reservations.cancelError}
+          busyId={reservations.busyId}
+          now={reservations.now}
+          onCancel={cancel}
+        />
         {hub.selectedId && (
           <HubDetailPanel
             detail={hub.detail}
