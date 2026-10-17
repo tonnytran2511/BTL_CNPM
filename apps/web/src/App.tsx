@@ -1,8 +1,10 @@
 import { useFoundation } from "./hooks/useFoundation";
 import { useHubDetail } from "./hooks/useHubDetail";
+import { useVehicleSearch } from "./hooks/useVehicleSearch";
 import { LoginForm } from "./components/LoginForm";
 import { HubCard } from "./components/HubCard";
 import { HubDetailPanel } from "./components/HubDetailPanel";
+import { VehicleSearch } from "./components/VehicleSearch";
 import { formatNumber, formatTime } from "./utils/format";
 import { useMobility } from "./hooks/useMobility";
 import { MobilityPanel } from "./components/MobilityPanel";
@@ -10,6 +12,7 @@ export function App() {
   const model = useFoundation();
   const hub = useHubDetail(model.user?.id, model.updatedAt);
   const mobility = useMobility(model.user, model.refresh);
+  const vehicles = useVehicleSearch(model.user?.id, model.updatedAt);
   if (model.booting)
     return (
       <main className="center-state" role="status">
@@ -130,6 +133,17 @@ export function App() {
           </div>
         </section>
         <MobilityPanel model={mobility} hubs={model.hubs} />
+        <VehicleSearch
+          hubs={model.hubs}
+          filter={vehicles.filter}
+          result={vehicles.result}
+          loading={vehicles.loading}
+          error={vehicles.error}
+          onHub={vehicles.setHubId}
+          onType={vehicles.setType}
+          onMinBattery={vehicles.setMinBattery}
+          onReset={vehicles.reset}
+        />
         {hub.selectedId && (
           <HubDetailPanel
             detail={hub.detail}

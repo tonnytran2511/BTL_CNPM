@@ -13,6 +13,7 @@ Prefix `/api`; JSON; ID UUID; thời gian ISO 8601 có timezone; pin và tỷ l�
 | GET /hubs/:id            | Đăng nhập | `HubDetail`                      | 200; ID sai 400; không tồn tại/Hub inactive với sinh viên 404 |
 | GET /network/overview    | Operator  | `NetworkOverview`                | 200; sinh viên 403                                            |
 | GET /simulation/snapshot | Operator  | `SimulationSnapshot`             | 200; sinh viên 403                                            |
+| GET /vehicles            | Đăng nhập | `VehicleSearchResult`            | 200; query sai 400; chưa đăng nhập 401                        |
 
 Login body: `{email: string, password: string}`. Không nhận role từ client; field ngoài DTO bị từ chối. Response user chỉ gồm `id,email,name,role`.
 
@@ -69,3 +70,7 @@ Lịch đỗ tương lai không thay đổi parking_spaces. So sánh `[startsAt,
 Xe cá nhân phải đỗ thực tế tại đúng Hub khi yêu cầu sạc; target lớn hơn pin hiện tại, không quá 100. Xe thuê chỉ operator được yêu cầu và xe phải available tại Hub. Chỉ một yêu cầu queued/allocated cho một xe. Bản tuần 1 ghi hàng chờ FIFO theo thời điểm gửi/ID, không phân bổ cổng hay chạy sạc. Check-out hủy yêu cầu queued của xe; nếu đã allocated thì chặn, chờ workflow phiên sạc tuần 2.
 
 Kiểu payload baseline tại `packages/contracts/planned.ts`; quy tắc và testcase tại `docs/business-rules.md`. Endpoint mới cần request validation, response type và mã lỗi nghiệp vụ được review; hiện `ApiError.code` mới có HTTP_<status>. Không công bố mã lỗi nghiệp vụ như đã triển khai khi chưa có controller/service tương ứng.
+
+## GET /vehicles (T06, đã triển khai)
+
+Query tùy chọn: `hubId` (UUID), `type` (`electric_bicycle` | `electric_motorcycle`), `minBatteryPercent` (0–100). Chỉ trả xe `available` ở Hub `active` có pin không thấp hơn `minimumRentalBatteryPercent` trong bảng `settings`; bộ lọc của người dùng chỉ có thể nâng ngưỡng này lên. Response: `{minimumBatteryPercent, vehicles: RentableVehicle[]}` sắp xếp theo pin giảm dần. Chưa phân trang.

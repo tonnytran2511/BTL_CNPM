@@ -211,3 +211,10 @@ stateDiagram-v2
 ```
 
 Các chuyển trạng thái trên là baseline thiết kế, chưa phải service đã chạy. Trường hợp sự cố khi reserved/in_use/charging cần chủ module thiết kế thêm; không cho phép cập nhật status tùy ý.
+
+## Thuê xe: reservation và trip (T06, migration 003)
+
+- `vehicle_reservations`: `active → cancelled | expired | fulfilled`; unique index một lượt `active` cho mỗi xe; `closed_at` chỉ có khi đã kết thúc.
+- `trips`: `active → completed`; một reservation tạo tối đa một trip (`reservation_id UNIQUE`); trip `completed` bắt buộc có `ended_at`, Hub đích và pin cuối.
+- Quy tắc trạng thái nằm ở `apps/api/src/rental/rental.rules.ts`; trạng thái xe đổi theo sự kiện reserve/cancel/expire/pickup/return và phải cập nhật có điều kiện (`WHERE status = from`).
+- Settings cần có: `reservationHoldMinutes`, `minimumRentalBatteryPercent` (seed trong `database/seed.example.json`).

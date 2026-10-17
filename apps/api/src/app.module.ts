@@ -4,6 +4,7 @@ import { Database, DatabaseModule } from "./database/database.module";
 import { AuthGuard, Public } from "./auth/auth.guard";
 import { AuthModule } from "./auth/auth.module";
 import { HubsModule } from "./hubs/hubs.module";
+import { RentalModule } from "./rental/rental.module";
 import { config } from "./config";
 import { MobilityModule } from "./mobility/mobility.module";
 @Controller()
@@ -18,7 +19,13 @@ class AppController {
   }
 }
 @Module({
-  imports: [DatabaseModule, AuthModule, HubsModule, MobilityModule],
+  imports: [
+    DatabaseModule,
+    AuthModule,
+    HubsModule,
+    MobilityModule,
+    RentalModule,
+  ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],
 })
