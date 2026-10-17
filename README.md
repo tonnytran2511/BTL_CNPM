@@ -12,7 +12,7 @@ Nền tảng bài tập lớn CNPM HK261, nhóm 5 người. Frontend React/TypeS
 
 Phần Mai Anh tuần 1 đã có code local: đăng ký xe cá nhân, tra cứu/đặt/hủy lịch đỗ, check-in/check-out, gửi/xem yêu cầu sạc và provider AllocationPort cho thuê xe/điều chuyển. Hợp đồng API tại `docs/api.md`; còn chờ review/tích hợp của nhóm.
 
-Thuê xe, quản trị tài nguyên, sự cố/điều chuyển và engine simulation chưa được triển khai. Scheduler và chạy phiên sạc thuộc tuần 2; endpoint snapshot chưa phải chức năng What-if Simulation hoàn chỉnh.
+Vòng đời thuê xe, quản trị tài nguyên và sự cố/điều chuyển chưa hoàn chỉnh. T13 đã có engine mô phỏng tăng nhu cầu và operator UI; mô hình giới hạn ở lượt rời Hub, xem docs/simulation.md. Scheduler và chạy phiên sạc thuộc tuần 2.
 
 ## Setup
 
@@ -90,3 +90,7 @@ tests/                 integration test trên PostgreSQL thật
 Nhóm trưởng dùng `docs/leader-review.md` để review/bàn giao; baseline nghiệp vụ và test chấp nhận tại `docs/business-rules.md`. Các request types dự kiến ở packages/contracts/planned.ts chưa phải endpoint chạy được.
 
 Chạy production cần hosting, HTTPS/cookie Secure, cấu hình DB và chiến lược vận hành riêng; compose/local hiện phục vụ phát triển. Hướng dẫn này không khẳng định hệ thống đã được triển khai production.
+
+## Simulation T13
+
+Có mô phỏng tăng nhu cầu cho operator: chạy db:seed để thêm settings, nhập tham số và xem baseline/scenario trên cùng snapshot/seed. Engine đầu tiên chỉ mô phỏng lượt xe rời Hub; các kịch bản đỗ/sạc, đề xuất và lịch sử thuộc T22. Xem [docs/simulation.md](docs/simulation.md).

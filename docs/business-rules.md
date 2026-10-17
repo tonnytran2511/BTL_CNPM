@@ -24,16 +24,17 @@ Nhóm trưởng chuẩn bị baseline này để các module có cùng cách x�
 
 ## Cấu hình cần module sở hữu bổ sung
 
-| Key dự kiến trong settings     | Đơn vị / validation                            | Owner |
-| ------------------------------ | ---------------------------------------------- | ----- |
-| reservationHoldMinutes         | Số nguyên dương                                | TV2   |
-| minimumRentalBatteryPercent    | 0–100                                          | TV2   |
-| maximumParkingDurationMinutes  | Số nguyên dương                                | TV3   |
-| chargingUrgencyWindowMinutes   | Số nguyên không âm                             | TV3   |
-| chargingMaximumWaitMinutes     | Số nguyên dương                                | TV3   |
-| simulationMaximumSteps         | Số nguyên dương                                | TV5   |
-| simulationTravelMinutesByRoute | Route IDs và thời lượng dương                  | TV5   |
-| simulationChargingModel        | Tham số năng lượng/công suất có đơn vị rõ ràng | TV5   |
+| Key dự kiến trong settings       | Đơn vị / validation                                   | Owner |
+| -------------------------------- | ----------------------------------------------------- | ----- |
+| reservationHoldMinutes           | Số nguyên dương                                       | TV2   |
+| minimumRentalBatteryPercent      | 0–100                                                 | TV2   |
+| maximumParkingDurationMinutes    | Số nguyên dương                                       | TV3   |
+| chargingUrgencyWindowMinutes     | Số nguyên không âm                                    | TV3   |
+| chargingMaximumWaitMinutes       | Số nguyên dương                                       | TV3   |
+| simulationMaximumSteps           | Số nguyên dương                                       | TV5   |
+| simulationMaximumArrivalsPerStep | Số nguyên dương; giới hạn nhu cầu trung bình mỗi bước | TV5   |
+| simulationTravelMinutesByRoute   | Route IDs và thời lượng dương                         | TV5   |
+| simulationChargingModel          | Tham số năng lượng/công suất có đơn vị rõ ràng        | TV5   |
 
 lowBatteryThreshold đã dùng ở dashboard; maximumParkingDurationMinutes được seed mới và validation trong module mobility. Các key còn lại chưa có trong DB. Chủ module thêm migration/seed và validation khi triển khai; không tự fallback sang số trong service. Giá trị demo là dữ liệu cấu hình nhóm chọn, không phải con số từ giảng viên.
 

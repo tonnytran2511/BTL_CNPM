@@ -49,6 +49,8 @@ try {
   );
   // T06 rental settings (BR-01): validated here, read from the DB by the rental module.
   const rentalSettings = {
+    simulationMaximumSteps: (v) => Number.isSafeInteger(v) && v > 0,
+    simulationMaximumArrivalsPerStep: (v) => Number.isSafeInteger(v) && v > 0,
     reservationHoldMinutes: (v) => Number.isInteger(v) && v > 0,
     minimumRentalBatteryPercent: (v) =>
       Number.isInteger(v) && v >= 0 && v <= 100,

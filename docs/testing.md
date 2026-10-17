@@ -42,3 +42,7 @@ Kiểm tra Chrome thủ công: đăng nhập operator, dashboard hiển thị d�
 CI trên Ubuntu/Node 22 cho commit nền tảng `2f22bef` đã pass toàn bộ bước npm ci, setup env, format, build và test: https://github.com/tonnytran2511/BTL_CNPM/actions/runs/38594291555. Đây là lần setup từ checkout sạch trên runner, không dùng node_modules hoặc database local của nhóm trưởng.
 
 Docker daemon không chạy trên máy tại thời điểm thực hiện; đã dùng PostgreSQL local thay thế. Chưa đo tải/latency mục tiêu, chưa kiểm tra deploy production hoặc các module TV2–TV5.
+
+## T13 — 17/10/2026
+
+Build frontend/backend pass; npm test: 31 test pass, gồm T13 engine và HTTP trên PostgreSQL tạm. Kiểm tra reproducibility, số liệu từ timeline, conservation, pin/trạng thái, invalid inputs, operator-only và bảng vận hành không đổi. npm run format:check pass. Chưa kiểm chứng UI trong trình duyệt; chờ Minh Khuê demo/peer review. Xem simulation.md.

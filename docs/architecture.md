@@ -218,3 +218,7 @@ Các chuyển trạng thái trên là baseline thiết kế, chưa phải servic
 - `trips`: `active → completed`; một reservation tạo tối đa một trip (`reservation_id UNIQUE`); trip `completed` bắt buộc có `ended_at`, Hub đích và pin cuối.
 - Quy tắc trạng thái nằm ở `apps/api/src/rental/rental.rules.ts`; trạng thái xe đổi theo sự kiện reserve/cancel/expire/pickup/return và phải cập nhật có điều kiện (`WHERE status = from`).
 - Settings cần có: `reservationHoldMinutes`, `minimumRentalBatteryPercent` (seed trong `database/seed.example.json`).
+
+## T13 Simulation
+
+SimulationPanel → useSimulation → simulationApi → SimulationController (operator) → SimulationService → HubsService.snapshot() + SimulationRepository (chỉ đọc settings) → engine thuần departures-v1. Không thêm bảng/migration; kết quả chỉ trả cho client. Xem simulation.md về model và giới hạn.

@@ -95,3 +95,7 @@ Baseline cụ thể cho các lựa chọn nghiệp vụ tại `docs/business-rul
 Kiểm tra luồng bình thường, sai quyền, hết hạn, xung đột đồng thời, Hub đầy, cổng sạc hỏng và request lặp. Với simulation, kiểm tra kết quả tái lập theo đầu vào/seed và dữ liệu vận hành không bị đổi.
 
 Use case, kiến trúc, ERD và sơ đồ hành vi phải được cập nhật theo triển khai thực tế. Các chỉ tiêu phi chức năng chỉ được đánh dấu đạt khi có phép đo hoặc bằng chứng kiểm tra.
+
+## T13 — 17/10/2026
+
+SimulationModule dùng HubsService.snapshot() và settings; engine departures-v1 thuần so sánh baseline/scenario cùng seed, có operator UI. Giả định/giới hạn tại docs/simulation.md. Chưa lưu lịch sử/chưa mô phỏng trả xe/sạc; chờ peer review. Không ghi dữ liệu vận hành.

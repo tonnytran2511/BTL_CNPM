@@ -74,3 +74,7 @@ Kiểu payload baseline tại `packages/contracts/planned.ts`; quy tắc và tes
 ## GET /vehicles (T06, đã triển khai)
 
 Query tùy chọn: `hubId` (UUID), `type` (`electric_bicycle` | `electric_motorcycle`), `minBatteryPercent` (0–100). Chỉ trả xe `available` ở Hub `active` có pin không thấp hơn `minimumRentalBatteryPercent` trong bảng `settings`; bộ lọc của người dùng chỉ có thể nâng ngưỡng này lên. Response: `{minimumBatteryPercent, vehicles: RentableVehicle[]}` sắp xếp theo pin giảm dần. Chưa phân trang.
+
+## T13 Simulation
+
+`GET /simulations/config` (operator, 200, SimulationLimits) và `POST /simulations/demand-surge` (operator, 201, DemandSimulationResult) đã triển khai. Request/validation/đơn vị tại [simulation.md](simulation.md); kiểu tại packages/contracts/simulation.ts. Endpoint lưu/list kết quả vẫn là kế hoạch T22.

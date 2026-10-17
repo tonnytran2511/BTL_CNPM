@@ -1,5 +1,7 @@
 {
   "settings": {
+    "simulationMaximumSteps": 288,
+    "simulationMaximumArrivalsPerStep": 1000,
     "lowBatteryThreshold": 25,
     "maximumParkingDurationMinutes": 1440,
     "reservationHoldMinutes": 15,
