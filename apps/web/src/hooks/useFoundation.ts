@@ -26,12 +26,18 @@ export function useFoundation() {
   const reset = useCallback(() => {
     generation.current += 1;
     activeRequest.current?.abort();
+    activeRequest.current = null;
     inFlight.current = false;
+    setRefreshing(false);
     setUser(null);
     setHubs([]);
     setOverview(null);
     setUpdatedAt(null);
   }, []);
+  const sessionExpired = useCallback(() => {
+    reset();
+    setError("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+  }, [reset]);
   const initialize = useCallback(async (signal?: AbortSignal) => {
     setBooting(true);
     setError("");
@@ -82,8 +88,11 @@ export function useFoundation() {
       }
       setError("");
     } catch (e) {
-      if (current !== generation.current) return;
-      if (e instanceof RequestError && e.status === 401) reset();
+      if (current !== generation.current || controller.signal.aborted) return;
+      if (e instanceof RequestError && e.status === 401) {
+        sessionExpired();
+        return;
+      }
       setError(e instanceof Error ? e.message : "Không thể cập nhật dữ liệu.");
     } finally {
       if (activeRequest.current === controller) {
@@ -92,15 +101,18 @@ export function useFoundation() {
         setRefreshing(false);
       }
     }
-  }, [user, reset]);
+  }, [user, sessionExpired]);
   useEffect(() => {
     if (!config || !user) return;
     void refresh();
-    const interval = window.setInterval(() => {
+    const refreshVisible = () => {
       if (document.visibilityState === "visible") void refresh();
-    }, config.pollIntervalMs);
+    };
+    const interval = window.setInterval(refreshVisible, config.pollIntervalMs);
+    document.addEventListener("visibilitychange", refreshVisible);
     return () => {
       window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", refreshVisible);
       generation.current += 1;
       activeRequest.current?.abort();
       activeRequest.current = null;
@@ -149,6 +161,7 @@ export function useFoundation() {
     setPassword,
     login,
     logout,
+    sessionExpired,
     refresh,
     retry: () => initialize(),
     stats: dashboardStats(hubs, overview),

@@ -1,6 +1,6 @@
 # Baseline nghiệp vụ v1 cho nhóm review
 
-Nhóm trưởng chuẩn bị baseline này để các module có cùng cách xử lý. Đây là lựa chọn thiết kế cho dự án, không phải yêu cầu nguyên văn của đề hoặc xác nhận cả nhóm đã duyệt. Chỉ auth, đọc Hub/dashboard, dữ liệu cốt lõi và snapshot đã có code. Các BR về thuê/đỗ/sạc/điều chuyển/simulation là tiêu chí cho phần triển khai tiếp theo.
+Nhóm trưởng chuẩn bị baseline này để các module có cùng cách xử lý. Đây là lựa chọn thiết kế cho dự án, không phải yêu cầu nguyên văn của đề hoặc xác nhận cả nhóm đã duyệt. Auth, đọc Hub/dashboard, dữ liệu cốt lõi và snapshot đã có code. Mai Anh bổ sung local đỗ/yêu cầu sạc tuần 1; xem docs/api.md và docs/testing.md về hành vi/giới hạn và trạng thái kiểm tra. Scheduler, thuê xe, điều chuyển và simulation vẫn cần triển khai tiếp.
 
 ## Quy tắc và nghiệm thu
 
@@ -24,18 +24,19 @@ Nhóm trưởng chuẩn bị baseline này để các module có cùng cách x�
 
 ## Cấu hình cần module sở hữu bổ sung
 
-| Key dự kiến trong settings     | Đơn vị / validation                            | Owner |
-| ------------------------------ | ---------------------------------------------- | ----- |
-| reservationHoldMinutes         | Số nguyên dương                                | TV2   |
-| minimumRentalBatteryPercent    | 0–100                                          | TV2   |
-| maximumParkingDurationMinutes  | Số nguyên dương                                | TV3   |
-| chargingUrgencyWindowMinutes   | Số nguyên không âm                             | TV3   |
-| chargingMaximumWaitMinutes     | Số nguyên dương                                | TV3   |
-| simulationMaximumSteps         | Số nguyên dương                                | TV5   |
-| simulationTravelMinutesByRoute | Route IDs và thời lượng dương                  | TV5   |
-| simulationChargingModel        | Tham số năng lượng/công suất có đơn vị rõ ràng | TV5   |
+| Key dự kiến trong settings       | Đơn vị / validation                                   | Owner |
+| -------------------------------- | ----------------------------------------------------- | ----- |
+| reservationHoldMinutes           | Số nguyên dương                                       | TV2   |
+| minimumRentalBatteryPercent      | 0–100                                                 | TV2   |
+| maximumParkingDurationMinutes    | Số nguyên dương                                       | TV3   |
+| chargingUrgencyWindowMinutes     | Số nguyên không âm                                    | TV3   |
+| chargingMaximumWaitMinutes       | Số nguyên dương                                       | TV3   |
+| simulationMaximumSteps           | Số nguyên dương                                       | TV5   |
+| simulationMaximumArrivalsPerStep | Số nguyên dương; giới hạn nhu cầu trung bình mỗi bước | TV5   |
+| simulationTravelMinutesByRoute   | Route IDs và thời lượng dương                         | TV5   |
+| simulationChargingModel          | Tham số năng lượng/công suất có đơn vị rõ ràng        | TV5   |
 
-Các key trên **chưa có trong DB**, trừ lowBatteryThreshold đã dùng ở dashboard. Chủ module thêm migration/seed và validation khi triển khai; không tự fallback sang số trong service. Giá trị demo là dữ liệu cấu hình nhóm chọn, không phải con số từ giảng viên.
+lowBatteryThreshold đã dùng ở dashboard; maximumParkingDurationMinutes được seed mới và validation trong module mobility. Các key còn lại chưa có trong DB. Chủ module thêm migration/seed và validation khi triển khai; không tự fallback sang số trong service. Giá trị demo là dữ liệu cấu hình nhóm chọn, không phải con số từ giảng viên.
 
 ## Trạng thái dự kiến
 

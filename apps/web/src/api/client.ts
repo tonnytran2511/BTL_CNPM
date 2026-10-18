@@ -1,20 +1,24 @@
+import { clientConfig } from "./config";
 import type {
   User,
   PublicConfig,
   HubSummary,
   HubDetail,
   NetworkOverview,
+  VehicleSearchQuery,
+  VehicleSearchResult,
   ApiError,
 } from "@emobility/contracts";
 export class RequestError extends Error {
   constructor(
     message: string,
     readonly status: number,
+    readonly code: string = `HTTP_${status}`,
   ) {
     super(message);
   }
 }
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function readResponse<T>(path: string, options: RequestInit): Promise<T> {
   let response: Response;
   try {
     response = await fetch(`/api${path}`, {
@@ -47,8 +51,49 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
         ? String((body as ApiError).message)
         : "Yêu cầu thất bại.",
       response.status,
+      body &&
+        typeof body === "object" &&
+        "code" in body &&
+        typeof body.code === "string"
+        ? body.code
+        : undefined,
     );
   return body as T;
+}
+export async function request<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T> {
+  const controller = new AbortController();
+  const callerSignal = options.signal;
+  const cancel = () => controller.abort(callerSignal?.reason);
+  if (callerSignal?.aborted) {
+    throw callerSignal.reason ?? new DOMException("Aborted", "AbortError");
+  }
+  callerSignal?.addEventListener("abort", cancel, { once: true });
+  let timedOut = false;
+  const timer = window.setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, clientConfig.requestTimeoutMs);
+  try {
+    return await readResponse<T>(path, {
+      ...options,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (callerSignal?.aborted) throw callerSignal.reason ?? error;
+    if (timedOut)
+      throw new RequestError(
+        "Máy chủ phản hồi quá lâu. Vui lòng thử lại. Nếu vừa gửi thao tác, kiểm tra kết quả trước khi gửi lại.",
+        0,
+        "REQUEST_TIMEOUT",
+      );
+    throw error;
+  } finally {
+    window.clearTimeout(timer);
+    callerSignal?.removeEventListener("abort", cancel);
+  }
 }
 export const api = {
   config: (signal?: AbortSignal) =>
@@ -66,4 +111,15 @@ export const api = {
     request<NetworkOverview>("/network/overview", { signal }),
   detail: (id: string, signal?: AbortSignal) =>
     request<HubDetail>(`/hubs/${encodeURIComponent(id)}`, { signal }),
+  vehicles: (query: VehicleSearchQuery, signal?: AbortSignal) => {
+    const params = new URLSearchParams();
+    if (query.hubId) params.set("hubId", query.hubId);
+    if (query.type) params.set("type", query.type);
+    if (query.minBatteryPercent !== undefined)
+      params.set("minBatteryPercent", String(query.minBatteryPercent));
+    const qs = params.toString();
+    return request<VehicleSearchResult>(`/vehicles${qs ? `?${qs}` : ""}`, {
+      signal,
+    });
+  },
 };

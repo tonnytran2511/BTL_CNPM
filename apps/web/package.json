@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "dependencies": {
     "@emobility/contracts": "^0.1.0",
@@ -14,9 +15,12 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.3.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
-    "vite": "^8.3.4"
+    "jsdom": "^29.1.1",
+    "vite": "^8.3.4",
+    "vitest": "^4.1.11"
   }
 }

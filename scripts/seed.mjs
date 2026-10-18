@@ -27,12 +27,41 @@ try {
     );
   }
   const threshold = data.settings.lowBatteryThreshold;
+  const maximumParkingDurationMinutes =
+    data.settings.maximumParkingDurationMinutes;
+  if (
+    !Number.isInteger(maximumParkingDurationMinutes) ||
+    maximumParkingDurationMinutes <= 0
+  )
+    throw new Error("Invalid maximumParkingDurationMinutes");
+  await client.query(
+    "INSERT INTO settings(key,value) VALUES($1,$2) ON CONFLICT(key) DO NOTHING",
+    [
+      "maximumParkingDurationMinutes",
+      JSON.stringify(maximumParkingDurationMinutes),
+    ],
+  );
   if (!Number.isInteger(threshold) || threshold < 0 || threshold > 100)
     throw new Error("Invalid lowBatteryThreshold");
   await client.query(
     "INSERT INTO settings(key,value) VALUES($1,$2) ON CONFLICT(key) DO NOTHING",
     ["lowBatteryThreshold", JSON.stringify(threshold)],
   );
+  // T06 rental settings (BR-01): validated here, read from the DB by the rental module.
+  const rentalSettings = {
+    simulationMaximumSteps: (v) => Number.isSafeInteger(v) && v > 0,
+    simulationMaximumArrivalsPerStep: (v) => Number.isSafeInteger(v) && v > 0,
+    reservationHoldMinutes: (v) => Number.isInteger(v) && v > 0,
+    minimumRentalBatteryPercent: (v) =>
+      Number.isInteger(v) && v >= 0 && v <= 100,
+  };
+  for (const [key, valid] of Object.entries(rentalSettings)) {
+    if (!valid(data.settings[key])) throw new Error(`Invalid ${key}`);
+    await client.query(
+      "INSERT INTO settings(key,value) VALUES($1,$2) ON CONFLICT(key) DO NOTHING",
+      [key, JSON.stringify(data.settings[key])],
+    );
+  }
   for (const hub of data.hubs) {
     if (
       !Number.isInteger(hub.parkingCapacity) ||

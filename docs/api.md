@@ -13,6 +13,7 @@ Prefix `/api`; JSON; ID UUID; thời gian ISO 8601 có timezone; pin và tỷ l�
 | GET /hubs/:id                    | Đăng nhập | `HubDetail`                      | 200; ID sai 400; không tồn tại/Hub inactive với sinh viên 404 |
 | GET /network/overview            | Operator  | `NetworkOverview`                | 200; sinh viên 403                                            |
 | GET /simulation/snapshot         | Operator  | `SimulationSnapshot`             | 200; sinh viên 403                                            |
+| GET /vehicles                    | Đăng nhập | `VehicleSearchResult`            | 200; query sai 400                                            |
 | POST /incidents                  | Operator  | `Incident`                       | 201; tài nguyên không tồn tại 404; payload sai 400            |
 | POST /incidents/:id/resolve      | Operator  | `Incident`                       | 201; không tồn tại 404; đã xử lý 409                          |
 | POST /redistributions            | Operator  | `Redistribution`                 | 201; xe/Hub không đủ điều kiện 409; payload sai 400           |
@@ -42,12 +43,53 @@ Các endpoint dưới đây là đề xuất, **chưa tồn tại**; chủ modul
 | Chủ module | Đề xuất                                                                                                                                         |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | TV2        | GET /vehicles; POST /vehicle-reservations; POST /vehicle-reservations/:id/cancel; POST /vehicle-reservations/:id/pickup; POST /trips/:id/return |
-| TV3        | POST /private-vehicles; POST /parking-reservations; POST /charging-requests; GET /charging-queue                                                |
-| TV4        | POST/PATCH /hubs (chưa triển khai)                                                                                                              |
+| TV3        | Đã triển khai local các endpoint `/mobility` bên dưới; scheduler/phiên sạc còn chờ tuần 2.                                                      |
+| TV4        | POST/PATCH /hubs (incident/redistribution đã triển khai bên trên)                                                                               |
 | TV5        | POST /simulations; GET /simulations/:id; GET /simulations                                                                                       |
 
 TV4 đã triển khai các endpoint incident và redistribution nêu ở trên. `POST /redistributions` chỉ tạo lệnh `pending`; `start` kiểm tra lại Hub, xe available tại nguồn và incident đang mở trong transaction rồi chuyển xe sang `redistributing`. `cancel` chỉ áp dụng trước khi bắt đầu. Hoàn tất điều chuyển cần allocation service của TV3 để chiếm chỗ ở Hub đích; endpoint hoàn tất chưa được bật cho đến khi service đó được tích hợp.
 
 Không thêm endpoint success giả hoặc dữ liệu mẫu trong component để thay phần chưa triển khai.
 
+## Mai Anh — API đỗ/sạc tuần 1
+
+Tất cả endpoint `/mobility` yêu cầu session. POST yêu cầu header `Idempotency-Key` dài 1–128 ký tự; lưu kết quả cùng transaction. Cùng actor/operation/key và payload chuẩn hóa trả response cũ; khác payload trả 409. Không có TTL tự xóa key trong bản tuần 1.
+
+| Method / path                                 | Input                         | Response / quyền                                                              |
+| --------------------------------------------- | ----------------------------- | ----------------------------------------------------------------------------- |
+| GET /mobility/private-vehicles                | —                             | `PrivateVehicle[]` của người đăng nhập                                        |
+| POST /mobility/private-vehicles               | `{code,type,batteryPercent}`  | `PrivateVehicle`; owner lấy từ session                                        |
+| GET /mobility/parking/availability            | query `hubId,startsAt,endsAt` | `ParkingAvailability`                                                         |
+| GET /mobility/parking/bookings                | —                             | `ParkingBooking[]` của người đăng nhập                                        |
+| POST /mobility/parking/bookings               | `ReserveParkingRequest`       | `ParkingBooking`                                                              |
+| POST /mobility/parking/bookings/:id/cancel    | `{}`                          | `ParkingBooking`; chỉ chủ lịch, trạng thái reserved                           |
+| POST /mobility/parking/bookings/:id/check-in  | `{}`                          | `ParkingBooking`; chỉ chủ lịch, trong giờ đặt và chỗ vật lý trống             |
+| POST /mobility/parking/bookings/:id/check-out | `{}`                          | `ParkingBooking`; chỉ chủ lịch, trạng thái checked_in                         |
+| GET /mobility/charging/requests               | —                             | `ChargingQueueEntry[]`; sinh viên chỉ thấy yêu cầu mình, operator thấy tất cả |
+| POST /mobility/charging/requests              | `ChargingRequestInput`        | `{id,status:"queued"}`                                                        |
+
+GET trả 200; POST trả 201. 400: DTO/time/pin/key sai; 401: chưa đăng nhập; 403: sai chủ sở hữu/quyền; 404: ID tài nguyên không tồn tại; 409: Hub ngừng, hết chỗ, lịch/xe/yêu cầu trùng, sai trạng thái hoặc key dùng lại khác nội dung. TypeScript interfaces tại `packages/contracts/mobility.ts`, request dùng lại `ReserveParkingRequest` và `ChargingRequestInput` trong planned.ts; các request này nay có implementation như bảng trên.
+
+`type` là electric_bicycle/electric_motorcycle. Pin xe cá nhân do chủ xe khai báo khi đăng ký; xe cũ có pin null phải có dữ liệu pin trước khi gửi yêu cầu. Backend không tự giả định pin.
+
+Lịch đỗ tương lai không thay đổi parking_spaces. So sánh `[startsAt,endsAt)`; yêu cầu timezone, bắt đầu ở tương lai, thời lượng không vượt settings.maximumParkingDurationMinutes. Seed mẫu chọn 1440 phút cho demo; không fallback trong service. Chỗ đang occupied hoặc held còn hạn bị loại vì chưa biết thời điểm rời. Chỗ có lịch tiếp giáp vẫn đặt được. Trả xe thuê chưa có thời gian rời nên không chiếm chỗ đã cam kết cho một lịch tương lai. Xem các giới hạn này tại tài liệu bàn giao trước khi review baseline.
+
+Xe cá nhân phải đỗ thực tế tại đúng Hub khi yêu cầu sạc; target lớn hơn pin hiện tại, không quá 100. Xe thuê chỉ operator được yêu cầu và xe phải available tại Hub. Chỉ một yêu cầu queued/allocated cho một xe. Bản tuần 1 ghi hàng chờ FIFO theo thời điểm gửi/ID, không phân bổ cổng hay chạy sạc. Check-out hủy yêu cầu queued của xe; nếu đã allocated thì chặn, chờ workflow phiên sạc tuần 2.
+
 Kiểu payload baseline tại `packages/contracts/planned.ts`; quy tắc và testcase tại `docs/business-rules.md`. Endpoint mới cần request validation, response type và mã lỗi nghiệp vụ được review; hiện `ApiError.code` mới có HTTP_<status>. Không công bố mã lỗi nghiệp vụ như đã triển khai khi chưa có controller/service tương ứng.
+
+## Frontend cập nhật và lỗi
+
+API client giữ `RequestError.status`, `RequestError.code` và message từ error envelope; thiếu code dùng `HTTP_<status>`. Lỗi kết nối có status 0; response thành công không đọc được JSON được coi là lỗi 502 phía client. Abort được giữ nguyên để hooks bỏ qua request đã hủy.
+
+Dashboard chỉ có một request refresh tại một thời điểm, polling theo config và cập nhật khi tab trở lại visible. Chi tiết Hub dùng request riêng, không hủy request chậm vì dashboard vừa poll; lỗi tạm giữ dữ liệu gần nhất và cho thử lại. 401 xóa session state phía UI; 403/404 ở chi tiết xóa dữ liệu cũ. Không đổi endpoint hoặc quyền backend trong thay đổi này.
+
+Mỗi request frontend có deadline `VITE_API_TIMEOUT_MS` từ cấu hình công khai khi build/dev; kiểm tra số nguyên dương trong giới hạn timer 32-bit. Deadline bao gồm cả đọc JSON. Quá hạn trả `RequestError` với status 0, code `REQUEST_TIMEOUT`; hủy từ hook vẫn giữ nguyên cancellation. Timer/listener được dọn khi hoàn tất. Client không tự retry mutation: timeout không chứng minh server chưa xử lý thao tác. Config này thuộc client, không thay đổi payload `/config` của server.
+
+## GET /vehicles (T06, đã triển khai)
+
+Query tùy chọn: `hubId` (UUID), `type` (`electric_bicycle` | `electric_motorcycle`), `minBatteryPercent` (0–100). Chỉ trả xe `available` ở Hub `active` có pin không thấp hơn `minimumRentalBatteryPercent` trong bảng `settings`; bộ lọc của người dùng chỉ có thể nâng ngưỡng này lên. Response: `{minimumBatteryPercent, vehicles: RentableVehicle[]}` sắp xếp theo pin giảm dần. Chưa phân trang.
+
+## T13 Simulation
+
+`GET /simulations/config` (operator, 200, SimulationLimits) và `POST /simulations/demand-surge` (operator, 201, DemandSimulationResult) đã triển khai. Request/validation/đơn vị tại [simulation.md](simulation.md); kiểu tại packages/contracts/simulation.ts. Endpoint lưu/list kết quả vẫn là kế hoạch T22.

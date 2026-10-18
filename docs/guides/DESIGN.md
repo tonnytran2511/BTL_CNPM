@@ -28,7 +28,7 @@ Frontend → API → services/domain → data access → database.
 - Frontend gồm UI, hooks, model/type và API client tách biệt.
 - Backend triển khai theo module trong cùng một ứng dụng để giảm chi phí tích hợp.
 - Auth kiểm tra danh tính và quyền tại backend; các service kiểm tra quyền sở hữu tài nguyên.
-- Dashboard đọc trạng thái tổng hợp từ API; polling là phương án ban đầu, chu kỳ cập nhật cấu hình được.
+- Dashboard đọc trạng thái tổng hợp từ API; polling là phương án ban đầu, chu kỳ cập nhật cấu hình được. HTTP client có deadline theo `VITE_API_TIMEOUT_MS` được kiểm tra khi build/dev, hủy request chậm để UI có thể phục hồi. Deadline không đảm bảo server đã hủy mutation; không tự replay thao tác gửi dữ liệu.
 - Simulator lấy snapshot chỉ đọc; chạy trên trạng thái riêng và lưu kết quả riêng.
 - Đề xuất simulation không tự thay đổi vận hành. Khi thực thi, tạo lệnh nghiệp vụ và kiểm tra lại điều kiện hiện tại.
 
@@ -37,6 +37,8 @@ Stack: React + TypeScript + Vite; NestJS + TypeScript; PostgreSQL. Data access d
 Xác thực: session opaque, token ngẫu nhiên chỉ nằm trong cookie HttpOnly/SameSite Strict; database lưu SHA-256 của token, thời hạn và user. Mật khẩu dùng scrypt với salt riêng. Logout xóa session; mỗi request đọc quyền hiện tại từ user đang active. Mutation kiểm tra Origin; login có rate limit cấu hình được. Bản hiện tại chỉ có đăng nhập tài khoản được cấp qua seed, chưa có đăng ký/quên mật khẩu.
 
 Hợp đồng endpoint đã triển khai tại `docs/api.md`; ERD/kiến trúc tại `docs/architecture.md`; hướng dẫn mở rộng tại `docs/guides/CONTRIBUTING.md`.
+
+15/10 — phần Mai Anh tuần 1 có implementation local tại MobilityModule; chưa có xác nhận peer review/merge. AllocationPort có provider thực, nhận cùng PoolClient của caller. Lịch tương lai tách khỏi trạng thái vật lý. Chính sách bảo thủ: chỗ đang bị chiếm/giữ còn hạn không được hứa cho lịch tương lai khi chưa biết giờ rời; trả xe thuê không chiếm chỗ có lịch tương lai còn hiệu lực. Chỗ quá giờ chưa check-out vẫn occupied và chặn check-in sau; không tự xóa xe khỏi chỗ. Nhóm cần review chính sách này trước tích hợp. Pin cá nhân là dữ liệu khai báo lúc đăng ký, xe cũ không có pin giữ null. Bản tuần 1 hỗ trợ check-in/check-out để xác nhận vị trí trước yêu cầu sạc; chưa chạy phiên/scheduler. Hợp đồng API tại `docs/api.md`; kết quả kiểm tra tại `docs/testing.md`.
 
 ### Lý do chọn stack
 
@@ -90,6 +92,12 @@ Baseline cụ thể cho các lựa chọn nghiệp vụ tại `docs/business-rul
 
 ## Kiểm chứng thiết kế
 
+Đặc tả use case và source UML nằm trong `docs/use-cases.md`, `docs/diagrams/`; kế hoạch test tích hợp và mục tiêu NFR đề xuất nằm trong `docs/integration-test-plan.md`. Trạng thái thực thi thực tế được ghi riêng ở `docs/testing.md` và execution logs khi có. Không chuyển một testcase kế hoạch thành kết quả đã kiểm chứng.
+
 Kiểm tra luồng bình thường, sai quyền, hết hạn, xung đột đồng thời, Hub đầy, cổng sạc hỏng và request lặp. Với simulation, kiểm tra kết quả tái lập theo đầu vào/seed và dữ liệu vận hành không bị đổi.
 
 Use case, kiến trúc, ERD và sơ đồ hành vi phải được cập nhật theo triển khai thực tế. Các chỉ tiêu phi chức năng chỉ được đánh dấu đạt khi có phép đo hoặc bằng chứng kiểm tra.
+
+## T13 — 17/10/2026
+
+SimulationModule dùng HubsService.snapshot() và settings; engine departures-v1 thuần so sánh baseline/scenario cùng seed, có operator UI. Giả định/giới hạn tại docs/simulation.md. Chưa lưu lịch sử/chưa mô phỏng trả xe/sạc; chờ peer review. Không ghi dữ liệu vận hành.
