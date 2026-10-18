@@ -222,3 +222,18 @@ Các chuyển trạng thái trên là baseline thiết kế, chưa phải servic
 ## T13 Simulation
 
 SimulationPanel → useSimulation → simulationApi → SimulationController (operator) → SimulationService → HubsService.snapshot() + SimulationRepository (chỉ đọc settings) → engine thuần departures-v1. Không thêm bảng/migration; kết quả chỉ trả cho client. Xem simulation.md về model và giới hạn.
+
+## T07/T12 sau tích hợp 18/10/2026
+
+Đặt/hủy: UI → useRental/useReservations → API client có deadline → ReservationService → RentalRepository/RentalTx → PostgreSQL. Xác nhận hủy nằm trong hook; component chỉ render và nối sự kiện. Phản hồi mutation từ tài khoản cũ không thay đổi UI của phiên mới.
+
+Sự cố/điều chuyển: OperationsController → DTO → OperationsService → OperationsRepository. Service giữ điều kiện nghiệp vụ; repository giữ SQL/transaction. OperationsService gọi RentalService với cùng PoolClient để khóa và chuyển xe `available → redistributing`; không tự cập nhật bảng vehicles. Hub được khóa theo ID, xe theo ID để các lệnh cạnh tranh tuần tự. Cập nhật xe và order nằm trong cùng transaction.
+
+```mermaid
+stateDiagram-v2
+  [*] --> pending: tạo lệnh, chưa di chuyển xe
+  pending --> cancelled: hủy trước khi bắt đầu
+  pending --> in_progress: kiểm tra lại Hub, xe, sự cố và khóa xe
+```
+
+Đây là phạm vi T12: chưa có endpoint hoàn tất/hoàn tác lệnh đang chạy hoặc UI quản trị. `in_progress` giữ vị trí/chỗ nguồn cho đến workflow di chuyển thực tế ở task tiếp theo; không tự chiếm chỗ đích. Incident hiện là nhật ký open/resolved; không tự chuyển Hub inactive, xe maintenance hay cổng failed, và không tự xử lý reservation/trip/charging. Tác động của sự cố lên vận hành theo BR-08/BR-10 cần service của chủ module triển khai tiếp. Chưa có Idempotency-Key cho T07/T12; client không tự retry mutation.

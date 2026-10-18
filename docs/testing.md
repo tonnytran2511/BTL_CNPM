@@ -58,3 +58,13 @@ Build frontend/backend pass; npm test: 31 test pass, gồm T13 engine và HTTP t
 ## Tích hợp 18/10/2026 — PR #2 sau T13
 
 Checkout tích hợp giữ dashboard deadline/session, mobility, rental search và simulation. Build frontend/backend pass; API 34/34 tests và frontend 16/16 tests pass. Bộ chạy API tìm toàn bộ file `tests/*.test.mjs` qua Node để tránh bỏ sót suite và không phụ thuộc shell glob trên Windows. Chưa chạy lại demo trình duyệt trong lần tích hợp này.
+
+## Tích hợp 18/10/2026 — PR #6
+
+Build frontend/backend pass; API 45/45 tests và frontend 18/18 tests pass trên bản gồm dashboard, mobility, T13 và T07. Sửa trùng formatDateTime khi auto-merge; chuyển điều phối đặt/hủy và xác nhận hủy sang hooks. Regression frontend kiểm tra phản hồi mutation của tài khoản cũ không khóa/ghi lỗi vào phiên mới, chống submit đồng thời và đọc lại dữ liệu sau xung đột. Chưa demo trình duyệt trong lần này; T08/T16 và Idempotency-Key của rental vẫn ngoài phạm vi T07.
+
+## Tích hợp 18/10/2026 — PR #7 và toàn bộ module đã ghép
+
+Build frontend/backend pass; API 53/53 tests và frontend 18/18 tests pass. `tests/operations.test.mjs` dùng PostgreSQL riêng và HTTP thật: operator-only/validation, mô tả trắng 400, actor/thời gian, resolve/final-state guards, không đổi xe khi tạo/hủy pending, Hub/xe thay đổi sau tạo lệnh, incident mở chặn start, hai lệnh tranh cùng xe, reservation tranh với start và lỗi sau cập nhật xe rollback cả xe/order. Migration T12 chạy cùng migration parking/rental trên database sạch. Giữ toàn bộ test dashboard/auth, mobility, rental và T13.
+
+T12 chưa có UI, hoàn tất điều chuyển, Idempotency-Key hoặc ảnh hưởng incident lên trạng thái vận hành/phiên đang chạy; đây không phải bằng chứng những luồng đó đã triển khai. Chưa chạy lại demo trình duyệt, đo tải hoặc deploy.

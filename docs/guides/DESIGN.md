@@ -101,3 +101,7 @@ Use case, kiến trúc, ERD và sơ đồ hành vi phải được cập nhật 
 ## T13 — 17/10/2026
 
 SimulationModule dùng HubsService.snapshot() và settings; engine departures-v1 thuần so sánh baseline/scenario cùng seed, có operator UI. Giả định/giới hạn tại docs/simulation.md. Chưa lưu lịch sử/chưa mô phỏng trả xe/sạc; chờ peer review. Không ghi dữ liệu vận hành.
+
+## Tích hợp 18/10/2026
+
+PR #1/#2/#6/#7 được ghép với nền T13. Dashboard, mobility, rental search/reservation và simulation dùng cùng API client có deadline; test runner thu thập toàn bộ API suite. T12 tách SQL khỏi service; đổi trạng thái xe khi bắt đầu điều chuyển qua RentalService trong cùng transaction. Phạm vi T12 chỉ gồm nhật ký sự cố và tạo/bắt đầu/hủy lệnh trước khi chạy; hoàn tất điều chuyển và tác động sự cố lên thuê/sạc còn là workflow chưa triển khai, xem architecture.md và api.md. Chưa coi demo UI/NFR hoặc toàn bộ module là hoàn thành chỉ vì merge PR.

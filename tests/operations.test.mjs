@@ -30,7 +30,7 @@ async function command(file, env) {
   const [code] = await once(child, "exit");
   assert.equal(code, 0, out);
 }
-// T07: đặt/hủy xe trên PostgreSQL thật. Cần `npm run build` trước (test chạy apps/api/dist).
+// Real HTTP + PostgreSQL regression coverage for T12 and rental integration.
 test(
   "T12 operations and rental integration against real PostgreSQL",
   { timeout: 120_000 },

@@ -40,12 +40,12 @@ Lỗi có dạng `{statusCode: number, code: "HTTP_<status>", message: string}`;
 
 Các endpoint dưới đây là đề xuất, **chưa tồn tại**; chủ module bổ sung DTO/response và review trước khi triển khai:
 
-| Chủ module | Đề xuất                                                                                                                                         |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| TV2        | GET /vehicles; POST /vehicle-reservations; POST /vehicle-reservations/:id/cancel; POST /vehicle-reservations/:id/pickup; POST /trips/:id/return |
-| TV3        | Đã triển khai local các endpoint `/mobility` bên dưới; scheduler/phiên sạc còn chờ tuần 2.                                                      |
-| TV4        | POST/PATCH /hubs (incident/redistribution đã triển khai bên trên)                                                                               |
-| TV5        | POST /simulations; GET /simulations/:id; GET /simulations                                                                                       |
+| Chủ module | Đề xuất                                                                                    |
+| ---------- | ------------------------------------------------------------------------------------------ |
+| TV2        | POST /vehicle-reservations/:id/pickup; POST /trips/:id/return (tìm/đặt/hủy đã có bên dưới) |
+| TV3        | Đã triển khai local các endpoint `/mobility` bên dưới; scheduler/phiên sạc còn chờ tuần 2. |
+| TV4        | POST/PATCH /hubs (incident/redistribution đã triển khai bên trên)                          |
+| TV5        | POST /simulations; GET /simulations/:id; GET /simulations                                  |
 
 TV4 đã triển khai các endpoint incident và redistribution nêu ở trên. `POST /redistributions` chỉ tạo lệnh `pending`; `start` kiểm tra lại Hub, xe available tại nguồn và incident đang mở trong transaction rồi chuyển xe sang `redistributing`. `cancel` chỉ áp dụng trước khi bắt đầu. Hoàn tất điều chuyển cần allocation service của TV3 để chiếm chỗ ở Hub đích; endpoint hoàn tất chưa được bật cho đến khi service đó được tích hợp.
 
@@ -90,6 +90,27 @@ Mỗi request frontend có deadline `VITE_API_TIMEOUT_MS` từ cấu hình công
 
 Query tùy chọn: `hubId` (UUID), `type` (`electric_bicycle` | `electric_motorcycle`), `minBatteryPercent` (0–100). Chỉ trả xe `available` ở Hub `active` có pin không thấp hơn `minimumRentalBatteryPercent` trong bảng `settings`; bộ lọc của người dùng chỉ có thể nâng ngưỡng này lên. Response: `{minimumBatteryPercent, vehicles: RentableVehicle[]}` sắp xếp theo pin giảm dần. Chưa phân trang.
 
+## Đặt / hủy xe (T07, đã triển khai)
+
+Mọi endpoint cần đăng nhập (cookie session). `userId` lấy từ session, không nhận từ body; field ngoài DTO bị từ chối 400. Mutation phải có Origin đúng `WEB_ORIGIN` khi mang cookie.
+
+| Method / path                         | Response                   | Trạng thái                                                                        |
+| ------------------------------------- | -------------------------- | --------------------------------------------------------------------------------- |
+| GET /vehicle-reservations             | `VehicleReservationView[]` | 200; chỉ lượt của chính người gọi, mới nhất trước, tối đa 100; chưa đăng nhập 401 |
+| POST /vehicle-reservations            | `VehicleReservationView`   | 201; body `{vehicleId}` sai 400; xe không tồn tại 404; xe không còn đặt được 409  |
+| POST /vehicle-reservations/:id/cancel | `VehicleReservationView`   | 200; id sai 400; không tồn tại 404; không phải chủ 403; không còn `active` 409    |
+
+- Đặt xe (BR-01): xe phải `available`, thuộc Hub `active`, pin không thấp hơn `minimumRentalBatteryPercent`. Xe chuyển `reserved`, tạo reservation `active` với `expiresAt = now + reservationHoldMinutes` (settings, tính bằng đồng hồ DB). Tất cả trong một transaction; hai người đặt cùng xe thì đúng một người thành công (khóa hàng xe + cập nhật có điều kiện + unique index `vehicle_reservations_active_vehicle_idx`).
+- Hủy xe: chỉ chủ lượt đặt, chỉ khi `active`. Reservation thành `cancelled` (`closedAt` được ghi) và xe `reserved → available` bằng cập nhật có điều kiện: nếu xe đã bị đổi sang trạng thái khác (ví dụ sự cố, BR-10) thì không ghi đè.
+- Lỗi vẫn theo dạng `{statusCode, code: "HTTP_<status>", message}`; chưa có mã lỗi nghiệp vụ riêng.
+- Chưa làm: tự động chuyển `expired` khi quá hạn (T16), nhận xe `fulfilled` (T08), Idempotency-Key (BR-11).
+
 ## T13 Simulation
 
 `GET /simulations/config` (operator, 200, SimulationLimits) và `POST /simulations/demand-surge` (operator, 201, DemandSimulationResult) đã triển khai. Request/validation/đơn vị tại [simulation.md](simulation.md); kiểu tại packages/contracts/simulation.ts. Endpoint lưu/list kết quả vẫn là kế hoạch T22.
+
+## Giới hạn T12 sau tích hợp
+
+Payload incident: `{resourceType: "vehicle" | "charging_point" | "hub", resourceId, description}`; description phải chứa ký tự không trắng, trim trước khi lưu. Payload redistribution: `{sourceHubId, targetHubId, vehicleIds}`; Hub khác nhau, danh sách không trống/trùng. ID/actor lấy từ session; field ngoài DTO bị từ chối. Hub/xe sai trạng thái hoặc xe có incident đang mở chặn tạo/bắt đầu điều chuyển; start kiểm tra lại trong transaction. Hai lệnh hoặc reservation/start tranh cùng xe chỉ một thao tác chiếm được xe.
+
+Incident hiện chỉ ghi nhận/resolve; chưa tự đổi trạng thái vận hành hoặc xử lý reservation/trip/charging. Lệnh in_progress chưa có endpoint hoàn tất hay hủy; vị trí/chỗ nguồn được giữ đến workflow điều chuyển tiếp theo. Chưa có Idempotency-Key cho T12; không tự replay POST khi timeout. Các giới hạn này là phần chưa triển khai, không phải thay đổi quy tắc BR-08/BR-10/BR-11.
