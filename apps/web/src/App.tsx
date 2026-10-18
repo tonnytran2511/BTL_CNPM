@@ -2,11 +2,13 @@ import { useFoundation } from "./hooks/useFoundation";
 import { useHubDetail } from "./hooks/useHubDetail";
 import { useVehicleSearch } from "./hooks/useVehicleSearch";
 import { useReservations } from "./hooks/useReservations";
+import { useTrips } from "./hooks/useTrips";
 import { LoginForm } from "./components/LoginForm";
 import { HubCard } from "./components/HubCard";
 import { HubDetailPanel } from "./components/HubDetailPanel";
 import { VehicleSearch } from "./components/VehicleSearch";
 import { ReservationList } from "./components/ReservationList";
+import { TripPanel } from "./components/TripPanel";
 import { formatNumber, formatTime } from "./utils/format";
 import { useMobility } from "./hooks/useMobility";
 import { MobilityPanel } from "./components/MobilityPanel";
@@ -15,9 +17,21 @@ export function App() {
   const hub = useHubDetail(model.user?.id, model.updatedAt);
   const vehicles = useVehicleSearch(model.user?.id, model.updatedAt);
   const reservations = useReservations(model.user?.id, model.updatedAt);
+  const trips = useTrips(model.user?.id, model.updatedAt);
   // Đặt hoặc hủy xong (kể cả bị từ chối vì xung đột) đều đọc lại danh sách xe và số liệu Hub.
   const reserve = async (vehicleId: string) => {
     await reservations.reserve(vehicleId);
+    vehicles.reload();
+    void model.refresh();
+  };
+  // Nhận/trả xe đổi trạng thái xe và chỗ đỗ: đọc lại xe, Hub, lượt đặt và chuyến.
+  const pickup = async (reservationId: string) => {
+    await trips.pickup(reservationId);
+    vehicles.reload();
+    void model.refresh();
+  };
+  const giveBack = async (tripId: string, targetHubId: string) => {
+    await trips.returnVehicle(tripId, targetHubId);
     vehicles.reload();
     void model.refresh();
   };
@@ -167,9 +181,23 @@ export function App() {
           loading={reservations.loading}
           error={reservations.error}
           cancelError={reservations.cancelError}
-          busyId={reservations.busyId}
+          pickupError={trips.pickupError}
+          busyId={reservations.busyId ?? trips.busyId}
           now={reservations.now}
           onCancel={cancel}
+          onPickup={pickup}
+        />
+        <TripPanel
+          hubs={model.hubs}
+          current={trips.current}
+          history={trips.history}
+          loaded={trips.loaded}
+          loading={trips.loading}
+          error={trips.error}
+          returnError={trips.returnError}
+          suggestions={trips.suggestions}
+          busyId={trips.busyId ?? reservations.busyId}
+          onReturn={giveBack}
         />
         <MobilityPanel model={mobility} hubs={model.hubs} />
         {hub.selectedId && (

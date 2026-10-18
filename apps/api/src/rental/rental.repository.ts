@@ -5,7 +5,9 @@ import {
 } from "@nestjs/common";
 import type { PoolClient } from "pg";
 import type {
+  HubSuggestion,
   RentableVehicle,
+  TripView,
   VehicleReservationView,
 } from "@emobility/contracts";
 import { Database } from "../database/database.module";
@@ -13,6 +15,7 @@ import {
   VEHICLE_STATUS_BY_EVENT,
   type RentalEvent,
   type ReservationStatus,
+  type TripStatus,
   type VehicleStatus,
   type VehicleType,
 } from "./rental.rules";
@@ -36,7 +39,68 @@ export interface LockedReservation {
   id: string;
   userId: string;
   vehicleId: string;
+  sourceHubId: string;
   status: ReservationStatus;
+  /** Quá hạn giữ xe, tính theo đồng hồ database (cùng nguồn với expires_at). */
+  expired: boolean;
+}
+
+export interface LockedTrip {
+  id: string;
+  userId: string;
+  vehicleId: string;
+  status: TripStatus;
+  targetHubId: string | null;
+}
+
+interface TripRow {
+  id: string;
+  status: TripStatus;
+  reservation_id: string;
+  started_at: Date;
+  ended_at: Date | null;
+  start_battery_percent: number;
+  end_battery_percent: number | null;
+  vehicle_id: string;
+  vehicle_code: string;
+  vehicle_type: VehicleType;
+  source_hub_id: string;
+  source_hub_name: string;
+  target_hub_id: string | null;
+  target_hub_name: string | null;
+}
+
+const TRIP_VIEW_SQL = `
+  SELECT t.id, t.status, t.reservation_id, t.started_at, t.ended_at,
+         t.start_battery_percent, t.end_battery_percent,
+         v.id AS vehicle_id, v.code AS vehicle_code, v.type AS vehicle_type,
+         sh.id AS source_hub_id, sh.name AS source_hub_name,
+         th.id AS target_hub_id, th.name AS target_hub_name
+    FROM trips t
+    JOIN vehicles v ON v.id = t.vehicle_id
+    JOIN hubs sh ON sh.id = t.source_hub_id
+    LEFT JOIN hubs th ON th.id = t.target_hub_id`;
+
+function toTripView(row: TripRow): TripView {
+  return {
+    id: row.id,
+    status: row.status,
+    reservationId: row.reservation_id,
+    startedAt: row.started_at.toISOString(),
+    endedAt: row.ended_at ? row.ended_at.toISOString() : null,
+    startBatteryPercent: row.start_battery_percent,
+    endBatteryPercent: row.end_battery_percent,
+    vehicle: {
+      id: row.vehicle_id,
+      code: row.vehicle_code,
+      type: row.vehicle_type,
+    },
+    sourceHub: { id: row.source_hub_id, name: row.source_hub_name },
+    targetHub:
+      row.target_hub_id && row.target_hub_name
+        ? { id: row.target_hub_id, name: row.target_hub_name }
+        : null,
+  };
 }
 
 interface ReservationRow {
@@ -84,7 +148,8 @@ function toView(row: ReservationRow): VehicleReservationView {
  * quyết định nghiệp vụ (được đặt không, ai được hủy) nằm ở ReservationService.
  */
 export class RentalTx {
-  constructor(private readonly client: PoolClient) {}
+  /** Client của transaction hiện tại; truyền cho AllocationPort để cùng một transaction (BR-02/BR-03). */
+  constructor(readonly client: PoolClient) {}
 
   /** Khóa hàng xe để hai yêu cầu cùng xe được xử lý tuần tự. */
   async lockVehicle(id: string): Promise<LockedVehicle | null> {
@@ -144,9 +209,12 @@ export class RentalTx {
       id: string;
       user_id: string;
       vehicle_id: string;
+      source_hub_id: string;
       status: ReservationStatus;
+      expired: boolean;
     }>(
-      "SELECT id, user_id, vehicle_id, status FROM vehicle_reservations WHERE id=$1 FOR UPDATE",
+      `SELECT id, user_id, vehicle_id, source_hub_id, status, (expires_at <= now()) AS expired
+         FROM vehicle_reservations WHERE id=$1 FOR UPDATE`,
       [id],
     );
     const row = result.rows[0];
@@ -155,7 +223,9 @@ export class RentalTx {
           id: row.id,
           userId: row.user_id,
           vehicleId: row.vehicle_id,
+          sourceHubId: row.source_hub_id,
           status: row.status,
+          expired: row.expired,
         }
       : null;
   }
@@ -170,6 +240,102 @@ export class RentalTx {
       [id, to],
     );
     return result.rowCount === 1;
+  }
+
+  /** Nhận xe: reserved -> in_use và rời Hub (hub_id = NULL) để không còn tính vào tài nguyên Hub. */
+  async departVehicle(id: string): Promise<boolean> {
+    const { from, to } = VEHICLE_STATUS_BY_EVENT.pickup;
+    const result = await this.client.query(
+      "UPDATE vehicles SET status=$2, hub_id=NULL, updated_at=now() WHERE id=$1 AND status=$3",
+      [id, to, from],
+    );
+    return result.rowCount === 1;
+  }
+
+  /** Trả xe: in_use -> available và xe thuộc Hub đích. */
+  async arriveVehicle(id: string, hubId: string): Promise<boolean> {
+    const { from, to } = VEHICLE_STATUS_BY_EVENT.return;
+    const result = await this.client.query(
+      "UPDATE vehicles SET status=$2, hub_id=$3, updated_at=now() WHERE id=$1 AND status=$4",
+      [id, to, hubId, from],
+    );
+    return result.rowCount === 1;
+  }
+
+  async insertTrip(input: {
+    reservationId: string;
+    userId: string;
+    vehicleId: string;
+    sourceHubId: string;
+    startBatteryPercent: number;
+  }): Promise<string> {
+    const result = await this.client.query<{ id: string }>(
+      `INSERT INTO trips(reservation_id, user_id, vehicle_id, source_hub_id, start_battery_percent)
+       VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+      [
+        input.reservationId,
+        input.userId,
+        input.vehicleId,
+        input.sourceHubId,
+        input.startBatteryPercent,
+      ],
+    );
+    return result.rows[0].id;
+  }
+
+  async tripIdByReservation(reservationId: string): Promise<string | null> {
+    const result = await this.client.query<{ id: string }>(
+      "SELECT id FROM trips WHERE reservation_id=$1",
+      [reservationId],
+    );
+    return result.rows[0]?.id ?? null;
+  }
+
+  async lockTrip(id: string): Promise<LockedTrip | null> {
+    const result = await this.client.query<{
+      id: string;
+      user_id: string;
+      vehicle_id: string;
+      status: TripStatus;
+      target_hub_id: string | null;
+    }>(
+      "SELECT id, user_id, vehicle_id, status, target_hub_id FROM trips WHERE id=$1 FOR UPDATE",
+      [id],
+    );
+    const row = result.rows[0];
+    return row
+      ? {
+          id: row.id,
+          userId: row.user_id,
+          vehicleId: row.vehicle_id,
+          status: row.status,
+          targetHubId: row.target_hub_id,
+        }
+      : null;
+  }
+
+  /** active -> completed. Trả false nếu chuyến không còn active. */
+  async completeTrip(
+    id: string,
+    targetHubId: string,
+    endBatteryPercent: number,
+  ): Promise<boolean> {
+    const result = await this.client.query(
+      `UPDATE trips SET status='completed', target_hub_id=$2, ended_at=now(), end_battery_percent=$3
+        WHERE id=$1 AND status='active'`,
+      [id, targetHubId, endBatteryPercent],
+    );
+    return result.rowCount === 1;
+  }
+
+  async tripView(id: string): Promise<TripView> {
+    const result = await this.client.query<TripRow>(
+      `${TRIP_VIEW_SQL} WHERE t.id = $1`,
+      [id],
+    );
+    if (!result.rows[0])
+      throw new InternalServerErrorException("Không đọc lại được chuyến thuê.");
+    return toTripView(result.rows[0]);
   }
 
   async view(id: string): Promise<VehicleReservationView> {
@@ -244,6 +410,38 @@ export class RentalRepository {
       [userId],
     );
     return result.rows.map(toView);
+  }
+
+  /** Chuyến của chính người dùng, mới nhất trước. Chuyến đang chạy luôn nằm trong 100 dòng đầu vì mỗi người chỉ có chuyến mới nhất. */
+  async listTrips(userId: string): Promise<TripView[]> {
+    const result = await this.db.query<TripRow>(
+      `${TRIP_VIEW_SQL} WHERE t.user_id = $1 ORDER BY t.started_at DESC, t.id LIMIT 100`,
+      [userId],
+    );
+    return result.rows.map(toTripView);
+  }
+
+  /**
+   * Hub active khác Hub đã chọn còn chỗ trả xe (BR-03). Điều kiện "chỗ còn trống" phải giống
+   * MobilityRepository.claimRental: chỗ trống hoặc held đã hết hạn, và không vướng lịch đặt đỗ chưa kết thúc.
+   */
+  async suggestHubs(excludeHubId: string): Promise<HubSuggestion[]> {
+    const result = await this.db.query<HubSuggestion>(
+      `SELECT h.id, h.name, h.location, count(*)::int AS "freeSpaces"
+         FROM hubs h
+         JOIN parking_spaces p ON p.hub_id = h.id
+        WHERE h.status = 'active' AND h.id <> $1
+          AND (p.status = 'available' OR (p.status = 'held' AND p.hold_expires_at <= now()))
+          AND NOT EXISTS (
+            SELECT 1 FROM parking_bookings b
+             WHERE b.parking_space_id = p.id
+               AND b.status IN ('reserved','checked_in') AND b.ends_at > now())
+        GROUP BY h.id, h.name, h.location
+        ORDER BY count(*) DESC, h.name
+        LIMIT 5`,
+      [excludeHubId],
+    );
+    return result.rows;
   }
 
   /** Transaction nằm ở lớp data access (AGENTS.md); service chỉ truyền logic vào. */

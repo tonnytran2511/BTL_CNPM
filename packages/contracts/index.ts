@@ -72,6 +72,8 @@ export interface ApiError {
   statusCode: number;
   message: string;
   code: string;
+  /** Dữ liệu có cấu trúc đi kèm lỗi (ví dụ `{ suggestedHubs }` khi trả xe bị từ chối). */
+  details?: unknown;
 }
 export interface SimulationSnapshot {
   capturedAt: string;

@@ -13,6 +13,7 @@ import {
 import type { AuthRequest } from "../auth/auth.guard";
 import { CreateReservationDto } from "./reservation.dto";
 import { ReservationService } from "./reservation.service";
+import { TripService } from "./trip.service";
 
 const invalidId = new ParseUUIDPipe({
   exceptionFactory: () =>
@@ -25,6 +26,7 @@ export class ReservationController {
   constructor(
     @Inject(ReservationService)
     private readonly reservations: ReservationService,
+    @Inject(TripService) private readonly trips: TripService,
   ) {}
 
   @Get() mine(@Req() req: AuthRequest) {
@@ -39,5 +41,12 @@ export class ReservationController {
   @HttpCode(200)
   cancel(@Req() req: AuthRequest, @Param("id", invalidId) id: string) {
     return this.reservations.cancel(req.user.id, id);
+  }
+
+  // Nhận xe (BR-02): tạo chuyến thuê; gửi lặp trả lại đúng chuyến cũ.
+  @Post(":id/pickup")
+  @HttpCode(200)
+  pickup(@Req() req: AuthRequest, @Param("id", invalidId) id: string) {
+    return this.trips.pickup(req.user.id, id);
   }
 }

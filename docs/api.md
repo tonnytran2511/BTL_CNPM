@@ -89,3 +89,19 @@ Mọi endpoint cần đăng nhập (cookie session). `userId` lấy từ session
 - Hủy xe: chỉ chủ lượt đặt, chỉ khi `active`. Reservation thành `cancelled` (`closedAt` được ghi) và xe `reserved → available` bằng cập nhật có điều kiện: nếu xe đã bị đổi sang trạng thái khác (ví dụ sự cố, BR-10) thì không ghi đè.
 - Lỗi vẫn theo dạng `{statusCode, code: "HTTP_<status>", message}`; chưa có mã lỗi nghiệp vụ riêng.
 - Chưa làm: tự động chuyển `expired` khi quá hạn (T16), nhận xe `fulfilled` (T08), Idempotency-Key (BR-11).
+
+## Thuê xe: nhận xe, trả xe, chuyến thuê (T08)
+
+Mọi route cần đăng nhập; người dùng lấy từ session. Chỉ chủ lượt đặt được nhận xe và chỉ chủ chuyến được trả xe (người khác nhận 403).
+
+| Route                                   | Mô tả                                                                                                            |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `POST /vehicle-reservations/:id/pickup` | Nhận xe (BR-02). Trả `TripView`. Gửi lặp trên lượt đã nhận trả lại đúng chuyến cũ, không tạo chuyến thứ hai.     |
+| `POST /trips/:id/return`                | Trả xe (BR-03). Body `{ targetHubId }`. Trả `TripView` đã `completed`. Gửi lặp cùng Hub đích trả lại kết quả cũ. |
+| `GET /trips`                            | Chuyến của chính người dùng, mới nhất trước (tối đa 100); chuyến `active` là chuyến hiện tại.                    |
+
+**Nhận xe** chạy trong một transaction: khóa reservation rồi khóa xe; reservation `active → fulfilled`; tạo trip `active` (pin lúc nhận lấy từ xe); xe `reserved → in_use` và `hub_id = NULL` (xe đang đi, không còn tính vào tài nguyên Hub); giải phóng chỗ đỗ ở Hub nguồn qua `AllocationPort.releaseRentalVehicleSpace`. Bước nào lỗi thì rollback toàn bộ. Từ chối bằng 409 khi: lượt đặt đã hủy/hết hạn, quá `expires_at` (theo đồng hồ database), xe không còn `reserved` (ví dụ bảo trì), xe không chiếm chỗ ở Hub nguồn, Hub nguồn ngừng hoạt động.
+
+**Trả xe** chạy trong một transaction: khóa trip rồi khóa xe; xe phải `in_use`; chiếm chỗ ở Hub đích qua `AllocationPort.claimRentalVehicleSpace` (Hub đích phải `active`, chỗ không vướng lịch đặt đỗ còn hiệu lực); xe `in_use → available` và `hub_id = Hub đích`; trip `active → completed` với `ended_at`, Hub đích và pin cuối. Hub đích đầy hoặc ngừng hoạt động: 409, trip giữ `active`, response có `details.suggestedHubs` (tối đa 5 Hub active còn chỗ, kèm `freeSpaces`). Đây là cùng điều kiện "chỗ còn trống" mà `MobilityRepository.claimRental` dùng.
+
+Giới hạn hiện tại: pin cuối chuyến bằng pin hiện có của xe (chưa có mô hình hao pin hay telemetry); đặt chỗ quá hạn vẫn `active` cho đến khi T16 xử lý hết hạn; kiểm tra pin/xe hỏng khi nhận và chống thao tác lặp mở rộng thuộc T17.

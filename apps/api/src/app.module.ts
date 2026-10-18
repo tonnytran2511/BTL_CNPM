@@ -19,7 +19,13 @@ class AppController {
   }
 }
 @Module({
-  imports: [DatabaseModule, AuthModule, HubsModule, RentalModule, MobilityModule],
+  imports: [
+    DatabaseModule,
+    AuthModule,
+    HubsModule,
+    RentalModule,
+    MobilityModule,
+  ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],
 })

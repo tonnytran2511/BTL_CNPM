@@ -7,12 +7,14 @@ import type {
   VehicleSearchQuery,
   VehicleSearchResult,
   VehicleReservationView,
+  TripView,
   ApiError,
 } from "@emobility/contracts";
 export class RequestError extends Error {
   constructor(
     message: string,
     readonly status: number,
+    readonly details?: unknown,
   ) {
     super(message);
   }
@@ -53,6 +55,9 @@ export async function request<T>(
         ? String((body as ApiError).message)
         : "Yêu cầu thất bại.",
       response.status,
+      body && typeof body === "object" && "details" in body
+        ? (body as ApiError).details
+        : undefined,
     );
   return body as T;
 }
@@ -95,4 +100,15 @@ export const api = {
       `/vehicle-reservations/${encodeURIComponent(id)}/cancel`,
       { method: "POST" },
     ),
+  pickupReservation: (id: string) =>
+    request<TripView>(
+      `/vehicle-reservations/${encodeURIComponent(id)}/pickup`,
+      { method: "POST" },
+    ),
+  trips: (signal?: AbortSignal) => request<TripView[]>("/trips", { signal }),
+  returnTrip: (id: string, targetHubId: string) =>
+    request<TripView>(`/trips/${encodeURIComponent(id)}/return`, {
+      method: "POST",
+      body: JSON.stringify({ targetHubId }),
+    }),
 };
