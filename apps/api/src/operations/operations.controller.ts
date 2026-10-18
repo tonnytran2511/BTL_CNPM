@@ -7,39 +7,9 @@ import {
   Post,
   Req,
 } from "@nestjs/common";
-import {
-  ArrayMaxSize,
-  ArrayMinSize,
-  IsArray,
-  IsIn,
-  IsString,
-  IsUUID,
-  MaxLength,
-  MinLength,
-} from "class-validator";
-import type {
-  CreateIncidentRequest,
-  IncidentResourceType,
-  RedistributionRequest,
-} from "@emobility/contracts";
 import { Roles, type AuthRequest } from "../auth/auth.guard";
 import { OperationsService } from "./operations.service";
-
-class IncidentDto implements CreateIncidentRequest {
-  @IsIn(["vehicle", "charging_point", "hub"])
-  resourceType!: IncidentResourceType;
-  @IsUUID() resourceId!: string;
-  @IsString() @MinLength(1) @MaxLength(2000) description!: string;
-}
-class RedistributionDto implements RedistributionRequest {
-  @IsUUID() sourceHubId!: string;
-  @IsUUID() targetHubId!: string;
-  @IsArray()
-  @ArrayMinSize(1)
-  @ArrayMaxSize(50)
-  @IsUUID("all", { each: true })
-  vehicleIds!: string[];
-}
+import { IncidentDto, RedistributionDto } from "./operations.dto";
 
 @Roles("operator")
 @Controller()

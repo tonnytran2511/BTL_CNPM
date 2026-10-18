@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
 } from "@nestjs/common";
 import type { RentableVehicle } from "@emobility/contracts";
+import type { PoolClient } from "pg";
 import { Database } from "../database/database.module";
 import type { VehicleType } from "./rental.rules";
 
@@ -51,5 +52,29 @@ export class RentalRepository {
       [filter.minBatteryPercent, filter.hubId ?? null, filter.type ?? null],
     );
     return result.rows;
+  }
+  async lockRedistributionVehicles(
+    client: PoolClient,
+    ids: string[],
+    hub: string,
+  ) {
+    return (
+      await client.query(
+        "SELECT id FROM vehicles WHERE id=ANY($1::uuid[]) AND hub_id=$2 AND status='available' ORDER BY id FOR UPDATE",
+        [ids, hub],
+      )
+    ).rowCount;
+  }
+  async startRedistributionVehicles(
+    client: PoolClient,
+    ids: string[],
+    hub: string,
+  ) {
+    return (
+      await client.query(
+        "UPDATE vehicles SET status='redistributing',updated_at=now() WHERE id=ANY($1::uuid[]) AND hub_id=$2 AND status='available'",
+        [ids, hub],
+      )
+    ).rowCount;
   }
 }

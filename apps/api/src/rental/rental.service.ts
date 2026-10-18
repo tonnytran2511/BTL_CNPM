@@ -1,4 +1,5 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { ConflictException, Inject, Injectable } from "@nestjs/common";
+import type { PoolClient } from "pg";
 import type { VehicleSearchResult } from "@emobility/contracts";
 import { RentalRepository } from "./rental.repository";
 import type { VehicleSearchDto } from "./rental.dto";
@@ -23,5 +24,39 @@ export class RentalService {
       ),
     });
     return { minimumBatteryPercent, vehicles };
+  }
+  async validateRedistributionVehicles(
+    client: PoolClient,
+    ids: string[],
+    sourceHubId: string,
+  ) {
+    if (
+      !ids.length ||
+      (await this.repository.lockRedistributionVehicles(
+        client,
+        ids,
+        sourceHubId,
+      )) !== ids.length
+    )
+      throw new ConflictException(
+        "Xe trong lệnh không còn đủ điều kiện điều chuyển.",
+      );
+  }
+  async startRedistributionVehicles(
+    client: PoolClient,
+    ids: string[],
+    sourceHubId: string,
+  ) {
+    await this.validateRedistributionVehicles(client, ids, sourceHubId);
+    if (
+      (await this.repository.startRedistributionVehicles(
+        client,
+        ids,
+        sourceHubId,
+      )) !== ids.length
+    )
+      throw new ConflictException(
+        "Xe trong lệnh không còn đủ điều kiện điều chuyển.",
+      );
   }
 }
