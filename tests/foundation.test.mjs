@@ -49,6 +49,7 @@ test(
       port: dbPort,
       persistent: false,
       authMethod: "scram-sha-256",
+      initdbFlags: ["--encoding=UTF8"],
       postgresFlags: ["-h", "127.0.0.1"],
       initdbFlags: ["--encoding=UTF8"],
       onLog: () => {},
@@ -128,6 +129,9 @@ test(
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
       assert.ok(ready, startupOutput);
+      await t.test("Mai Anh parking and charging integration", async () => {
+        await command("tests/mobility-check.mjs", env);
+      });
       await t.test(
         "shared transaction commits, rolls back and enforces read-only snapshots",
         async () => {
@@ -401,7 +405,12 @@ test(
       }
       if (pool) await pool.end();
       await db.stop();
-      await rm(directory, { recursive: true, force: true });
+      await rm(directory, {
+        recursive: true,
+        force: true,
+        maxRetries: 20,
+        retryDelay: 100,
+      });
     }
   },
 );

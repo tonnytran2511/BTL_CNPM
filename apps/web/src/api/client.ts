@@ -17,7 +17,10 @@ export class RequestError extends Error {
     super(message);
   }
 }
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+export async function request<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T> {
   let response: Response;
   try {
     response = await fetch(`/api${path}`, {

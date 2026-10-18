@@ -1,6 +1,7 @@
 {
   "settings": {
     "lowBatteryThreshold": 25,
+    "maximumParkingDurationMinutes": 1440,
     "reservationHoldMinutes": 15,
     "minimumRentalBatteryPercent": 20
   },

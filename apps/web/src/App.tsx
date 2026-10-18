@@ -8,6 +8,8 @@ import { HubDetailPanel } from "./components/HubDetailPanel";
 import { VehicleSearch } from "./components/VehicleSearch";
 import { ReservationList } from "./components/ReservationList";
 import { formatNumber, formatTime } from "./utils/format";
+import { useMobility } from "./hooks/useMobility";
+import { MobilityPanel } from "./components/MobilityPanel";
 export function App() {
   const model = useFoundation();
   const hub = useHubDetail(model.user?.id, model.updatedAt);
@@ -24,6 +26,7 @@ export function App() {
     vehicles.reload();
     void model.refresh();
   };
+  const mobility = useMobility(model.user, model.refresh);
   if (model.booting)
     return (
       <main className="center-state" role="status">
@@ -168,6 +171,7 @@ export function App() {
           now={reservations.now}
           onCancel={cancel}
         />
+        <MobilityPanel model={mobility} hubs={model.hubs} />
         {hub.selectedId && (
           <HubDetailPanel
             detail={hub.detail}
