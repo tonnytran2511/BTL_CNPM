@@ -38,6 +38,8 @@ Xác thực: session opaque, token ngẫu nhiên chỉ nằm trong cookie HttpOn
 
 Hợp đồng endpoint đã triển khai tại `docs/api.md`; ERD/kiến trúc tại `docs/architecture.md`; hướng dẫn mở rộng tại `docs/guides/CONTRIBUTING.md`.
 
+15/10 — phần Mai Anh tuần 1 có implementation local tại MobilityModule; chưa có xác nhận peer review/merge. AllocationPort có provider thực, nhận cùng PoolClient của caller. Lịch tương lai tách khỏi trạng thái vật lý. Chính sách bảo thủ: chỗ đang bị chiếm/giữ còn hạn không được hứa cho lịch tương lai khi chưa biết giờ rời; trả xe thuê không chiếm chỗ có lịch tương lai còn hiệu lực. Chỗ quá giờ chưa check-out vẫn occupied và chặn check-in sau; không tự xóa xe khỏi chỗ. Nhóm cần review chính sách này trước tích hợp. Pin cá nhân là dữ liệu khai báo lúc đăng ký, xe cũ không có pin giữ null. Bản tuần 1 hỗ trợ check-in/check-out để xác nhận vị trí trước yêu cầu sạc; chưa chạy phiên/scheduler. Hợp đồng API tại `docs/api.md`; kết quả kiểm tra tại `docs/testing.md`.
+
 ### Lý do chọn stack
 
 Người dùng đã xác nhận frontend/backend và cho phép triển khai PostgreSQL cùng simulation TypeScript:
@@ -95,3 +97,7 @@ Baseline cụ thể cho các lựa chọn nghiệp vụ tại `docs/business-rul
 Kiểm tra luồng bình thường, sai quyền, hết hạn, xung đột đồng thời, Hub đầy, cổng sạc hỏng và request lặp. Với simulation, kiểm tra kết quả tái lập theo đầu vào/seed và dữ liệu vận hành không bị đổi.
 
 Use case, kiến trúc, ERD và sơ đồ hành vi phải được cập nhật theo triển khai thực tế. Các chỉ tiêu phi chức năng chỉ được đánh dấu đạt khi có phép đo hoặc bằng chứng kiểm tra.
+
+## T13 — 17/10/2026
+
+SimulationModule dùng HubsService.snapshot() và settings; engine departures-v1 thuần so sánh baseline/scenario cùng seed, có operator UI. Giả định/giới hạn tại docs/simulation.md. Chưa lưu lịch sử/chưa mô phỏng trả xe/sạc; chờ peer review. Không ghi dữ liệu vận hành.

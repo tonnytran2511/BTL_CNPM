@@ -10,7 +10,9 @@ Nền tảng bài tập lớn CNPM HK261, nhóm 5 người. Frontend React/TypeS
 - Snapshot nhất quán chỉ đọc để TV5 xây simulation.
 - Seed giả lập từ JSON; migration, kiểm thử PostgreSQL riêng và kiểu API dùng chung.
 
-Thuê xe, đặt đỗ/sạc, quản trị tài nguyên, sự cố/điều chuyển và engine simulation chưa được triển khai; đó là phần của TV2–TV5. Endpoint snapshot chưa phải chức năng What-if Simulation hoàn chỉnh.
+Phần Mai Anh tuần 1 đã có code local: đăng ký xe cá nhân, tra cứu/đặt/hủy lịch đỗ, check-in/check-out, gửi/xem yêu cầu sạc và provider AllocationPort cho thuê xe/điều chuyển. Hợp đồng API tại `docs/api.md`; còn chờ review/tích hợp của nhóm.
+
+Vòng đời thuê xe, quản trị tài nguyên và sự cố/điều chuyển chưa hoàn chỉnh. T13 đã có engine mô phỏng tăng nhu cầu và operator UI; mô hình giới hạn ở lượt rời Hub, xem docs/simulation.md. Scheduler và chạy phiên sạc thuộc tuần 2.
 
 ## Setup
 
@@ -90,3 +92,7 @@ Nhóm trưởng dùng `docs/leader-review.md` để review/bàn giao; baseline n
 Đặc tả 15 use case: `docs/use-cases.md`; UML source: `docs/diagrams/`; kế hoạch 36 testcase tích hợp và traceability: `docs/integration-test-plan.md`. Kết quả chạy thực tế được ghi riêng tại `docs/testing.md`.
 
 Chạy production cần hosting, HTTPS/cookie Secure, cấu hình DB và chiến lược vận hành riêng; compose/local hiện phục vụ phát triển. Hướng dẫn này không khẳng định hệ thống đã được triển khai production.
+
+## Simulation T13
+
+Có mô phỏng tăng nhu cầu cho operator: chạy db:seed để thêm settings, nhập tham số và xem baseline/scenario trên cùng snapshot/seed. Engine đầu tiên chỉ mô phỏng lượt xe rời Hub; các kịch bản đỗ/sạc, đề xuất và lịch sử thuộc T22. Xem [docs/simulation.md](docs/simulation.md).

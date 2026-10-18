@@ -5,7 +5,7 @@
 - Nền tảng có code và đã kiểm chứng local; auth, dữ liệu Hub, dashboard, snapshot, migration/seed hoạt động.
 - AuthModule/HubsModule đã tách file và export service; AppModule chỉ lắp ráp các module.
 - Database.transaction cung cấp transaction ghi dùng chung; readSnapshot giữ transaction read-only.
-- AllocationPort là interface cho TV3, chưa có provider. Planned API types không đồng nghĩa endpoint đã triển khai.
+- AllocationPort đã có provider thật trong MobilityModule của Mai Anh tuần 1 (local, chờ review/tích hợp). Hợp đồng endpoint mobility thực tại docs/api.md; planned types khác không đồng nghĩa endpoint đã triển khai.
 - Quy tắc v1 tại business-rules.md là baseline cần các thành viên review; chưa ghi nhận cả nhóm đã thông qua.
 - Không đánh dấu task được peer review/merge nếu chỉ có kiểm tra của Codex.
 

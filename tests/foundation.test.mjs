@@ -49,7 +49,9 @@ test(
       port: dbPort,
       persistent: false,
       authMethod: "scram-sha-256",
+      initdbFlags: ["--encoding=UTF8"],
       postgresFlags: ["-h", "127.0.0.1"],
+      initdbFlags: ["--encoding=UTF8"],
       onLog: () => {},
       onError: () => {},
     });
@@ -127,6 +129,9 @@ test(
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
       assert.ok(ready, startupOutput);
+      await t.test("Mai Anh parking and charging integration", async () => {
+        await command("tests/mobility-check.mjs", env);
+      });
       await t.test(
         "shared transaction commits, rolls back and enforces read-only snapshots",
         async () => {
@@ -218,6 +223,85 @@ test(
         },
       );
       const hubs = (await request("/hubs", { cookie: operator.cookie })).body;
+      await t.test(
+        "T13 operator simulation validates requests and leaves operational tables unchanged",
+        async () => {
+          const body = {
+            hubId: hubs[0].id,
+            horizonMinutes: 60,
+            stepMinutes: 5,
+            seed: 42,
+            baselineArrivalsPerStep: 0.5,
+            scenarioArrivalsPerStep: 4,
+          };
+          const run = (changes = {}, cookie = operator.cookie) =>
+            request("/simulations/demand-surge", {
+              method: "POST",
+              cookie,
+              body: { ...body, ...changes },
+            });
+          assert.equal((await request("/simulations/config")).status, 401);
+          assert.equal(
+            (await request("/simulations/config", { cookie: student.cookie }))
+              .status,
+            403,
+          );
+          assert.equal((await run({}, student.cookie)).status, 403);
+          const config = await request("/simulations/config", {
+            cookie: operator.cookie,
+          });
+          assert.equal(config.status, 200);
+          const capture = async () => {
+            const result = {};
+            for (const table of [
+              "hubs",
+              "vehicles",
+              "parking_spaces",
+              "charging_points",
+              "parking_bookings",
+              "charging_requests",
+              "vehicle_reservations",
+              "trips",
+            ])
+              result[table] = (
+                await pool.query(`SELECT * FROM ${table} ORDER BY id`)
+              ).rows;
+            return result;
+          };
+          const before = await capture();
+          const first = await run();
+          assert.equal(first.status, 201, JSON.stringify(first.body));
+          assert.equal(first.body.modelVersion, "departures-v1");
+          const second = await run();
+          assert.deepEqual(second.body.baseline, first.body.baseline);
+          assert.deepEqual(second.body.scenario, first.body.scenario);
+          assert.deepEqual(await capture(), before);
+          for (const changes of [
+            { stepMinutes: 7 },
+            { seed: -1 },
+            { scenarioArrivalsPerStep: 0 },
+            { scenarioArrivalsPerStep: config.body.maximumArrivalsPerStep + 1 },
+            { horizonMinutes: (config.body.maximumSteps + 1) * 5 },
+            { hubId: "bad" },
+            { role: "operator" },
+            { seed: "42" },
+            { hubId: "00000000-0000-4000-8000-000000000000" },
+          ])
+            assert.equal(
+              (await run(changes)).status,
+              400,
+              JSON.stringify(changes),
+            );
+          await pool.query(
+            "UPDATE settings SET value='1' WHERE key='simulationMaximumSteps'",
+          );
+          assert.equal((await run()).status, 400);
+          await pool.query(
+            "UPDATE settings SET value=$1 WHERE key='simulationMaximumSteps'",
+            [JSON.stringify(config.body.maximumSteps)],
+          );
+        },
+      );
       await t.test(
         "seed is idempotent; Hub counts match actual database resources",
         async () => {
@@ -400,7 +484,12 @@ test(
       }
       if (pool) await pool.end();
       await db.stop();
-      await rm(directory, { recursive: true, force: true });
+      await rm(directory, {
+        recursive: true,
+        force: true,
+        maxRetries: 20,
+        retryDelay: 100,
+      });
     }
   },
 );
