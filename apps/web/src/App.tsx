@@ -1,16 +1,27 @@
 import { useFoundation } from "./hooks/useFoundation";
+import { useSimulation } from "./hooks/useSimulation";
+import { SimulationPage } from "./pages/SimulationPage";
+import { useAppPage } from "./hooks/useAppPage";
 import { useHubDetail } from "./hooks/useHubDetail";
+import { useVehicleSearch } from "./hooks/useVehicleSearch";
 import { LoginForm } from "./components/LoginForm";
 import { HubCard } from "./components/HubCard";
 import { HubDetailPanel } from "./components/HubDetailPanel";
+import { VehicleSearch } from "./components/VehicleSearch";
 import { formatNumber, formatTime } from "./utils/format";
+import { useMobility } from "./hooks/useMobility";
+import { MobilityPanel } from "./components/MobilityPanel";
 export function App() {
   const model = useFoundation();
+  const simulation = useSimulation(model.user);
+  const page = useAppPage(model.user?.role);
   const hub = useHubDetail(
     model.user?.id,
     model.updatedAt,
     model.sessionExpired,
   );
+  const mobility = useMobility(model.user, model.refresh);
+  const vehicles = useVehicleSearch(model.user?.id, model.updatedAt);
   if (model.booting)
     return (
       <main className="center-state" role="status">
@@ -43,7 +54,7 @@ export function App() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <a className="brand" href="#main">
+        <a className="brand" href="#/">
           <span className="brand-mark" aria-hidden="true">
             ↗
           </span>
@@ -66,78 +77,119 @@ export function App() {
           </button>
         </div>
       </header>
-      <main id="main">
-        <section className="hero">
-          <div>
-            <p className="eyebrow">
-              {model.role.toUpperCase()} / MOBILITY HUBS
-            </p>
-            <h1>{model.heading}</h1>
-            <p>Theo dõi phương tiện, chỗ đỗ và khả năng sạc tại từng điểm.</p>
-          </div>
-          <div className="refresh-meta">
-            <span>
-              {model.updatedAt
-                ? `Cập nhật ${formatTime(model.updatedAt)}`
-                : "Đang tải dữ liệu"}
-            </span>
-            <button
-              className="secondary"
-              onClick={model.refresh}
-              disabled={model.refreshing}
+      <nav className="page-nav" aria-label="Điều hướng chính">
+        <a href="#/" aria-current={page === "overview" ? "page" : undefined}>
+          Tổng quan
+        </a>
+        {model.user.role === "operator" && (
+          <>
+            <a
+              href="#/simulation"
+              aria-current={page === "simulation" ? "page" : undefined}
             >
-              {model.refreshing ? "Đang cập nhật…" : "Làm mới ↻"}
-            </button>
-          </div>
-        </section>
-        {model.error && (
-          <p className="notice error" role="alert">
-            {model.error}
-            {model.updatedAt &&
-              " Dữ liệu hiển thị là lần cập nhật thành công gần nhất."}
-          </p>
+              Mô phỏng
+            </a>
+          </>
         )}
-        <section className="stat-grid" aria-label="Chỉ số mạng lưới">
-          {model.stats.map((stat) => (
-            <article className="stat-card" key={stat.label}>
-              <p>{stat.label}</p>
-              <strong>
-                {model.updatedAt ? formatNumber(stat.value) : "—"}
-              </strong>
-              <small>{stat.hint}</small>
-            </article>
-          ))}
-        </section>
-        <section className="hubs-section">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">MẠNG LƯỚI</p>
-              <h2>Các Mobility Hub</h2>
-            </div>
-            <span className="muted">
-              {formatNumber(model.hubs.length)} điểm phục vụ
-            </span>
-          </div>
-          {!model.updatedAt && !model.error && (
-            <p role="status">Đang tải các Hub…</p>
-          )}
-          {model.updatedAt && model.hubs.length === 0 && (
-            <p className="empty">Chưa có Hub để hiển thị.</p>
-          )}
-          <div className="hub-grid">
-            {model.hubs.map((item) => (
-              <HubCard key={item.id} hub={item} onOpen={hub.open} />
-            ))}
-          </div>
-        </section>
-        {hub.selectedId && (
-          <HubDetailPanel
-            detail={hub.detail}
-            loading={hub.loading}
-            error={hub.error}
-            onClose={hub.close}
-            onRetry={hub.retry}
+      </nav>
+      <main id="main" tabIndex={-1}>
+        {page === "simulation" ? (
+          <SimulationPage
+            model={simulation}
+            hubs={model.hubs}
+            error={model.error}
+            loading={!model.updatedAt && !model.error}
+            onRefresh={model.refresh}
           />
+        ) : (
+          <>
+            <section className="hero">
+              <div>
+                <p className="eyebrow">
+                  {model.role.toUpperCase()} / MOBILITY HUBS
+                </p>
+                <h1>{model.heading}</h1>
+                <p>
+                  Theo dõi phương tiện, chỗ đỗ và khả năng sạc tại từng điểm.
+                </p>
+              </div>
+              <div className="refresh-meta">
+                <span>
+                  {model.updatedAt
+                    ? `Cập nhật ${formatTime(model.updatedAt)}`
+                    : "Đang tải dữ liệu"}
+                </span>
+                <button
+                  className="secondary"
+                  onClick={model.refresh}
+                  disabled={model.refreshing}
+                >
+                  {model.refreshing ? "Đang cập nhật…" : "Làm mới ↻"}
+                </button>
+              </div>
+            </section>
+            {model.error && (
+              <p className="notice error" role="alert">
+                {model.error}
+                {model.updatedAt &&
+                  " Dữ liệu hiển thị là lần cập nhật thành công gần nhất."}
+              </p>
+            )}
+            <section className="stat-grid" aria-label="Chỉ số mạng lưới">
+              {model.stats.map((stat) => (
+                <article className="stat-card" key={stat.label}>
+                  <p>{stat.label}</p>
+                  <strong>
+                    {model.updatedAt ? formatNumber(stat.value) : "—"}
+                  </strong>
+                  <small>{stat.hint}</small>
+                </article>
+              ))}
+            </section>
+            <section className="hubs-section">
+              <div className="section-heading">
+                <div>
+                  <p className="eyebrow">MẠNG LƯỚI</p>
+                  <h2>Các Mobility Hub</h2>
+                </div>
+                <span className="muted">
+                  {formatNumber(model.hubs.length)} điểm phục vụ
+                </span>
+              </div>
+              {!model.updatedAt && !model.error && (
+                <p role="status">Đang tải các Hub…</p>
+              )}
+              {model.updatedAt && model.hubs.length === 0 && (
+                <p className="empty">Chưa có Hub để hiển thị.</p>
+              )}
+              <div className="hub-grid">
+                {model.hubs.map((item) => (
+                  <HubCard key={item.id} hub={item} onOpen={hub.open} />
+                ))}
+              </div>
+            </section>
+            <MobilityPanel model={mobility} hubs={model.hubs} />
+            <VehicleSearch
+              hubs={model.hubs}
+              filter={vehicles.filter}
+              result={vehicles.result}
+              loading={vehicles.loading}
+              error={vehicles.error}
+              onHub={vehicles.setHubId}
+              onType={vehicles.setType}
+              onMinBattery={vehicles.setMinBattery}
+              onReset={vehicles.reset}
+            />
+            {hub.selectedId && (
+              <HubDetailPanel
+                detail={hub.detail}
+                loading={hub.loading}
+                error={hub.error}
+                onClose={hub.close}
+                onRetry={hub.retry}
+              />
+            )}
+          </>
         )}
         <footer className="page-footer">
           <span>{model.config.appName}</span>

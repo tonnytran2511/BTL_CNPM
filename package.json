@@ -19,7 +19,7 @@
     "test": "npm run test:api && npm run test:web",
     "format": "prettier --write apps packages scripts tests docs AGENTS.md README.md package.json compose.yaml .github/workflows",
     "format:check": "prettier --check apps packages scripts tests docs AGENTS.md README.md package.json compose.yaml .github/workflows",
-    "test:api": "npm run build -w @emobility/api && node --test tests/foundation.test.mjs",
+    "test:api": "npm run build -w @emobility/api && node scripts/test-api.mjs",
     "test:web": "npm run test -w @emobility/web"
   },
   "devDependencies": {

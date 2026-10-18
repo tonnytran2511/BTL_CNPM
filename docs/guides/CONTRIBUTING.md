@@ -17,7 +17,7 @@ Không import AppModule vào feature module. Service cần dependency giữa mod
 
 Đọc `docs/business-rules.md` trước khi thêm nghiệp vụ. Kiểu DTO dự kiến ở `packages/contracts/planned.ts` phải có validation phía backend; TypeScript type không thay thế kiểm tra runtime.
 
-TV3 implement và export provider cho `ALLOCATION_PORT` tại `apps/api/src/integration/allocation.port.ts`. TV2/TV4 gọi allocation trong `Database.transaction`, truyền **cùng PoolClient** qua service/repository; không mở transaction độc lập bên trong allocation. Chỉ inject port sau khi provider thực đã có; không thêm provider giả trả success.
+MobilityModule hiện implement và export provider thật cho `ALLOCATION_PORT` tại `apps/api/src/integration/allocation.port.ts` (phần Mai Anh tuần 1, chờ review). TV2/TV4 import MobilityModule và gọi allocation trong `Database.transaction`, truyền **cùng PoolClient** qua service/repository; không mở transaction độc lập bên trong allocation. Caller sở hữu việc kiểm tra quyền, trạng thái xe và cập nhật hub_id/trip; allocation chỉ quản lý chỗ, kiểm tra Hub active và khóa Hub trước khi cấp/giải phóng. Nếu caller cần khóa xe/Hub nhiều nơi, thống nhất thứ tự Hub IDs tăng dần → xe → chỗ và retry lỗi transaction phù hợp để tránh deadlock. Không thêm provider giả trả success.
 
 ## Đầu ra riêng
 
