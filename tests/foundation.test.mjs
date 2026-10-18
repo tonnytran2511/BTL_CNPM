@@ -49,6 +49,7 @@ test(
       port: dbPort,
       persistent: false,
       authMethod: "scram-sha-256",
+      initdbFlags: ["--encoding=UTF8", "--locale=C"],
       postgresFlags: ["-h", "127.0.0.1"],
       onLog: () => {},
       onError: () => {},
@@ -116,17 +117,28 @@ test(
         startupOutput += chunk;
       });
       let ready = false;
+      let lastHealthCheck = "no response";
       for (let i = 0; i < 100; i++) {
         if (server.exitCode !== null) throw new Error(startupOutput);
         try {
-          if ((await request("/health")).status === 200) {
+          const health = await request("/health");
+          lastHealthCheck = `HTTP ${health.status}`;
+          if (health.status === 200) {
             ready = true;
             break;
           }
-        } catch {}
+        } catch (error) {
+          lastHealthCheck =
+            error instanceof Error
+              ? `${error.name}: ${error.message}`
+              : String(error);
+        }
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
-      assert.ok(ready, startupOutput);
+      assert.ok(
+        ready,
+        `${startupOutput}\nAPI readiness failed at ${base}/health: ${lastHealthCheck}; child exit code: ${server.exitCode}`,
+      );
       await t.test(
         "shared transaction commits, rolls back and enforces read-only snapshots",
         async () => {

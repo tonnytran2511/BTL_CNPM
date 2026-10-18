@@ -33,6 +33,36 @@ export interface RedistributionRequest {
   targetHubId: string;
   vehicleIds: string[];
 }
+export type IncidentResourceType = "vehicle" | "charging_point" | "hub";
+export type IncidentStatus = "open" | "resolved";
+export interface CreateIncidentRequest {
+  resourceType: IncidentResourceType;
+  resourceId: string;
+  description: string;
+}
+export interface Incident {
+  id: string;
+  resourceType: IncidentResourceType;
+  resourceId: string;
+  description: string;
+  status: IncidentStatus;
+  reportedBy: string;
+  createdAt: string;
+  resolvedAt: string | null;
+}
+export type RedistributionStatus =
+  "pending" | "in_progress" | "completed" | "cancelled";
+export interface Redistribution {
+  id: string;
+  sourceHubId: string;
+  targetHubId: string;
+  vehicleIds: string[];
+  status: RedistributionStatus;
+  createdBy: string;
+  createdAt: string;
+  startedAt: string | null;
+  completedAt: string | null;
+}
 export type ScenarioInput =
   | { kind: "demand_surge"; hubId: string; arrivalsPerStep: number }
   | { kind: "parking_full"; hubId: string; additionalOccupiedSpaces: number }
