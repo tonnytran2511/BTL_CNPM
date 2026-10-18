@@ -250,4 +250,28 @@ export class RentalRepository {
   inTransaction<T>(work: (tx: RentalTx) => Promise<T>): Promise<T> {
     return this.db.transaction((client) => work(new RentalTx(client)));
   }
+  async lockRedistributionVehicles(
+    client: PoolClient,
+    ids: string[],
+    hub: string,
+  ) {
+    return (
+      await client.query(
+        "SELECT id FROM vehicles WHERE id=ANY($1::uuid[]) AND hub_id=$2 AND status='available' ORDER BY id FOR UPDATE",
+        [ids, hub],
+      )
+    ).rowCount;
+  }
+  async startRedistributionVehicles(
+    client: PoolClient,
+    ids: string[],
+    hub: string,
+  ) {
+    return (
+      await client.query(
+        "UPDATE vehicles SET status='redistributing',updated_at=now() WHERE id=ANY($1::uuid[]) AND hub_id=$2 AND status='available'",
+        [ids, hub],
+      )
+    ).rowCount;
+  }
 }

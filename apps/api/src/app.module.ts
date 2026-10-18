@@ -5,6 +5,7 @@ import { AuthGuard, Public } from "./auth/auth.guard";
 import { AuthModule } from "./auth/auth.module";
 import { HubsModule } from "./hubs/hubs.module";
 import { RentalModule } from "./rental/rental.module";
+import { OperationsModule } from "./operations/operations.module";
 import { config } from "./config";
 import { MobilityModule } from "./mobility/mobility.module";
 import { SimulationModule } from "./simulation/simulation.module";
@@ -27,6 +28,7 @@ class AppController {
     MobilityModule,
     RentalModule,
     SimulationModule,
+    OperationsModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],
