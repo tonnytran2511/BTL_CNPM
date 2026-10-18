@@ -9,7 +9,9 @@ const db = new EmbeddedPostgres({
   port: Number(required("POSTGRES_PORT")),
   persistent: true,
   authMethod: "scram-sha-256",
+  initdbFlags: ["--encoding=UTF8"],
   postgresFlags: ["-h", "127.0.0.1"],
+  initdbFlags: ["--encoding=UTF8"],
   onLog: () => {},
   onError: (error) => console.error(error),
 });

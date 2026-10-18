@@ -4,6 +4,8 @@ import type {
   HubSummary,
   HubDetail,
   NetworkOverview,
+  VehicleSearchQuery,
+  VehicleSearchResult,
   ApiError,
 } from "@emobility/contracts";
 export class RequestError extends Error {
@@ -14,7 +16,10 @@ export class RequestError extends Error {
     super(message);
   }
 }
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+export async function request<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T> {
   let response: Response;
   try {
     response = await fetch(`/api${path}`, {
@@ -66,4 +71,15 @@ export const api = {
     request<NetworkOverview>("/network/overview", { signal }),
   detail: (id: string, signal?: AbortSignal) =>
     request<HubDetail>(`/hubs/${encodeURIComponent(id)}`, { signal }),
+  vehicles: (query: VehicleSearchQuery, signal?: AbortSignal) => {
+    const params = new URLSearchParams();
+    if (query.hubId) params.set("hubId", query.hubId);
+    if (query.type) params.set("type", query.type);
+    if (query.minBatteryPercent !== undefined)
+      params.set("minBatteryPercent", String(query.minBatteryPercent));
+    const qs = params.toString();
+    return request<VehicleSearchResult>(`/vehicles${qs ? `?${qs}` : ""}`, {
+      signal,
+    });
+  },
 };
