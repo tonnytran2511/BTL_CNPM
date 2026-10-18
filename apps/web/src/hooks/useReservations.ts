@@ -17,12 +17,19 @@ export function useReservations(userId?: string, refreshKey?: string | null) {
   const [version, setVersion] = useState(0);
   const [now, setNow] = useState(() => Date.now());
   const working = useRef(false);
+  const generation = useRef(0);
 
   useEffect(() => {
+    generation.current++;
+    working.current = false;
+    setBusyId(null);
     setItems(null);
     setError("");
     setReserveError("");
     setCancelError("");
+    return () => {
+      generation.current++;
+    };
   }, [userId]);
 
   useEffect(() => {
@@ -62,7 +69,8 @@ export function useReservations(userId?: string, refreshKey?: string | null) {
       fallback: string,
       setFailure: (message: string) => void,
     ) => {
-      if (working.current) return;
+      if (!userId || working.current) return false;
+      const current = generation.current;
       working.current = true;
       setBusyId(id);
       setReserveError("");
@@ -70,15 +78,19 @@ export function useReservations(userId?: string, refreshKey?: string | null) {
       try {
         await action();
       } catch (e) {
-        setFailure(e instanceof Error ? e.message : fallback);
+        if (current === generation.current)
+          setFailure(e instanceof Error ? e.message : fallback);
       } finally {
-        working.current = false;
-        setBusyId(null);
-        setNow(Date.now());
-        setVersion((v) => v + 1); // dù thành công hay xung đột, đọc lại dữ liệu thật
+        if (current === generation.current) {
+          working.current = false;
+          setBusyId(null);
+          setNow(Date.now());
+          setVersion((v) => v + 1); // đọc lại sau thành công hoặc xung đột
+        }
       }
+      return current === generation.current;
     },
-    [],
+    [userId],
   );
 
   return {

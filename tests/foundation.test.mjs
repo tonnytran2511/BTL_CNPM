@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
@@ -49,6 +49,7 @@ test(
       port: dbPort,
       persistent: false,
       authMethod: "scram-sha-256",
+      initdbFlags: ["--encoding=UTF8"],
       postgresFlags: ["-h", "127.0.0.1"],
       initdbFlags: ["--encoding=UTF8"],
       onLog: () => {},
@@ -93,6 +94,7 @@ test(
         status: response.status,
         body: await response.json(),
         cookie: response.headers.get("set-cookie")?.split(";")[0],
+        headers: response.headers,
       };
     };
     try {
@@ -128,6 +130,9 @@ test(
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
       assert.ok(ready, startupOutput);
+      await t.test("Mai Anh parking and charging integration", async () => {
+        await command("tests/mobility-check.mjs", env);
+      });
       await t.test(
         "shared transaction commits, rolls back and enforces read-only snapshots",
         async () => {
@@ -219,6 +224,85 @@ test(
         },
       );
       const hubs = (await request("/hubs", { cookie: operator.cookie })).body;
+      await t.test(
+        "T13 operator simulation validates requests and leaves operational tables unchanged",
+        async () => {
+          const body = {
+            hubId: hubs[0].id,
+            horizonMinutes: 60,
+            stepMinutes: 5,
+            seed: 42,
+            baselineArrivalsPerStep: 0.5,
+            scenarioArrivalsPerStep: 4,
+          };
+          const run = (changes = {}, cookie = operator.cookie) =>
+            request("/simulations/demand-surge", {
+              method: "POST",
+              cookie,
+              body: { ...body, ...changes },
+            });
+          assert.equal((await request("/simulations/config")).status, 401);
+          assert.equal(
+            (await request("/simulations/config", { cookie: student.cookie }))
+              .status,
+            403,
+          );
+          assert.equal((await run({}, student.cookie)).status, 403);
+          const config = await request("/simulations/config", {
+            cookie: operator.cookie,
+          });
+          assert.equal(config.status, 200);
+          const capture = async () => {
+            const result = {};
+            for (const table of [
+              "hubs",
+              "vehicles",
+              "parking_spaces",
+              "charging_points",
+              "parking_bookings",
+              "charging_requests",
+              "vehicle_reservations",
+              "trips",
+            ])
+              result[table] = (
+                await pool.query(`SELECT * FROM ${table} ORDER BY id`)
+              ).rows;
+            return result;
+          };
+          const before = await capture();
+          const first = await run();
+          assert.equal(first.status, 201, JSON.stringify(first.body));
+          assert.equal(first.body.modelVersion, "departures-v1");
+          const second = await run();
+          assert.deepEqual(second.body.baseline, first.body.baseline);
+          assert.deepEqual(second.body.scenario, first.body.scenario);
+          assert.deepEqual(await capture(), before);
+          for (const changes of [
+            { stepMinutes: 7 },
+            { seed: -1 },
+            { scenarioArrivalsPerStep: 0 },
+            { scenarioArrivalsPerStep: config.body.maximumArrivalsPerStep + 1 },
+            { horizonMinutes: (config.body.maximumSteps + 1) * 5 },
+            { hubId: "bad" },
+            { role: "operator" },
+            { seed: "42" },
+            { hubId: "00000000-0000-4000-8000-000000000000" },
+          ])
+            assert.equal(
+              (await run(changes)).status,
+              400,
+              JSON.stringify(changes),
+            );
+          await pool.query(
+            "UPDATE settings SET value='1' WHERE key='simulationMaximumSteps'",
+          );
+          assert.equal((await run()).status, 400);
+          await pool.query(
+            "UPDATE settings SET value=$1 WHERE key='simulationMaximumSteps'",
+            [JSON.stringify(config.body.maximumSteps)],
+          );
+        },
+      );
       await t.test(
         "seed is idempotent; Hub counts match actual database resources",
         async () => {
@@ -330,6 +414,197 @@ test(
         },
       );
       await t.test(
+        "current account role and activation take effect on an existing session",
+        async () => {
+          try {
+            await pool.query("UPDATE users SET role='student' WHERE id=$1", [
+              operator.body.id,
+            ]);
+            const denied = await request("/network/overview", {
+              cookie: operator.cookie,
+            });
+            assert.equal(denied.status, 403);
+            assert.equal(denied.body.statusCode, 403);
+            assert.equal(denied.body.code, "HTTP_403");
+            assert.equal(typeof denied.body.message, "string");
+            assert.equal(
+              (await request("/auth/me", { cookie: operator.cookie })).body
+                .role,
+              "student",
+            );
+            await pool.query("UPDATE users SET active=false WHERE id=$1", [
+              operator.body.id,
+            ]);
+            assert.equal(
+              (await request("/auth/me", { cookie: operator.cookie })).status,
+              401,
+            );
+            assert.equal(
+              (await request("/hubs", { cookie: operator.cookie })).status,
+              401,
+            );
+            assert.equal(
+              (
+                await request("/auth/login", {
+                  method: "POST",
+                  body: {
+                    email: env.SEED_OPERATOR_EMAIL,
+                    password: env.SEED_OPERATOR_PASSWORD,
+                  },
+                })
+              ).status,
+              401,
+            );
+          } finally {
+            await pool.query(
+              "UPDATE users SET role='operator', active=true WHERE id=$1",
+              [operator.body.id],
+            );
+          }
+          assert.equal(
+            (await request("/network/overview", { cookie: operator.cookie }))
+              .status,
+            200,
+          );
+        },
+      );
+      await t.test(
+        "login rotates the current session and stores only a token hash",
+        async () => {
+          const body = {
+            email: env.SEED_STUDENT_EMAIL,
+            password: env.SEED_STUDENT_PASSWORD,
+          };
+          const first = await request("/auth/login", { method: "POST", body });
+          const second = await request("/auth/login", {
+            method: "POST",
+            body,
+            cookie: first.cookie,
+          });
+          assert.equal(first.status, 201);
+          assert.equal(second.status, 201);
+          assert.notEqual(first.cookie, second.cookie);
+          assert.equal(
+            (await request("/auth/me", { cookie: first.cookie })).status,
+            401,
+          );
+          assert.equal(
+            (await request("/auth/me", { cookie: second.cookie })).status,
+            200,
+          );
+          const rawToken = second.cookie.slice("session=".length);
+          const hashes = (
+            await pool.query(
+              "SELECT token_hash FROM sessions WHERE user_id=$1",
+              [second.body.id],
+            )
+          ).rows.map((row) => row.token_hash);
+          assert.ok(
+            hashes.includes(
+              createHash("sha256").update(rawToken).digest("hex"),
+            ),
+          );
+          assert.ok(!hashes.includes(rawToken));
+          const cookieHeader = second.headers.get("set-cookie");
+          assert.match(cookieHeader, /HttpOnly/i);
+          assert.match(cookieHeader, /SameSite=Strict/i);
+          assert.match(cookieHeader, /Path=\/api/i);
+          assert.match(
+            cookieHeader,
+            new RegExp(`Max-Age=${env.SESSION_TTL_SECONDS}(?:;|$)`, "i"),
+          );
+          const logout = await request("/auth/logout", {
+            method: "POST",
+            cookie: second.cookie,
+          });
+          assert.match(logout.headers.get("set-cookie"), /Path=\/api/i);
+          assert.equal(
+            (await request("/auth/me", { cookie: second.cookie })).status,
+            401,
+          );
+        },
+      );
+      await t.test(
+        "login rate limit and Secure cookie config enforced on an isolated API instance",
+        async () => {
+          const isolatedPort = await freePort();
+          const isolatedBase = `http://127.0.0.1:${isolatedPort}/api`;
+          const limited = spawn(process.execPath, ["apps/api/dist/main.js"], {
+            cwd: root,
+            env: {
+              ...env,
+              API_PORT: String(isolatedPort),
+              COOKIE_SECURE: "true",
+              LOGIN_MAX_ATTEMPTS: "2",
+            },
+            stdio: ["ignore", "pipe", "pipe"],
+          });
+          let output = "";
+          limited.stdout.on("data", (chunk) => {
+            output += chunk;
+          });
+          limited.stderr.on("data", (chunk) => {
+            output += chunk;
+          });
+          try {
+            let ready = false;
+            for (let attempt = 0; attempt < 100; attempt++) {
+              if (limited.exitCode !== null) throw new Error(output);
+              try {
+                if ((await fetch(isolatedBase + "/health")).ok) {
+                  ready = true;
+                  break;
+                }
+              } catch {}
+              await new Promise((resolve) => setTimeout(resolve, 100));
+            }
+            assert.ok(ready, "Isolated API should start");
+            const login = (password) =>
+              fetch(isolatedBase + "/auth/login", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Origin: env.WEB_ORIGIN,
+                },
+                body: JSON.stringify({
+                  email: env.SEED_OPERATOR_EMAIL,
+                  password,
+                }),
+              });
+            const valid = await login(env.SEED_OPERATOR_PASSWORD);
+            assert.equal(valid.status, 201);
+            const cookie = valid.headers.get("set-cookie");
+            assert.match(cookie, /; Secure(?:;|$)/i);
+            assert.match(cookie, /HttpOnly/i);
+            assert.match(cookie, /SameSite=Strict/i);
+            await valid.json();
+            const count = Number(
+              (await pool.query("SELECT count(*) FROM sessions")).rows[0].count,
+            );
+            const invalid = await login("wrong");
+            assert.equal(invalid.status, 401);
+            await invalid.json();
+            const blocked = await login(env.SEED_OPERATOR_PASSWORD);
+            assert.equal(blocked.status, 429);
+            assert.equal((await blocked.json()).code, "HTTP_429");
+            assert.ok(Number(blocked.headers.get("retry-after")) > 0);
+            assert.equal(blocked.headers.get("set-cookie"), null);
+            assert.equal(
+              Number(
+                (await pool.query("SELECT count(*) FROM sessions")).rows[0]
+                  .count,
+              ),
+              count,
+            );
+          } finally {
+            if (limited.exitCode === null) {
+              limited.kill("SIGTERM");
+              await once(limited, "exit");
+            }
+          }
+        },
+      );
+      await t.test(
         "cross-origin mutations rejected; logout revokes existing token immediately",
         async () => {
           assert.equal(
@@ -401,7 +676,12 @@ test(
       }
       if (pool) await pool.end();
       await db.stop();
-      await rm(directory, { recursive: true, force: true });
+      await rm(directory, {
+        recursive: true,
+        force: true,
+        maxRetries: 20,
+        retryDelay: 100,
+      });
     }
   },
 );

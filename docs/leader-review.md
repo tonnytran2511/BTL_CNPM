@@ -5,13 +5,15 @@
 - Nền tảng có code và đã kiểm chứng local; auth, dữ liệu Hub, dashboard, snapshot, migration/seed hoạt động.
 - AuthModule/HubsModule đã tách file và export service; AppModule chỉ lắp ráp các module.
 - Database.transaction cung cấp transaction ghi dùng chung; readSnapshot giữ transaction read-only.
-- AllocationPort là interface cho TV3, chưa có provider. Planned API types không đồng nghĩa endpoint đã triển khai.
+- AllocationPort đã có provider thật trong MobilityModule của Mai Anh tuần 1 (local, chờ review/tích hợp). Hợp đồng endpoint mobility thực tại docs/api.md; planned types khác không đồng nghĩa endpoint đã triển khai.
 - Quy tắc v1 tại business-rules.md là baseline cần các thành viên review; chưa ghi nhận cả nhóm đã thông qua.
 - Không đánh dấu task được peer review/merge nếu chỉ có kiểm tra của Codex.
 
 ## Review ngắn trong tuần thi
 
 Nhóm trưởng đọc theo thứ tự: README → DESIGN → business-rules → api → architecture. Mỗi thành viên chỉ cần review BR và contract của module mình trong một buổi ngắn.
+
+Review tiếp `docs/use-cases.md` và testcase của module tại `docs/integration-test-plan.md`. Có 15 UC, hai sơ đồ UML source và 36 case kế hoạch; chưa ghi nhận các case này đã chạy. Chủ module xác nhận các quyết định mở và phản hồi expectation trước khi tích hợp.
 
 | Người  | Cần phản hồi cụ thể                                                    | Bằng chứng chốt                                             |
 | ------ | ---------------------------------------------------------------------- | ----------------------------------------------------------- |
@@ -47,3 +49,9 @@ Repository public: https://github.com/tonnytran2511/BTL_CNPM. Remote local dùng
 CI commit nền tảng `2f22bef` đã pass trên Ubuntu/Node 22: checkout, npm ci, setup env, format, build và integration test. Bằng chứng: https://github.com/tonnytran2511/BTL_CNPM/actions/runs/38594291555.
 
 Danh sách publish đã được kiểm tra không chứa mật khẩu `.env`; .env, cluster local, build output và hai PDF đề bài được giữ ngoài repo public. Chưa có branch protection hoặc lời mời thành viên; chờ username để mời đúng người.
+
+## Xác nhận nhóm và phần việc tiếp theo — 15/10/2026
+
+Nhóm trưởng xác nhận cả nhóm đã đồng ý T01–T05 (phạm vi/yêu cầu, baseline thiết kế, setup và nền tảng hiện có); đã cập nhật trên bảng phân công. Xác nhận này thay cho trạng thái chờ phản hồi ở thời điểm soạn baseline, không có nghĩa PR #1 đã merge hoặc endpoint dự kiến đã có code.
+
+T15/T29 được bổ sung regression tests và sửa lifecycle dashboard trong branch `feat/dashboard-reliability`; xem execution log tại `docs/test-runs/2026-10-15-foundation-dashboard.md`. Cần review code mới, kiểm tra trình duyệt và tích hợp API của thành viên trước khi đánh dấu hoàn thành.

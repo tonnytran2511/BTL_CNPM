@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useReservationConfirmation } from "../hooks/useReservationConfirmation";
 import type { VehicleReservationView } from "@emobility/contracts";
 import { minutesLeft, reservationStatusLabel } from "../models/reservation";
 import { formatDateTime, formatNumber, statusLabel } from "../utils/format";
@@ -108,7 +108,7 @@ function Item({
 }
 
 export function ReservationList(props: Props) {
-  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const confirmation = useReservationConfirmation(props.onCancel);
   const empty = props.loaded && !props.active.length && !props.history.length;
   const row = (item: VehicleReservationView) => (
     <Item
@@ -116,13 +116,10 @@ export function ReservationList(props: Props) {
       item={item}
       now={props.now}
       busyId={props.busyId}
-      confirming={confirmId === item.id}
-      onAsk={() => setConfirmId(item.id)}
-      onDismiss={() => setConfirmId(null)}
-      onCancel={() => {
-        setConfirmId(null);
-        props.onCancel(item.id);
-      }}
+      confirming={confirmation.id === item.id}
+      onAsk={() => confirmation.ask(item.id)}
+      onDismiss={confirmation.dismiss}
+      onCancel={() => confirmation.confirm(item.id)}
     />
   );
   return (

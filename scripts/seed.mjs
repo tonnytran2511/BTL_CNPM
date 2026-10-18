@@ -27,6 +27,20 @@ try {
     );
   }
   const threshold = data.settings.lowBatteryThreshold;
+  const maximumParkingDurationMinutes =
+    data.settings.maximumParkingDurationMinutes;
+  if (
+    !Number.isInteger(maximumParkingDurationMinutes) ||
+    maximumParkingDurationMinutes <= 0
+  )
+    throw new Error("Invalid maximumParkingDurationMinutes");
+  await client.query(
+    "INSERT INTO settings(key,value) VALUES($1,$2) ON CONFLICT(key) DO NOTHING",
+    [
+      "maximumParkingDurationMinutes",
+      JSON.stringify(maximumParkingDurationMinutes),
+    ],
+  );
   if (!Number.isInteger(threshold) || threshold < 0 || threshold > 100)
     throw new Error("Invalid lowBatteryThreshold");
   await client.query(
@@ -35,6 +49,8 @@ try {
   );
   // T06 rental settings (BR-01): validated here, read from the DB by the rental module.
   const rentalSettings = {
+    simulationMaximumSteps: (v) => Number.isSafeInteger(v) && v > 0,
+    simulationMaximumArrivalsPerStep: (v) => Number.isSafeInteger(v) && v > 0,
     reservationHoldMinutes: (v) => Number.isInteger(v) && v > 0,
     minimumRentalBatteryPercent: (v) =>
       Number.isInteger(v) && v >= 0 && v <= 100,

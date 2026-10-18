@@ -8,7 +8,7 @@ flowchart LR
   Hooks --> Client[API client]
   Client --> Controllers[Nest controllers / validation]
   Controllers --> Guard[Session / role guard]
-  Guard --> Services[AuthService / HubsService]
+  Guard --> Services[AuthService / HubsService / MobilityService]
   Services --> Repos[Repositories]
   Repos --> DB[(PostgreSQL)]
   Snapshot[Read-only snapshot API] --> Services
@@ -119,6 +119,7 @@ erDiagram
     uuid owner_id FK
     text code UK
     text type
+    integer battery_percent "nullable; pin khai báo"
   }
   parking_spaces {
     uuid id PK
@@ -143,7 +144,55 @@ erDiagram
 
 Vehicle hub_id có thể null khi đang đi; quan hệ Hub/vehicle thực tế là tùy chọn phía vehicle. Một chỗ occupied chứa đúng một xe thuê hoặc cá nhân. `(hub_id,code)` unique với chỗ đỗ/cổng sạc; FK đã có index phù hợp. Database chặn pin ngoài 0–100 và trạng thái không hợp lệ.
 
-Schema chưa có constraint kiểm tra xe đỗ cùng Hub; các service phân bổ tương lai phải giữ invariant này trong transaction. Không gọi base schema là cơ chế chống đặt trùng hoàn chỉnh khi bảng đặt chỗ chưa được bổ sung.
+Schema chưa có constraint kiểm tra xe đỗ cùng Hub; caller và allocation service phải giữ invariant này trong transaction. Migration 002 bổ sung bảng đặt chỗ và exclusion constraints; base schema 001 riêng vẫn không phải cơ chế chống đặt trùng đầy đủ.
+
+## Mai Anh — dữ liệu và hành vi tuần 1
+
+```mermaid
+erDiagram
+  users ||--o{ parking_bookings : owns
+  private_vehicles ||--o{ parking_bookings : reserves
+  parking_spaces ||--o{ parking_bookings : scheduled
+  users ||--o{ charging_requests : submits
+  hubs ||--o{ charging_requests : receives
+  vehicles o|--o{ charging_requests : rental
+  private_vehicles o|--o{ charging_requests : private
+  charging_requests ||--o{ charging_sessions : has
+  charging_points ||--o{ charging_sessions : serves
+  users ||--o{ mobility_idempotency : deduplicates
+```
+
+charging_requests có đúng một trong vehicle_id/private_vehicle_id; partial unique index chặn hai yêu cầu active cho cùng xe. charging_sessions mới có schema/constraint cho tuần 2, chưa có scheduler hay API chạy phiên. parking_bookings có starts_at/ends_at và exclusion constraints theo chỗ/xe cho reserved/checked_in; lịch tương lai không cập nhật trạng thái parking_spaces.
+
+```mermaid
+stateDiagram-v2
+  [*] --> reserved: đặt và còn chỗ
+  reserved --> cancelled: chủ lịch hủy
+  reserved --> checked_in: đúng giờ và chiếm được chỗ
+  checked_in --> completed: check-out và giải phóng chỗ
+```
+
+```mermaid
+sequenceDiagram
+  actor Student
+  participant UI
+  participant Hook
+  participant Service as MobilityService
+  participant Repo as MobilityRepository
+  participant DB as PostgreSQL
+  Student->>UI: đặt lịch
+  UI->>Hook: onSubmit
+  Hook->>Service: POST + session + Idempotency-Key
+  Service->>Repo: transaction
+  Repo->>DB: lock key, lock Hub, đọc xe/chỗ
+  Service->>Service: kiểm tra chủ xe, thời gian, sức chứa
+  Repo->>DB: INSERT lịch + kết quả idempotency
+  DB-->>Repo: COMMIT hoặc ROLLBACK
+  Service-->>Hook: response hoặc lỗi
+  Hook-->>UI: cập nhật danh sách/thông báo
+```
+
+Trong triển khai HTTP thực, request đi qua global auth guard và controller/DTO trước service. Xem docs/api.md và docs/guides/CONTRIBUTING.md cho chính sách chỗ vật lý và điểm tích hợp AllocationPort.
 
 ## Vòng đời dự kiến cho TV2
 
@@ -169,3 +218,7 @@ Các chuyển trạng thái trên là baseline thiết kế, chưa phải servic
 - `trips`: `active → completed`; một reservation tạo tối đa một trip (`reservation_id UNIQUE`); trip `completed` bắt buộc có `ended_at`, Hub đích và pin cuối.
 - Quy tắc trạng thái nằm ở `apps/api/src/rental/rental.rules.ts`; trạng thái xe đổi theo sự kiện reserve/cancel/expire/pickup/return và phải cập nhật có điều kiện (`WHERE status = from`).
 - Settings cần có: `reservationHoldMinutes`, `minimumRentalBatteryPercent` (seed trong `database/seed.example.json`).
+
+## T13 Simulation
+
+SimulationPanel → useSimulation → simulationApi → SimulationController (operator) → SimulationService → HubsService.snapshot() + SimulationRepository (chỉ đọc settings) → engine thuần departures-v1. Không thêm bảng/migration; kết quả chỉ trả cho client. Xem simulation.md về model và giới hạn.
