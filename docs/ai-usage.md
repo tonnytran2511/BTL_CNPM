@@ -30,3 +30,5 @@ Nhóm cần tự review, chỉnh sửa và chạy lại; ghi rõ các phần đ�
 18/10/2026: Codex hỗ trợ nhóm trưởng giải quyết conflict và tích hợp tài liệu use case với main sau T13; giữ nguyên lịch sử hỗ trợ AI của các module.
 
 18/10/2026: Codex hỗ trợ giải quyết conflict PR #2 sau T13, ghép API client có deadline dùng chung, giữ onRetry/session-expiry ở chi tiết Hub và chạy lại build/API/frontend tests. Không coi kiểm tra tự động là demo UI của sinh viên.
+
+18/10/2026: Codex hỗ trợ nhóm trưởng tích hợp PR #6 với main sau #1/#2/#5; sửa hàm format trùng, tách orchestration/xác nhận khỏi UI, ngăn phản hồi mutation cũ ảnh hưởng phiên mới và bổ sung regression tests. Tác giả cần demo và giải thích phần T07.

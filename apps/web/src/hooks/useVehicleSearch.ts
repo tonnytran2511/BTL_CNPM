@@ -13,6 +13,7 @@ export function useVehicleSearch(userId?: string, refreshKey?: string | null) {
   const [result, setResult] = useState<VehicleSearchResult | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [version, setVersion] = useState(0); // tăng để tải lại sau khi đặt/hủy xe
   const query = useMemo(() => toSearchQuery(filter), [filter]);
   useEffect(() => {
     setFilter(emptyVehicleFilter);
@@ -38,7 +39,7 @@ export function useVehicleSearch(userId?: string, refreshKey?: string | null) {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [query, userId, refreshKey]);
+  }, [query, userId, refreshKey, version]);
   return {
     filter,
     result,
@@ -50,5 +51,6 @@ export function useVehicleSearch(userId?: string, refreshKey?: string | null) {
     setMinBattery: (minBattery: string) =>
       setFilter((f) => ({ ...f, minBattery })),
     reset: () => setFilter(emptyVehicleFilter),
+    reload: () => setVersion((v) => v + 1),
   };
 }

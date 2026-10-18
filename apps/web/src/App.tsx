@@ -3,7 +3,8 @@ import { useSimulation } from "./hooks/useSimulation";
 import { SimulationPage } from "./pages/SimulationPage";
 import { useAppPage } from "./hooks/useAppPage";
 import { useHubDetail } from "./hooks/useHubDetail";
-import { useVehicleSearch } from "./hooks/useVehicleSearch";
+import { useRental } from "./hooks/useRental";
+import { ReservationList } from "./components/ReservationList";
 import { LoginForm } from "./components/LoginForm";
 import { HubCard } from "./components/HubCard";
 import { HubDetailPanel } from "./components/HubDetailPanel";
@@ -21,7 +22,11 @@ export function App() {
     model.sessionExpired,
   );
   const mobility = useMobility(model.user, model.refresh);
-  const vehicles = useVehicleSearch(model.user?.id, model.updatedAt);
+  const { vehicles, reservations, reserve, cancel } = useRental(
+    model.user?.id,
+    model.updatedAt,
+    model.refresh,
+  );
   if (model.booting)
     return (
       <main className="center-state" role="status">
@@ -179,6 +184,20 @@ export function App() {
               onType={vehicles.setType}
               onMinBattery={vehicles.setMinBattery}
               onReset={vehicles.reset}
+              onReserve={reserve}
+              busyId={reservations.busyId}
+              reserveError={reservations.reserveError}
+            />
+            <ReservationList
+              active={reservations.active}
+              history={reservations.history}
+              loaded={reservations.loaded}
+              loading={reservations.loading}
+              error={reservations.error}
+              cancelError={reservations.cancelError}
+              busyId={reservations.busyId}
+              now={reservations.now}
+              onCancel={cancel}
             />
             {hub.selectedId && (
               <HubDetailPanel
