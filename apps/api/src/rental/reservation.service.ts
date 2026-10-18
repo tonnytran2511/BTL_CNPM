@@ -61,7 +61,8 @@ export class ReservationService {
           holdMinutes,
         });
       } catch (error) {
-        if (isUniqueViolation(error)) throw new ConflictException(NOT_AVAILABLE);
+        if (isUniqueViolation(error))
+          throw new ConflictException(NOT_AVAILABLE);
         throw error;
       }
       return tx.view(id);

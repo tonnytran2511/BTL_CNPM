@@ -37,10 +37,7 @@ export interface Trip {
 }
 
 export type VehicleReservationState =
-  | "active"
-  | "cancelled"
-  | "expired"
-  | "fulfilled";
+  "active" | "cancelled" | "expired" | "fulfilled";
 
 /** Một lượt giữ xe của chính người dùng. Thời gian là ISO 8601 (UTC). */
 export interface VehicleReservationView {

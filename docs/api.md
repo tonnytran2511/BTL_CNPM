@@ -54,11 +54,11 @@ Query tùy chọn: `hubId` (UUID), `type` (`electric_bicycle` | `electric_motorc
 
 Mọi endpoint cần đăng nhập (cookie session). `userId` lấy từ session, không nhận từ body; field ngoài DTO bị từ chối 400. Mutation phải có Origin đúng `WEB_ORIGIN` khi mang cookie.
 
-| Method / path                        | Response                    | Trạng thái                                                                                  |
-| ------------------------------------ | --------------------------- | ------------------------------------------------------------------------------------------- |
-| GET /vehicle-reservations            | `VehicleReservationView[]`  | 200; chỉ lượt của chính người gọi, mới nhất trước, tối đa 100; chưa đăng nhập 401            |
-| POST /vehicle-reservations           | `VehicleReservationView`    | 201; body `{vehicleId}` sai 400; xe không tồn tại 404; xe không còn đặt được 409             |
-| POST /vehicle-reservations/:id/cancel | `VehicleReservationView`    | 200; id sai 400; không tồn tại 404; không phải chủ 403; không còn `active` 409               |
+| Method / path                         | Response                   | Trạng thái                                                                        |
+| ------------------------------------- | -------------------------- | --------------------------------------------------------------------------------- |
+| GET /vehicle-reservations             | `VehicleReservationView[]` | 200; chỉ lượt của chính người gọi, mới nhất trước, tối đa 100; chưa đăng nhập 401 |
+| POST /vehicle-reservations            | `VehicleReservationView`   | 201; body `{vehicleId}` sai 400; xe không tồn tại 404; xe không còn đặt được 409  |
+| POST /vehicle-reservations/:id/cancel | `VehicleReservationView`   | 200; id sai 400; không tồn tại 404; không phải chủ 403; không còn `active` 409    |
 
 - Đặt xe (BR-01): xe phải `available`, thuộc Hub `active`, pin không thấp hơn `minimumRentalBatteryPercent`. Xe chuyển `reserved`, tạo reservation `active` với `expiresAt = now + reservationHoldMinutes` (settings, tính bằng đồng hồ DB). Tất cả trong một transaction; hai người đặt cùng xe thì đúng một người thành công (khóa hàng xe + cập nhật có điều kiện + unique index `vehicle_reservations_active_vehicle_idx`).
 - Hủy xe: chỉ chủ lượt đặt, chỉ khi `active`. Reservation thành `cancelled` (`closedAt` được ghi) và xe `reserved → available` bằng cập nhật có điều kiện: nếu xe đã bị đổi sang trạng thái khác (ví dụ sự cố, BR-10) thì không ghi đè.

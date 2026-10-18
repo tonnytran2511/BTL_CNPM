@@ -23,7 +23,8 @@ const invalidId = new ParseUUIDPipe({
 @Controller("vehicle-reservations")
 export class ReservationController {
   constructor(
-    @Inject(ReservationService) private readonly reservations: ReservationService,
+    @Inject(ReservationService)
+    private readonly reservations: ReservationService,
   ) {}
 
   @Get() mine(@Req() req: AuthRequest) {

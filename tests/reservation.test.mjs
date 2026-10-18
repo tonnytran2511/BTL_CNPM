@@ -35,7 +35,9 @@ test(
   "T07 reserve / cancel vehicle against real PostgreSQL",
   { timeout: 120_000 },
   async (t) => {
-    const directory = await mkdtemp(resolve(tmpdir(), "emobility-reservation-"));
+    const directory = await mkdtemp(
+      resolve(tmpdir(), "emobility-reservation-"),
+    );
     const dbPort = await freePort(),
       apiPort = await freePort();
     const password = randomBytes(24).toString("hex");
@@ -72,7 +74,8 @@ test(
     };
     const base = `http://127.0.0.1:${apiPort}/api`;
     const call = async (method, path, cookie, body) => {
-      const headers = body === undefined ? {} : { "Content-Type": "application/json" };
+      const headers =
+        body === undefined ? {} : { "Content-Type": "application/json" };
       if (cookie) {
         headers.Cookie = cookie;
         if (method !== "GET") headers.Origin = env.WEB_ORIGIN;
@@ -243,16 +246,30 @@ test(
       });
 
       await t.test("my list only contains my own reservations", async () => {
-        assert.equal((await call("GET", "/vehicle-reservations", operator)).body.length, 0);
+        assert.equal(
+          (await call("GET", "/vehicle-reservations", operator)).body.length,
+          0,
+        );
       });
 
       await t.test(
         "low battery, maintenance and inactive-Hub vehicles are refused",
         async () => {
-          assert.equal((await reserve(student, await vehicleId("METRO-B02"))).status, 409);
-          assert.equal((await reserve(student, await vehicleId("DORM-M01"))).status, 409);
-          await pool.query("UPDATE hubs SET status='inactive' WHERE code='DORM'");
-          assert.equal((await reserve(student, await vehicleId("DORM-B01"))).status, 409);
+          assert.equal(
+            (await reserve(student, await vehicleId("METRO-B02"))).status,
+            409,
+          );
+          assert.equal(
+            (await reserve(student, await vehicleId("DORM-M01"))).status,
+            409,
+          );
+          await pool.query(
+            "UPDATE hubs SET status='inactive' WHERE code='DORM'",
+          );
+          assert.equal(
+            (await reserve(student, await vehicleId("DORM-B01"))).status,
+            409,
+          );
           assert.equal(await vehicleStatus("DORM-B01"), "available");
           await pool.query("UPDATE hubs SET status='active' WHERE code='DORM'");
         },
@@ -279,8 +296,11 @@ test(
           await reset();
           // Trạng thái bất thường: xe available nhưng đã có reservation active → insert vi phạm unique.
           const id = await vehicleId("METRO-B01");
-          const user = (await pool.query("SELECT id FROM users LIMIT 1")).rows[0].id;
-          const hub = (await pool.query("SELECT hub_id FROM vehicles WHERE id=$1", [id])).rows[0].hub_id;
+          const user = (await pool.query("SELECT id FROM users LIMIT 1"))
+            .rows[0].id;
+          const hub = (
+            await pool.query("SELECT hub_id FROM vehicles WHERE id=$1", [id])
+          ).rows[0].hub_id;
           await pool.query(
             "INSERT INTO vehicle_reservations(user_id,vehicle_id,source_hub_id,expires_at) VALUES($1,$2,$3,now()+interval '5 minutes')",
             [user, id, hub],
@@ -295,12 +315,20 @@ test(
         await reset();
         const held = await reserve(student, await vehicleId("METRO-B01"));
         const id = held.body.id;
-        const other = await call("POST", `/vehicle-reservations/${id}/cancel`, operator);
+        const other = await call(
+          "POST",
+          `/vehicle-reservations/${id}/cancel`,
+          operator,
+        );
         assert.equal(other.status, 403);
         assert.equal(await vehicleStatus("METRO-B01"), "reserved");
         assert.equal(await activeCount("METRO-B01"), 1);
 
-        const ok = await call("POST", `/vehicle-reservations/${id}/cancel`, student);
+        const ok = await call(
+          "POST",
+          `/vehicle-reservations/${id}/cancel`,
+          student,
+        );
         assert.equal(ok.status, 200);
         assert.equal(ok.body.status, "cancelled");
         assert.ok(ok.body.closedAt);
@@ -311,20 +339,39 @@ test(
           ),
         );
 
-        const again = await call("POST", `/vehicle-reservations/${id}/cancel`, student);
+        const again = await call(
+          "POST",
+          `/vehicle-reservations/${id}/cancel`,
+          student,
+        );
         assert.equal(again.status, 409);
         assert.equal(await vehicleStatus("METRO-B01"), "available");
 
         assert.equal(
-          (await call("POST", "/vehicle-reservations/00000000-0000-4000-8000-000000000000/cancel", student)).status,
+          (
+            await call(
+              "POST",
+              "/vehicle-reservations/00000000-0000-4000-8000-000000000000/cancel",
+              student,
+            )
+          ).status,
           404,
         );
-        assert.equal((await call("POST", "/vehicle-reservations/abc/cancel", student)).status, 400);
+        assert.equal(
+          (await call("POST", "/vehicle-reservations/abc/cancel", student))
+            .status,
+          400,
+        );
 
         // Sau khi hủy xe được đặt lại; lịch sử vẫn còn cả hai lượt.
-        assert.equal((await reserve(operator, await vehicleId("METRO-B01"))).status, 201);
+        assert.equal(
+          (await reserve(operator, await vehicleId("METRO-B01"))).status,
+          201,
+        );
         assert.deepEqual(
-          (await call("GET", "/vehicle-reservations", student)).body.map((x) => x.status),
+          (await call("GET", "/vehicle-reservations", student)).body.map(
+            (x) => x.status,
+          ),
           ["cancelled"],
         );
       });
@@ -334,8 +381,14 @@ test(
         async () => {
           await reset();
           const held = await reserve(student, await vehicleId("DORM-B01"));
-          await pool.query("UPDATE vehicles SET status='maintenance' WHERE code='DORM-B01'");
-          const r = await call("POST", `/vehicle-reservations/${held.body.id}/cancel`, student);
+          await pool.query(
+            "UPDATE vehicles SET status='maintenance' WHERE code='DORM-B01'",
+          );
+          const r = await call(
+            "POST",
+            `/vehicle-reservations/${held.body.id}/cancel`,
+            student,
+          );
           assert.equal(r.status, 200);
           assert.equal(r.body.status, "cancelled");
           assert.equal(await vehicleStatus("DORM-B01"), "maintenance");

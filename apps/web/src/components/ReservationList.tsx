@@ -41,7 +41,8 @@ function Item({
       <div>
         <strong>{item.vehicle.code}</strong>
         <small>
-          {statusLabel(item.vehicle.type)} · Pin {formatNumber(item.vehicle.batteryPercent)}%
+          {statusLabel(item.vehicle.type)} · Pin{" "}
+          {formatNumber(item.vehicle.batteryPercent)}%
         </small>
       </div>
       <div>
@@ -53,13 +54,17 @@ function Item({
           <>
             <span>Giữ đến {formatDateTime(item.expiresAt)}</span>
             <small className={left <= 0 ? "overdue" : undefined}>
-              {left > 0 ? `Còn ${formatNumber(left)} phút` : "Đã quá hạn giữ xe"}
+              {left > 0
+                ? `Còn ${formatNumber(left)} phút`
+                : "Đã quá hạn giữ xe"}
             </small>
           </>
         ) : (
           <>
             <span>Đặt lúc {formatDateTime(item.createdAt)}</span>
-            {item.closedAt && <small>Kết thúc {formatDateTime(item.closedAt)}</small>}
+            {item.closedAt && (
+              <small>Kết thúc {formatDateTime(item.closedAt)}</small>
+            )}
           </>
         )}
       </div>
@@ -128,7 +133,9 @@ export function ReservationList(props: Props) {
           <h2>Đặt xe của tôi</h2>
         </div>
         <span className="muted">
-          {props.loaded ? `${formatNumber(props.active.length)} xe đang giữ` : ""}
+          {props.loaded
+            ? `${formatNumber(props.active.length)} xe đang giữ`
+            : ""}
         </span>
       </div>
       {props.error && (
@@ -146,7 +153,8 @@ export function ReservationList(props: Props) {
       )}
       {empty && !props.error && (
         <p className="empty">
-          Bạn chưa đặt xe nào. Chọn một xe ở phần “Tìm xe còn trống” và bấm “Đặt xe”.
+          Bạn chưa đặt xe nào. Chọn một xe ở phần “Tìm xe còn trống” và bấm “Đặt
+          xe”.
         </p>
       )}
       {props.active.length > 0 && (
