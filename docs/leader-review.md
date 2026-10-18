@@ -49,3 +49,9 @@ Repository public: https://github.com/tonnytran2511/BTL_CNPM. Remote local dùng
 CI commit nền tảng `2f22bef` đã pass trên Ubuntu/Node 22: checkout, npm ci, setup env, format, build và integration test. Bằng chứng: https://github.com/tonnytran2511/BTL_CNPM/actions/runs/38594291555.
 
 Danh sách publish đã được kiểm tra không chứa mật khẩu `.env`; .env, cluster local, build output và hai PDF đề bài được giữ ngoài repo public. Chưa có branch protection hoặc lời mời thành viên; chờ username để mời đúng người.
+
+## Xác nhận nhóm và phần việc tiếp theo — 15/10/2026
+
+Nhóm trưởng xác nhận cả nhóm đã đồng ý T01–T05 (phạm vi/yêu cầu, baseline thiết kế, setup và nền tảng hiện có); đã cập nhật trên bảng phân công. Xác nhận này thay cho trạng thái chờ phản hồi ở thời điểm soạn baseline, không có nghĩa PR #1 đã merge hoặc endpoint dự kiến đã có code.
+
+T15/T29 được bổ sung regression tests và sửa lifecycle dashboard trong branch `feat/dashboard-reliability`; xem execution log tại `docs/test-runs/2026-10-15-foundation-dashboard.md`. Cần review code mới, kiểm tra trình duyệt và tích hợp API của thành viên trước khi đánh dấu hoàn thành.

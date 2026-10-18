@@ -16,7 +16,7 @@ Vòng đời thuê xe, quản trị tài nguyên và sự cố/điều chuyển 
 
 ## Setup
 
-Cần Node.js >=22.12 và npm. Phiên bản kiểm chứng ghi tại `docs/testing.md`.
+Cần Node.js >=22.13 và npm. Phiên bản kiểm chứng ghi tại `docs/testing.md`.
 
 Repository: https://github.com/tonnytran2511/BTL_CNPM
 
@@ -55,7 +55,7 @@ npm run db:seed
 npm run dev
 ```
 
-Mở URL `WEB_ORIGIN` trong `.env` (mặc định `http://localhost:5173`). Vite proxy `/api` đến `API_PORT`; không có database credentials trong bundle frontend. Nếu đổi origin/port, khởi động lại dev server.
+Mở URL `WEB_ORIGIN` trong `.env` (mặc định `http://localhost:5173`). Vite proxy `/api` đến `API_PORT`; không có database credentials trong bundle frontend. Nếu đổi origin/port, khởi động lại dev server. `VITE_API_TIMEOUT_MS` là thời gian chờ tối đa mỗi request (ms, ví dụ trong `.env.example`); khi cập nhật từ bản cũ, bổ sung biến này vào `.env` trước khi build/dev. Giá trị được kiểm tra khi Vite khởi động và được đưa vào bundle; thay đổi cần restart/rebuild. Chỉ đưa cấu hình công khai vào biến `VITE_*`.
 
 Seed là dữ liệu ví dụ do nhóm kiểm soát qua `SEED_DATA_FILE`; có thể thay JSON trước lần seed đầu. Chạy lại seed giữ nguyên user, Hub và trạng thái vận hành đã tồn tại; thay mật khẩu trong `.env` sau seed không tự đổi mật khẩu user cũ. Các thay đổi dữ liệu đang vận hành phải đi qua migration/service hoặc công cụ quản trị phù hợp.
 
@@ -67,7 +67,7 @@ npm test
 npm run format:check
 ```
 
-Test tạo database PostgreSQL tạm trên port trống, chạy migration/seed và API thực, rồi dừng/xóa **chỉ cluster test**. Không ghi vào database vận hành.
+`npm test` chạy API integration trên PostgreSQL tạm/HTTP thật và frontend tests với Vitest/jsdom. Có thể chạy riêng `npm run test:api` hoặc `npm run test:web`. Database test dùng port trống, migration/seed riêng rồi dừng/xóa **chỉ cluster test**; không ghi vào database vận hành.
 
 ## Cấu trúc
 

@@ -71,6 +71,14 @@ Xe cá nhân phải đỗ thực tế tại đúng Hub khi yêu cầu sạc; tar
 
 Kiểu payload baseline tại `packages/contracts/planned.ts`; quy tắc và testcase tại `docs/business-rules.md`. Endpoint mới cần request validation, response type và mã lỗi nghiệp vụ được review; hiện `ApiError.code` mới có HTTP_<status>. Không công bố mã lỗi nghiệp vụ như đã triển khai khi chưa có controller/service tương ứng.
 
+## Frontend cập nhật và lỗi
+
+API client giữ `RequestError.status`, `RequestError.code` và message từ error envelope; thiếu code dùng `HTTP_<status>`. Lỗi kết nối có status 0; response thành công không đọc được JSON được coi là lỗi 502 phía client. Abort được giữ nguyên để hooks bỏ qua request đã hủy.
+
+Dashboard chỉ có một request refresh tại một thời điểm, polling theo config và cập nhật khi tab trở lại visible. Chi tiết Hub dùng request riêng, không hủy request chậm vì dashboard vừa poll; lỗi tạm giữ dữ liệu gần nhất và cho thử lại. 401 xóa session state phía UI; 403/404 ở chi tiết xóa dữ liệu cũ. Không đổi endpoint hoặc quyền backend trong thay đổi này.
+
+Mỗi request frontend có deadline `VITE_API_TIMEOUT_MS` từ cấu hình công khai khi build/dev; kiểm tra số nguyên dương trong giới hạn timer 32-bit. Deadline bao gồm cả đọc JSON. Quá hạn trả `RequestError` với status 0, code `REQUEST_TIMEOUT`; hủy từ hook vẫn giữ nguyên cancellation. Timer/listener được dọn khi hoàn tất. Client không tự retry mutation: timeout không chứng minh server chưa xử lý thao tác. Config này thuộc client, không thay đổi payload `/config` của server.
+
 ## GET /vehicles (T06, đã triển khai)
 
 Query tùy chọn: `hubId` (UUID), `type` (`electric_bicycle` | `electric_motorcycle`), `minBatteryPercent` (0–100). Chỉ trả xe `available` ở Hub `active` có pin không thấp hơn `minimumRentalBatteryPercent` trong bảng `settings`; bộ lọc của người dùng chỉ có thể nâng ngưỡng này lên. Response: `{minimumBatteryPercent, vehicles: RentableVehicle[]}` sắp xếp theo pin giảm dần. Chưa phân trang.

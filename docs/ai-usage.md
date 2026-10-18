@@ -5,6 +5,10 @@
 Nhóm cần tự review, chỉnh sửa và chạy lại; ghi rõ các phần đã được thành viên kiểm tra hoặc phát triển thêm. Không coi nhật ký này là khai báo báo cáo cuối đã hoàn tất, và không khẳng định review của sinh viên khi chưa thực hiện.
 
 15/10/2026: Codex hỗ trợ soạn 15 use case, hai source UML use-case diagram, kế hoạch 36 testcase tích hợp và traceability. Đây là tài liệu thiết kế/test plan; chưa phải bằng chứng chạy case hoặc review của sinh viên.
+
+15/10/2026: Codex hỗ trợ T15/T29: sửa lifecycle polling/session/chi tiết Hub, giữ mã lỗi API, thêm test frontend với Vitest/jsdom và regression test quyền tài khoản trên PostgreSQL thật; ghi execution log. Nhóm trưởng đã xác nhận cả nhóm đồng ý phần T01–T05 trước thay đổi này. Code bổ sung trong branch dashboard vẫn cần review; không coi xác nhận cũ là review code mới.
+
+15/10/2026: Codex tiếp tục thêm deadline request từ cấu hình công khai, kiểm thử timeout/cancellation/recovery, session rotation/hash/cookie và rate limit trên API instance riêng. Kiểm tra Chrome mất kết nối/phục hồi bằng mô phỏng mạng riêng cho tab, sau đó trả mạng về bình thường. Cập nhật yêu cầu Node >=22.13 cho dependency test; code mới vẫn chờ review.
 15/10/2026: Theo yêu cầu của Mai Anh, Codex hỗ trợ viết code local T09–T11: migration đỗ/sạc, MobilityModule/service allocation, API client/hooks/UI, test tích hợp và tài liệu. Đồng thời sửa cấu hình UTF-8 khi tạo PostgreSQL local trên Windows và retry cleanup test. Chưa commit/push GitHub theo yêu cầu của Mai Anh; chưa có peer review/merge. Mai Anh cần đọc, chạy demo và giải thích được phần mình trước bàn giao.
 
 17/10/2026: Theo yêu cầu Minh Khuê, Codex hỗ trợ T13: hợp đồng demand simulation, engine, validation/API, hook/UI, test và tài liệu giả định. Minh Khuê cần review, demo và giải thích model trước bàn giao; chưa coi là peer review hay phê duyệt giả định của nhóm.
@@ -24,3 +28,5 @@ Nhóm cần tự review, chỉnh sửa và chạy lại; ghi rõ các phần đ�
 17/10/2026: Codex thêm nút ngẫu nhiên tham số simulation theo yêu cầu Minh Khuê, tuân thủ giới hạn API và giữ Hub/kết quả cũ.
 
 18/10/2026: Codex hỗ trợ nhóm trưởng giải quyết conflict và tích hợp tài liệu use case với main sau T13; giữ nguyên lịch sử hỗ trợ AI của các module.
+
+18/10/2026: Codex hỗ trợ giải quyết conflict PR #2 sau T13, ghép API client có deadline dùng chung, giữ onRetry/session-expiry ở chi tiết Hub và chạy lại build/API/frontend tests. Không coi kiểm tra tự động là demo UI của sinh viên.

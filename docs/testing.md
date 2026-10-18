@@ -43,6 +43,18 @@ CI trên Ubuntu/Node 22 cho commit nền tảng `2f22bef` đã pass toàn bộ b
 
 Docker daemon không chạy trên máy tại thời điểm thực hiện; đã dùng PostgreSQL local thay thế. Chưa đo tải/latency mục tiêu, chưa kiểm tra deploy production hoặc các module TV2–TV5.
 
+## Bổ sung 15/10/2026 — T15/T29
+
+`npm test` hiện chạy cả API và frontend. Lần chạy mới pass 11 nhóm API với PostgreSQL/HTTP thật (Node đếm 12 tests bao gồm parent) và 12 test frontend với Vitest/jsdom/API mocks. Frontend kiểm tra polling, tránh request chồng, lỗi/phục hồi, phiên hết hạn, phản hồi cũ và retry chi tiết Hub. API thêm kiểm tra thay đổi quyền/active trên session hiện có. Build pass.
+
+Execution chi tiết và giới hạn: [test-runs/2026-10-15-foundation-dashboard.md](test-runs/2026-10-15-foundation-dashboard.md). Test frontend không thay thế kiểm thử toàn luồng trình duyệt–API–DB; 36 case tích hợp vẫn chưa chạy đủ.
+
+Lần mở rộng cùng ngày: API **13 nhóm con + 1 parent = 14 tests**, frontend **16 tests** pass. Bổ sung deadline request/body, recovery qua API client thật trong jsdom; session rotation/token hash/cookie và login rate limit trên API instance riêng. Chrome đã kiểm tra mất mạng/online phục hồi bằng network emulation riêng cho tab. Xem execution log ở trên.
+
 ## T13 — 17/10/2026
 
 Build frontend/backend pass; npm test: 31 test pass, gồm T13 engine và HTTP trên PostgreSQL tạm. Kiểm tra reproducibility, số liệu từ timeline, conservation, pin/trạng thái, invalid inputs, operator-only và bảng vận hành không đổi. npm run format:check pass. Chưa kiểm chứng UI trong trình duyệt; chờ Minh Khuê demo/peer review. Xem simulation.md.
+
+## Tích hợp 18/10/2026 — PR #2 sau T13
+
+Checkout tích hợp giữ dashboard deadline/session, mobility, rental search và simulation. Build frontend/backend pass; API 34/34 tests và frontend 16/16 tests pass. Bộ chạy API tìm toàn bộ file `tests/*.test.mjs` qua Node để tránh bỏ sót suite và không phụ thuộc shell glob trên Windows. Chưa chạy lại demo trình duyệt trong lần tích hợp này.

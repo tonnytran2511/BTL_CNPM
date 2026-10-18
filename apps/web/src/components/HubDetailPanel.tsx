@@ -5,8 +5,15 @@ interface Props {
   loading: boolean;
   error: string;
   onClose: () => void;
+  onRetry: () => void;
 }
-export function HubDetailPanel({ detail, loading, error, onClose }: Props) {
+export function HubDetailPanel({
+  detail,
+  loading,
+  error,
+  onClose,
+  onRetry,
+}: Props) {
   return (
     <section className="detail-panel" aria-label="Chi tiết Hub">
       <div className="section-heading">
@@ -22,6 +29,10 @@ export function HubDetailPanel({ detail, loading, error, onClose }: Props) {
       {error && (
         <p className="notice error" role="alert">
           {error}
+          {detail && " Dữ liệu hiển thị là lần tải thành công gần nhất."}
+          <button className="secondary" onClick={onRetry} disabled={loading}>
+            Thử lại
+          </button>
         </p>
       )}
       {detail && (

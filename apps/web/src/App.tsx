@@ -15,7 +15,11 @@ export function App() {
   const model = useFoundation();
   const simulation = useSimulation(model.user);
   const page = useAppPage(model.user?.role);
-  const hub = useHubDetail(model.user?.id, model.updatedAt);
+  const hub = useHubDetail(
+    model.user?.id,
+    model.updatedAt,
+    model.sessionExpired,
+  );
   const mobility = useMobility(model.user, model.refresh);
   const vehicles = useVehicleSearch(model.user?.id, model.updatedAt);
   if (model.booting)
@@ -182,6 +186,7 @@ export function App() {
                 loading={hub.loading}
                 error={hub.error}
                 onClose={hub.close}
+                onRetry={hub.retry}
               />
             )}
           </>
