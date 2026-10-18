@@ -2,6 +2,8 @@
 
 Trạng thái: dự thảo T01 để nhóm review. Các điều kiện chưa chốt được ghi tại `guides/DESIGN.md`.
 
+Đặc tả actor/luồng/ngoại lệ tại [use-cases.md](use-cases.md); traceability FR → UC → IT và 36 testcase dự kiến tại [integration-test-plan.md](integration-test-plan.md). Case có liên kết không đồng nghĩa đã có code hoặc đã pass.
+
 | Mã    | Yêu cầu                                           | Phụ trách         | Bằng chứng nghiệm thu dự kiến                                           |
 | ----- | ------------------------------------------------- | ----------------- | ----------------------------------------------------------------------- |
 | FR-01 | Xem Hub, xe, pin, chỗ đỗ, cổng sạc và mức sử dụng | Nhóm trưởng + TV4 | Thay đổi tài nguyên phản ánh trên danh sách/chi tiết/dashboard          |

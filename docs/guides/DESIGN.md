@@ -92,6 +92,8 @@ Baseline cụ thể cho các lựa chọn nghiệp vụ tại `docs/business-rul
 
 ## Kiểm chứng thiết kế
 
+Đặc tả use case và source UML nằm trong `docs/use-cases.md`, `docs/diagrams/`; kế hoạch test tích hợp và mục tiêu NFR đề xuất nằm trong `docs/integration-test-plan.md`. Trạng thái thực thi thực tế được ghi riêng ở `docs/testing.md` và execution logs khi có. Không chuyển một testcase kế hoạch thành kết quả đã kiểm chứng.
+
 Kiểm tra luồng bình thường, sai quyền, hết hạn, xung đột đồng thời, Hub đầy, cổng sạc hỏng và request lặp. Với simulation, kiểm tra kết quả tái lập theo đầu vào/seed và dữ liệu vận hành không bị đổi.
 
 Use case, kiến trúc, ERD và sơ đồ hành vi phải được cập nhật theo triển khai thực tế. Các chỉ tiêu phi chức năng chỉ được đánh dấu đạt khi có phép đo hoặc bằng chứng kiểm tra.

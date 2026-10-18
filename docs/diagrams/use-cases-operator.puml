@@ -1,0 +1,29 @@
+@startuml
+left to right direction
+actor "Người vận hành" as Operator
+rectangle "Smart E-Mobility Hub — luồng vận hành" {
+  usecase "UC-01\nĐăng nhập / đăng xuất" as UC01
+  usecase "UC-02\nXem Hub và tài nguyên" as UC02
+  usecase "UC-09\nYêu cầu sạc xe thuê" as UC09
+  usecase "UC-10\nPhân bổ / quản lý phiên sạc" as UC10
+  usecase "UC-11\nGiám sát mạng lưới" as UC11
+  usecase "UC-12\nQuản lý Hub / tài nguyên" as UC12
+  usecase "UC-13\nXử lý sự cố" as UC13
+  usecase "UC-14\nĐiều chuyển xe" as UC14
+  usecase "UC-15\nWhat-if và đề xuất" as UC15
+}
+Operator --> UC01
+Operator --> UC02
+Operator --> UC09
+Operator --> UC10
+Operator --> UC11
+Operator --> UC12
+Operator --> UC13
+Operator --> UC14
+Operator --> UC15
+note bottom of UC15
+  Chạy mô phỏng không đổi vận hành.
+  Áp dụng đề xuất là thao tác riêng,
+  cần kiểm tra lại trạng thái thực.
+end note
+@enduml
