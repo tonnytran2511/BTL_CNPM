@@ -133,6 +133,14 @@ export function SimulationPanel({ model: m, hubs }: Props) {
                 <button
                   className="secondary"
                   type="button"
+                  onClick={m.clearResults}
+                  disabled={!m.result && !m.error}
+                >
+                  Xóa kết quả
+                </button>
+                <button
+                  className="secondary"
+                  type="button"
                   onClick={m.randomize}
                 >
                   Ngẫu nhiên tham số ↻
@@ -165,6 +173,54 @@ export function SimulationPanel({ model: m, hubs }: Props) {
             {m.result.parameters.baselineArrivalsPerStep} →{" "}
             {m.result.parameters.scenarioArrivalsPerStep} yêu cầu/bước.
           </p>
+          <section aria-labelledby="simulated-hub-title">
+            <h4 id="simulated-hub-title">Trạng thái Hub trong mô phỏng</h4>
+            <p className="muted">
+              Mô phỏng đã tính xong. Các trạng thái dưới đây thuộc lần chạy này,
+              không phải trạng thái vận hành hiện tại của Hub. Xe thực tế không
+              bị di chuyển hoặc đặt chỗ.
+            </p>
+            <div className="simulation-table">
+              <table>
+                <caption>
+                  {m.result.hub.name} · Snapshot: {m.result.snapshotCapturedAt}
+                  {" · "}
+                  {m.result.modelVersion}
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Trạng thái</th>
+                    <th scope="col">Xe đủ điều kiện còn lại</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Snapshot trước mô phỏng</th>
+                    <td>{formatNumber(m.result.initialEligibleVehicles)}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">
+                      Nhu cầu ban đầu — sau {m.result.parameters.horizonMinutes}{" "}
+                      phút mô phỏng
+                    </th>
+                    <td>{formatNumber(m.result.baseline.remainingVehicles)}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">
+                      Nhu cầu tăng — sau {m.result.parameters.horizonMinutes}{" "}
+                      phút mô phỏng
+                    </th>
+                    <td>{formatNumber(m.result.scenario.remainingVehicles)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="muted">
+              Chỉ đếm xe sẵn sàng và đủ pin trong snapshot. Mô hình này chưa mô
+              phỏng trả xe, chỗ đỗ hay cổng sạc. Xóa kết quả để ẩn lần chạy và
+              giữ nguyên tham số; mô phỏng không chạy liên tục.
+            </p>
+          </section>
           <div className="simulation-table">
             <table>
               <caption>So sánh cùng snapshot và seed</caption>

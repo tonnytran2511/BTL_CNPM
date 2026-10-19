@@ -48,3 +48,9 @@ Form chính gồm Hub, thời lượng, bước thời gian và hai mức nhu c�
 ## Ngẫu nhiên tham số
 
 Nút Ngẫu nhiên tham số điền lại toàn bộ ô số, giữ Hub. Bước được lấy ngẫu nhiên 1–60 phút cho lần thử, số bước nằm trong giới hạn server và bảo đảm horizon nguyên an toàn/chia hết step. Nhu cầu ban đầu/kịch bản là số nguyên trong giới hạn server, scenario ≥ baseline; seed uint32 mới. Chỉ thay form, không gọi API/chạy lại hoặc đổi báo cáo cũ. Đây là dữ liệu thử ngẫu nhiên, không phải cấu hình nhu cầu vận hành.
+
+## Trạng thái Hub mô phỏng và xóa kết quả
+
+Sau khi chạy thành công, bảng Trạng thái Hub trong mô phỏng hiển thị số xe đủ điều kiện trong snapshot đầu kỳ và số xe còn lại cuối kỳ của baseline/scenario. Tên Hub, thời gian snapshot UTC, model và thời lượng đều lấy từ kết quả đã hoàn thành, kể cả khi form được sửa sau đó. Đây không phải chi tiết Hub trực tiếp: không suy diễn trạng thái chỗ đỗ/cổng sạc hoặc vị trí từng xe từ các số tổng hợp này.
+
+Nút Xóa kết quả ẩn kết quả, bảng trạng thái, timeline và nút xuất báo cáo, đồng thời xóa lỗi; giữ nguyên form và cấu hình. Nút bị khóa khi đang chạy; không gửi request hoặc sửa dữ liệu vận hành. Mô phỏng tính xong rồi dừng, không có vòng chạy nền cần tắt. File báo cáo đã tải không bị xóa.

@@ -11,3 +11,15 @@ coverage/
 # Assignment source files remain local; public repo contains group-owned code/docs.
 /Assignment_SoftwareEngineering_HK261.pdf
 /Guideline and Rubric.pdf
+
+# Local Codex agent roles.
+/AGENTS.override.md
+/docs/agents/
+
+# Keep unselected recordings and personal checklists local.
+/demo/**/*.mp4
+/demo/**/*.mov
+/demo/**/*.mkv
+/demo/**/*.webm
+!/demo/D7-TV5-2026-10-19.mov
+/demo/D7-TV5.md
