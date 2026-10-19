@@ -2,13 +2,15 @@
 
 Ngày demo: 19/10/2026. Người phụ trách: Minh Khuê.
 
+Recording demo: [Thư mục video D7 trên Google Drive](https://drive.google.com/drive/folders/18jdOcN2soXvNUl_WT7QpeXCqVR4d9oKE?usp=sharing).
+
 ## Thay đổi
 
 - Cập nhật nhánh khue từ main tới `f550081`.
 - Thêm nút Xóa kết quả: ẩn kết quả/timeline/nút xuất báo cáo và xóa lỗi, giữ nguyên tham số và cấu hình; khóa khi đang chạy.
 - Thêm bảng Trạng thái Hub trong mô phỏng: số xe đủ điều kiện ở snapshot đầu kỳ, số còn lại cuối kỳ baseline/scenario, Hub, thời điểm snapshot UTC và model. Giá trị lấy từ kết quả hoàn thành, không từ form đang sửa.
 - Nêu rõ simulation tính xong rồi dừng; kết quả mô phỏng tách khỏi vận hành thật. Không thêm API, migration hoặc thay đổi engine.
-- Cập nhật docs/simulation.md, lưu recording và báo cáo trong demo/. Các hướng dẫn agent và checklist cá nhân giữ local qua Git ignore.
+- Cập nhật docs/simulation.md, lưu báo cáo trong demo/ và liên kết recording trên Google Drive. Các hướng dẫn agent và checklist cá nhân giữ local qua Git ignore.
 
 ## Kết quả và bằng chứng
 
