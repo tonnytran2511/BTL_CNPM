@@ -16,10 +16,9 @@ coverage/
 /AGENTS.override.md
 /docs/agents/
 
-# Keep unselected recordings and personal checklists local.
+# Keep demo recordings and personal checklists local.
 /demo/**/*.mp4
 /demo/**/*.mov
 /demo/**/*.mkv
 /demo/**/*.webm
-!/demo/D7-TV5-2026-10-19.mov
 /demo/D7-TV5.md
