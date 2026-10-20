@@ -1,5 +1,7 @@
 # Nhật ký hỗ trợ AI
 
+20/10/2026: Theo yêu cầu Minh Tường làm T14, Codex tích hợp PR #11, chạy demo Chrome trên Nest/Vite/PostgreSQL riêng cho thuê xe, đặt/check-in/out, queue sạc và simulation; kiểm tra API T12 và hash 13 bảng trước/sau simulation. Bổ sung runner demo database tạm, báo cáo T14, bằng chứng JSON, defect/gap log và cập nhật use case/thiết kế. Minh Tường chọn ghi T35 là phụ thuộc còn chờ, không triển khai thay owner; chưa nghiệm thu đủ T14. Không xác nhận video, peer review hoặc TXT download khi chưa có bằng chứng.
+
 20/10/2026: Theo yêu cầu Minh Tường thực hiện task tuần 2 từ bảng phân công, Codex hỗ trợ T15: rà polling/auth/error, xác minh danh tính/role trước refresh, xử lý dashboard 403 và sự kiện online, che message nội bộ 5xx; bổ sung regression tests frontend và kiểm tra API/PostgreSQL xuyên module đặt/hủy xe. Codex hỗ trợ soạn execution log và phần báo cáo tuần 2 T24, ghi rõ các gate T23/T25 chưa đủ điều kiện. Kiểm thử tự động không thay thế peer review, demo và khả năng giải thích của Minh Tường; không tự cập nhật tiến độ bảng Google Sheets.
 
 14/10/2026: Codex hỗ trợ dự thảo yêu cầu/thiết kế, đề xuất stack, khởi tạo code nền tảng, migration/seed, auth/dashboard và integration test. Nội dung trong repository được AI tạo/chỉnh sửa với chỉ dẫn của nhóm trưởng.
