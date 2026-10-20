@@ -38,3 +38,5 @@ Nhóm cần tự review, chỉnh sửa và chạy lại; ghi rõ các phần đ�
 20/10/2026: Theo yêu cầu Mai Anh, Codex chuyển phần T18 sang worktree riêng trên nền main c73dabe trong folder BTL_CNPM-main (2), giữ các module đã tích hợp. Bổ sung service/repository/model giữ cổng xe cá nhân nguyên tử, test PostgreSQL đồng thời/rollback và tài liệu. npm test trên nền tích hợp pass 54 API + 18 frontend tests. Không viết thay rental/incident; các contract chưa có được ghi rõ. T18 được lưu commit local để T19 kế thừa; chưa push, peer review/merge phần mới.
 
 T19: Codex hỗ trợ điều phối sạc xe cá nhân, UI operator, kiểm thử và tài liệu. Quy tắc ưu tiên là đề xuất cần review; chưa tích hợp sạc xe thuê hoặc sự cố cổng.
+
+20/10/2026 — Theo yêu cầu Mai Anh, Codex bổ sung RentalChargingService và nối sạc xe thuê vào T19, UI operator, kiểm thử tranh chấp/rollback và tài liệu. Không còn chờ tích hợp Duy Tân cho luồng này; T20 sự cố vẫn riêng.

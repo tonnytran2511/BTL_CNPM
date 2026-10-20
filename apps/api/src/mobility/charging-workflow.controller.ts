@@ -71,4 +71,11 @@ export class ChargingWorkflowController {
       key,
     );
   }
+  @Post("requests/:id/cancel") cancelQueued(
+    @Req() r: AuthRequest,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Headers("idempotency-key") key?: string,
+  ) {
+    return this.service.cancelRentalQueued(r.user, id, key);
+  }
 }

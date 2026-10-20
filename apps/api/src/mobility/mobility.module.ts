@@ -1,3 +1,4 @@
+import { RentalModule } from "../rental/rental.module";
 import { Module } from "@nestjs/common";
 import { ALLOCATION_PORT } from "../integration/allocation.port";
 import { MobilityController } from "./mobility.controller";
@@ -9,6 +10,7 @@ import { ChargingWorkflowRepository } from "./charging-workflow.repository";
 import { ChargingWorkflowService } from "./charging-workflow.service";
 import { ChargingWorkflowController } from "./charging-workflow.controller";
 @Module({
+  imports: [RentalModule],
   controllers: [MobilityController, ChargingWorkflowController],
   providers: [
     MobilityRepository,

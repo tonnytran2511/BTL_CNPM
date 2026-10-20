@@ -121,4 +121,4 @@ Không thêm hoặc thay đổi endpoint HTTP trong T18. Backend export Charging
 
 ## T19 — API quản lý sạc
 
-Xem [hợp đồng điều phối sạc](charging-scheduler.md): overview, schedule và start/complete/cancel. Chỉ operator; POST yêu cầu Idempotency-Key. Phạm vi xe cá nhân.
+Xem [hợp đồng điều phối sạc](charging-scheduler.md): overview, schedule và start/complete/cancel. Chỉ operator; POST yêu cầu Idempotency-Key. Phạm vi xe cá nhân và xe thuê; operator có thể tạo/hủy yêu cầu xe thuê và quản lý phiên. RentalChargingService giữ/giải phóng trạng thái xe trong cùng transaction.

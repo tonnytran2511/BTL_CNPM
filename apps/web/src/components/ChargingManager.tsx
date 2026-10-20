@@ -10,12 +10,12 @@ export function ChargingManager({ model: m, hubs }: Props) {
   return (
     <section
       className="mobility-section mobility-region mobility-history"
-      aria-label="Điều phối sạc xe cá nhân"
+      aria-label="Điều phối sạc"
     >
       <div className="section-heading">
         <div>
           <p className="eyebrow">NGƯỜI VẬN HÀNH</p>
-          <h2>Điều phối sạc xe cá nhân</h2>
+          <h2>Điều phối sạc</h2>
         </div>
         <button
           className="secondary"
@@ -39,6 +39,59 @@ export function ChargingManager({ model: m, hubs }: Props) {
           {m.message}
         </p>
       )}
+      <h3>Yêu cầu sạc xe thuê</h3>
+      <p className="muted">
+        Yêu cầu đang chờ chưa giữ xe. Khi được phân bổ cổng, xe tạm ngừng nhận
+        đặt thuê và điều chuyển.
+      </p>
+      <form onSubmit={m.createRental}>
+        <fieldset
+          disabled={m.busy || m.loading || !m.data.rentalCandidates.length}
+        >
+          <label>
+            Xe thuê cần sạc
+            <select name="vehicle" required>
+              <option value="">Chọn xe thuê</option>
+              {m.data.rentalCandidates.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.code} · {v.hubName} · pin {v.batteryPercent}%
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Pin mục tiêu (%)
+            <input name="target" type="number" min="1" max="100" required />
+          </label>
+          <label>
+            Cần xe lúc (tùy chọn)
+            <input name="deadline" type="datetime-local" />
+          </label>
+          <button className="primary">Gửi yêu cầu sạc xe thuê</button>
+        </fieldset>
+      </form>
+      {!m.data.rentalCandidates.length && (
+        <p className="empty">Chưa có xe thuê đủ điều kiện gửi yêu cầu mới.</p>
+      )}
+      {!!m.data.rentalPending.length && (
+        <div>
+          <h4>Yêu cầu xe thuê còn chờ</h4>
+          <ul>
+            {m.data.rentalPending.map((q) => (
+              <li key={q.id}>
+                {q.vehicleCode} · {q.hubName}{" "}
+                <button
+                  className="secondary"
+                  disabled={m.busy}
+                  onClick={() => m.cancelQueued(q.id)}
+                >
+                  Hủy yêu cầu
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <form onSubmit={m.schedule}>
         <fieldset disabled={m.busy || m.loading}>
           <label>
@@ -59,13 +112,14 @@ export function ChargingManager({ model: m, hubs }: Props) {
       </form>
       <h3>Hàng chờ đủ điều kiện</h3>
       {!m.data.queue.length && (
-        <p className="empty">Chưa có xe cá nhân đủ điều kiện đang chờ.</p>
+        <p className="empty">Chưa có xe đủ điều kiện đang chờ.</p>
       )}
       <ol>
         {m.data.queue.map((q) => (
           <li key={q.id}>
-            <strong>{q.vehicleCode}</strong> · {q.hubName} · pin{" "}
-            {q.batteryPercent}% → {q.targetBatteryPercent}%
+            <strong>{q.vehicleCode}</strong> ·{" "}
+            {q.vehicleKind === "rental" ? "Xe thuê" : "Xe cá nhân"} ·{" "}
+            {q.hubName} · pin {q.batteryPercent}% → {q.targetBatteryPercent}%
             {q.requiredBy ? ` · Cần xe ${formatDateTime(q.requiredBy)}` : ""}
           </li>
         ))}
@@ -81,7 +135,9 @@ export function ChargingManager({ model: m, hubs }: Props) {
         {m.data.sessions.map((s) => (
           <article key={s.id}>
             <strong>
-              {s.vehicleCode} · {s.hubName} · {s.pointCode}
+              {s.vehicleCode} ·{" "}
+              {s.vehicleKind === "rental" ? "Xe thuê" : "Xe cá nhân"} ·{" "}
+              {s.hubName} · {s.pointCode}
             </strong>
             <p>
               {chargingSessionLabels[s.status]} · Pin hiện tại{" "}

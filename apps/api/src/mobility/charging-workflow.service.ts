@@ -1,3 +1,4 @@
+import { RentalChargingService } from "../rental/rental-charging.service";
 import {
   BadRequestException,
   ConflictException,
@@ -21,6 +22,8 @@ export class ChargingWorkflowService {
     private readonly repo: ChargingWorkflowRepository,
     @Inject(ChargingAllocationService)
     private readonly allocation: ChargingAllocationService,
+    @Inject(RentalChargingService)
+    private readonly rental: RentalChargingService,
   ) {}
   private operator(user: User) {
     if (user.role !== "operator")
@@ -64,6 +67,8 @@ export class ChargingWorkflowService {
         await this.repo.clock(c),
       ),
       sessions: await this.repo.sessions(c),
+      rentalCandidates: await this.rental.candidates(c),
+      rentalPending: await this.repo.rentalPending(c),
     }));
   }
   private async mutate<T>(
@@ -119,12 +124,11 @@ export class ChargingWorkflowService {
       const sessions = [];
       for (let i = 0; i < Math.min(queue.length, points.length); i++)
         sessions.push(
-          await this.allocation.allocatePrivateRequest(
-            user,
-            queue[i].id,
-            points[i].id,
-            c,
-          ),
+          await (
+            queue[i].vehicleKind === "rental"
+              ? this.allocation.allocateRentalRequest.bind(this.allocation)
+              : this.allocation.allocatePrivateRequest.bind(this.allocation)
+          )(user, queue[i].id, points[i].id, c),
         );
       return { sessions };
     });
@@ -140,10 +144,9 @@ export class ChargingWorkflowService {
       const located = await this.repo.locate(c, id);
       if (!located) throw new NotFoundException("Không tìm thấy phiên sạc.");
       await this.mobility.activeHub(c, located.hub_id);
-      const vehicle = await this.mobility.privateVehicle(
-        c,
-        located.private_vehicle_id,
-      );
+      const vehicle = located.vehicle_id
+        ? await this.rental.allocated(c, located.vehicle_id, located.hub_id)
+        : await this.mobility.privateVehicle(c, located.private_vehicle_id);
       const request = await this.repo.lockRequest(c, located.request_id);
       const point = await this.repo.lockPoint(c, located.charging_point_id);
       const session = await this.repo.lockSession(c, id);
@@ -161,11 +164,12 @@ export class ChargingWorkflowService {
         if (
           hub.status !== "active" ||
           session.status !== "scheduled" ||
-          !(await this.mobility.privateLocation(
-            c,
-            located.private_vehicle_id,
-            located.hub_id,
-          ))
+          (!located.vehicle_id &&
+            !(await this.mobility.privateLocation(
+              c,
+              located.private_vehicle_id,
+              located.hub_id,
+            )))
         )
           throw new ConflictException("Không thể bắt đầu phiên sạc.");
         await this.repo.change(c, id, "charging");
@@ -191,6 +195,13 @@ export class ChargingWorkflowService {
           id,
           action === "complete" ? "completed" : "cancelled",
         );
+        if (located.vehicle_id)
+          await this.rental.release(
+            c,
+            located.vehicle_id,
+            located.hub_id,
+            battery,
+          );
         await this.repo.finish(
           c,
           request.id,
@@ -201,6 +212,21 @@ export class ChargingWorkflowService {
         );
       }
       return this.repo.view(c, id);
+    });
+  }
+  cancelRentalQueued(user: User, id: string, key?: string) {
+    return this.mutate(user, "cancel-queued-rental", key, [id], async (c) => {
+      const located = await this.repo.requestLocation(c, id);
+      if (!located?.vehicle_id)
+        throw new NotFoundException("Không tìm thấy yêu cầu xe thuê.");
+      await this.mobility.activeHub(c, located.hub_id);
+      await this.rental.lock(c, located.vehicle_id);
+      const request = await this.repo.lockRequest(c, id);
+      if (request.status !== "queued")
+        throw new ConflictException(
+          "Chỉ hủy được yêu cầu còn chờ, chưa giữ cổng.",
+        );
+      return this.repo.cancelQueued(c, id);
     });
   }
 }

@@ -49,3 +49,11 @@ TV4 hiện triển khai lưu/resolve sự cố với actor và thời gian; lệ
 - Redistribution: pending → in_progress → completed / cancelled; hủy đang in_progress phải có xử lý vị trí thực tế, không chỉ đổi status.
 
 Đây là lifecycle baseline, không thay thế sơ đồ hành vi và đặc tả chi tiết của chủ module. Mọi thay đổi BR ảnh hưởng nhiều module phải được ghi trong PR và DESIGN trước khi merge.
+
+## T19 — đề xuất quy tắc tích hợp sạc xe thuê
+
+- Yêu cầu queued chưa giữ xe; chỉ phân bổ xe available, đỗ thật tại Hub hoạt động và không có active reservation/trip.
+- Khi phân bổ cổng, xe charging ngay ở phiên scheduled để chặn đặt thuê/điều chuyển; bắt đầu phiên không giữ xe lần thứ hai.
+- Hoàn tất/hủy phiên trả xe về available bằng cập nhật có điều kiện trong transaction sạc. Điều kiện pin tối thiểu/Hub hoạt động của thuê xe tiếp tục áp dụng.
+- Hủy yêu cầu queued không đổi trạng thái xe; xe đã được thuê/điều chuyển có thể bị loại khỏi hàng ưu tiên nhưng operator vẫn thấy yêu cầu còn chờ để hủy.
+- Pin không tự tăng, operator nhập số quan sát. Chính sách ưu tiên và giới hạn tại charging-scheduler.md cần peer review trước merge.

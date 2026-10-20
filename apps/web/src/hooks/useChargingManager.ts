@@ -10,6 +10,8 @@ export function useChargingManager(
   const [data, setData] = useState<ChargingOverview>({
     queue: [],
     sessions: [],
+    rentalCandidates: [],
+    rentalPending: [],
   });
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -22,7 +24,12 @@ export function useChargingManager(
     epoch.current++;
     running.current = false;
     pending.current = null;
-    setData({ queue: [], sessions: [] });
+    setData({
+      queue: [],
+      sessions: [],
+      rentalCandidates: [],
+      rentalPending: [],
+    });
     setError("");
     setMessage("");
     setBusy(false);
@@ -107,6 +114,39 @@ export function useChargingManager(
       Number(form.get("battery")),
     );
   };
+
+  const createRental = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const vehicle = data.rentalCandidates.find(
+      (v) => v.id === form.get("vehicle"),
+    );
+    if (!vehicle) {
+      setError("Hãy chọn xe thuê còn đủ điều kiện.");
+      return;
+    }
+    const target = Number(form.get("target"));
+    const deadline = String(form.get("deadline") ?? "");
+    const requiredBy = deadline ? new Date(deadline).toISOString() : undefined;
+    void run(
+      ["rental-request", vehicle.id, vehicle.hubId, target, requiredBy ?? null],
+      (key) =>
+        chargingApi.createRental(
+          vehicle.hubId,
+          vehicle.id,
+          target,
+          requiredBy,
+          key,
+        ),
+      "Đã đưa xe thuê vào hàng chờ sạc.",
+    );
+  };
+  const cancelQueued = (id: string) =>
+    void run(
+      ["cancel-queued", id],
+      (key) => chargingApi.cancelQueued(id, key),
+      "Đã hủy yêu cầu chờ sạc xe thuê.",
+    );
   const refresh = () =>
     void run(["refresh"], async () => {}, "Đã làm mới hàng chờ và phiên sạc.");
   return {
@@ -116,6 +156,8 @@ export function useChargingManager(
     busy,
     loading,
     schedule,
+    createRental,
+    cancelQueued,
     action,
     submitSession,
     refresh,

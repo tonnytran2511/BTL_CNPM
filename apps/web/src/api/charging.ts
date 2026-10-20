@@ -11,6 +11,25 @@ function post<T>(path: string, body: unknown, key: string) {
   });
 }
 export const chargingApi = {
+  createRental: (
+    hubId: string,
+    vehicleId: string,
+    targetBatteryPercent: number,
+    requiredBy: string | undefined,
+    key: string,
+  ) =>
+    request("/mobility/charging/requests", {
+      method: "POST",
+      headers: { "Idempotency-Key": key },
+      body: JSON.stringify({
+        hubId,
+        vehicle: { kind: "rental", id: vehicleId },
+        targetBatteryPercent,
+        requiredBy,
+      }),
+    }),
+  cancelQueued: (id: string, key: string) =>
+    post(`requests/${encodeURIComponent(id)}/cancel`, {}, key),
   overview: (signal?: AbortSignal) =>
     request<ChargingOverview>("/mobility/charging/overview", { signal }),
   schedule: (hubId: string, key: string) =>

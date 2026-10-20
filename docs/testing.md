@@ -80,3 +80,15 @@ Bản T18 cũ trên nền tuần 1 pass 17 tests; đó không phải số test c
 ## T19
 
 `npm.cmd test` đã pass 59 kiểm thử backend và 18 frontend. Bổ sung kiểm thử thứ tự ưu tiên và luồng sạc với PostgreSQL/HTTP độc lập, gồm gửi lặp và hoàn tất/hủy đồng thời. Xem [bàn giao T19](charging-scheduler.md); chưa kiểm tra trực quan thủ công màn hình mới.
+
+## 20/10/2026 — T19 tích hợp sạc xe thuê
+
+- `npm.cmd run build` và `npm.cmd run format:check`: pass.
+- `npm.cmd run test:web`: 22/22 pass (5 file); gồm 4 kiểm thử hook quản lý sạc mới.
+- Backend chạy tuần tự bằng Node test runner với `--test-concurrency=1`, toàn bộ 8 file *.test.mjs. Tổng 60 test: 59 pass, 1 suite T07 báo EBUSY khi Windows dọn folder PostgreSQL tạm; mọi assertion chức năng trong suite đó pass. Chạy lại `node --test tests/reservation.test.mjs`: 11/11 pass, cleanup thành công. Kết quả các bộ đạt sau lần chạy lại này, không phải một lần tổng 60/60.
+- Foundation riêng: 19/19 pass, bao gồm sạc xe thuê và cạnh tranh với đặt thuê/điều chuyển.
+- Fixture riêng tạo rồi xóa dữ liệu trên PostgreSQL tạm; không dùng database demo T19 đang chạy.
+- Kiểm thử lỗi chèn session và lỗi sau cập nhật pin đều xác nhận rollback. Gửi lại sau rollback dùng cùng key thực thi thành công.
+- Web localhost:5119 và proxy /api/health trả HTTP 200 sau build. Chưa xác minh trực quan thủ công toàn màn hình mới.
+
+T19 không còn chờ hợp đồng sạc xe thuê từ Duy Tân; đã có RentalChargingService nhận cùng PoolClient. T20 sự cố/interrupted vẫn chưa triển khai.

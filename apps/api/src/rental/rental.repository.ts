@@ -6,6 +6,7 @@ import {
 import type { PoolClient } from "pg";
 import type {
   RentableVehicle,
+  RentalChargingCandidate,
   VehicleReservationView,
 } from "@emobility/contracts";
 import { Database } from "../database/database.module";
@@ -273,5 +274,61 @@ export class RentalRepository {
         [ids, hub],
       )
     ).rowCount;
+  }
+  async chargingCandidates(c: PoolClient): Promise<RentalChargingCandidate[]> {
+    return (
+      await c.query<RentalChargingCandidate>(`SELECT v.id,v.code,v.hub_id AS "hubId",h.name AS "hubName",v.battery_percent AS "batteryPercent"
+      FROM vehicles v JOIN hubs h ON h.id=v.hub_id WHERE v.status='available' AND h.status='active' AND v.battery_percent<100
+      AND EXISTS(SELECT 1 FROM parking_spaces p WHERE p.vehicle_id=v.id AND p.hub_id=v.hub_id AND p.status='occupied')
+      AND NOT EXISTS(SELECT 1 FROM vehicle_reservations a WHERE a.vehicle_id=v.id AND a.status='active')
+      AND NOT EXISTS(SELECT 1 FROM trips a WHERE a.vehicle_id=v.id AND a.status='active')
+      AND NOT EXISTS(SELECT 1 FROM charging_requests a WHERE a.vehicle_id=v.id AND a.status IN ('queued','allocated'))
+      ORDER BY h.name,v.code`)
+    ).rows;
+  }
+  async lockChargingVehicle(c: PoolClient, id: string) {
+    return (
+      await c.query<{
+        id: string;
+        hub_id: string | null;
+        status: VehicleStatus;
+        battery_percent: number;
+        hub_status: "active" | "inactive" | null;
+        parked: boolean;
+        busy: boolean;
+      }>(
+        `SELECT v.id,v.hub_id,v.status,v.battery_percent,h.status AS hub_status,
+      EXISTS(SELECT 1 FROM parking_spaces p WHERE p.vehicle_id=v.id AND p.hub_id=v.hub_id AND p.status='occupied') AS parked,
+      (EXISTS(SELECT 1 FROM vehicle_reservations a WHERE a.vehicle_id=v.id AND a.status='active') OR
+       EXISTS(SELECT 1 FROM trips a WHERE a.vehicle_id=v.id AND a.status='active')) AS busy
+      FROM vehicles v LEFT JOIN hubs h ON h.id=v.hub_id WHERE v.id=$1 FOR UPDATE OF v`,
+        [id],
+      )
+    ).rows[0];
+  }
+  async claimChargingVehicle(c: PoolClient, id: string, hub: string) {
+    return (
+      (
+        await c.query(
+          "UPDATE vehicles SET status='charging',updated_at=now() WHERE id=$1 AND hub_id=$2 AND status='available'",
+          [id, hub],
+        )
+      ).rowCount === 1
+    );
+  }
+  async releaseChargingVehicle(
+    c: PoolClient,
+    id: string,
+    hub: string,
+    battery?: number,
+  ) {
+    return (
+      (
+        await c.query(
+          "UPDATE vehicles SET status='available',battery_percent=COALESCE($3::integer,battery_percent),updated_at=now() WHERE id=$1 AND hub_id=$2 AND status='charging'",
+          [id, hub, battery ?? null],
+        )
+      ).rowCount === 1
+    );
   }
 }
