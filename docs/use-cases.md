@@ -43,6 +43,7 @@ Nguồn UML use-case diagram: [sinh viên](diagrams/use-cases-student.puml), [v�
 - Luồng chính: (1) gửi thông tin; (2) validate và kiểm tra mật khẩu; (3) tạo session có hạn, cookie HttpOnly; (4) trả user không chứa secret; (5) UI hiển thị theo role. Logout thu hồi session và xóa cookie.
 - Ngoại lệ: DTO sai → 400; thông tin sai/user inactive → 401 với thông báo chung; vượt rate limit → 429; Origin không hợp lệ → 403; DB lỗi → lỗi server có thể thử lại.
 - Hậu điều kiện: đăng nhập thành công có session; logout token cũ không còn hợp lệ; lỗi không cấp quyền. Session expired bị từ chối ở request sau.
+- T15 (20/10): khi refresh phát hiện `/auth/me` có ID/role khác UI, hoặc dashboard trả 403, frontend xóa dữ liệu và yêu cầu đăng nhập lại. Đây không phải thao tác revoke session server; lỗi mạng/5xx không tự đăng xuất.
 - Liên kết: BR-12, IT-01/02/03. Chưa có bằng chứng peer review.
 
 ## UC-02 — Xem danh sách / chi tiết Hub

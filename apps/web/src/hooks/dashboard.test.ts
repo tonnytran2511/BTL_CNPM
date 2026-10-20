@@ -65,6 +65,104 @@ afterEach(() => {
 });
 
 describe("dashboard lifecycle", () => {
+  it("polls changed resource counts and refreshes immediately when the connection returns", async () => {
+    const { result, unmount } = renderHook(useFoundation);
+    await settle();
+    const changed = {
+      ...hub,
+      parking: { ...hub.parking, occupied: 1, available: 1 },
+    };
+    vi.mocked(api.hubs).mockResolvedValue([changed]);
+    await act(async () => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(result.current.hubs).toEqual([changed]);
+    vi.mocked(api.hubs).mockRejectedValueOnce(new RequestError("Offline", 0));
+    await act(async () => {
+      await result.current.refresh();
+    });
+    expect(result.current.error).toBe("Offline");
+    await act(async () => {
+      window.dispatchEvent(new Event("online"));
+    });
+    expect(result.current.error).toBe("");
+    expect(result.current.hubs).toEqual([changed]);
+    const calls = vi.mocked(api.hubs).mock.calls.length;
+    unmount();
+    window.dispatchEvent(new Event("online"));
+    expect(api.hubs).toHaveBeenCalledTimes(calls);
+  });
+  it.each(["role", "account"])(
+    "removes protected data when the session %s changes before polling",
+    async (change) => {
+      const { result } = renderHook(useFoundation);
+      await settle();
+      vi.mocked(api.me).mockResolvedValueOnce(
+        change === "role"
+          ? { ...user, role: "operator" }
+          : { ...user, id: "other" },
+      );
+      await act(async () => {
+        await result.current.refresh();
+      });
+      expect(result.current.user).toBeNull();
+      expect(result.current.hubs).toEqual([]);
+      expect(result.current.updatedAt).toBeNull();
+      expect(result.current.stats.every((stat) => stat.value === 0)).toBe(true);
+      expect(result.current.error).toContain("quyền truy cập đã thay đổi");
+      expect(api.hubs).toHaveBeenCalledTimes(1);
+      expect(api.overview).not.toHaveBeenCalled();
+    },
+  );
+  it("clears operator totals if permission is revoked after the session check", async () => {
+    vi.mocked(api.me).mockResolvedValue({ ...user, role: "operator" });
+    vi.mocked(api.overview).mockResolvedValue({
+      hubs: [hub],
+      updatedAt: "2026-10-20T00:00:00Z",
+      totals: {
+        hubs: 1,
+        vehicles: 10,
+        availableVehicles: 8,
+        availableParking: 2,
+        availableCharging: 1,
+        failedCharging: 0,
+      },
+    });
+    const { result } = renderHook(useFoundation);
+    await settle();
+    expect(result.current.stats.some((stat) => stat.value > 0)).toBe(true);
+    vi.mocked(api.overview).mockRejectedValueOnce(
+      new RequestError("Denied", 403),
+    );
+    await act(async () => {
+      await result.current.refresh();
+    });
+    expect(result.current.user).toBeNull();
+    expect(result.current.hubs).toEqual([]);
+    expect(result.current.stats.every((stat) => stat.value === 0)).toBe(true);
+    expect(result.current.refreshing).toBe(false);
+    expect(result.current.error).toContain("Quyền truy cập đã thay đổi");
+  });
+  it("does not start a resource read after logout while session validation is pending", async () => {
+    const { result } = renderHook(useFoundation);
+    await settle();
+    const pending = deferred<User>();
+    vi.mocked(api.me).mockReturnValueOnce(pending.promise);
+    vi.mocked(api.logout).mockResolvedValue({ success: true });
+    let refreshing!: Promise<void>;
+    act(() => {
+      refreshing = result.current.refresh();
+    });
+    await act(async () => {
+      window.dispatchEvent(new Event("online"));
+      await result.current.logout();
+      pending.resolve(user);
+      await refreshing;
+    });
+    expect(api.hubs).toHaveBeenCalledTimes(1);
+    expect(result.current.user).toBeNull();
+    expect(result.current.refreshing).toBe(false);
+  });
   it("does not overlap slow requests or manual refresh with polling; resumes on visibility", async () => {
     const pending = deferred<HubDetail[]>();
     vi.mocked(api.hubs).mockReturnValueOnce(pending.promise);

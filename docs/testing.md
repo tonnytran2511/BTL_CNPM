@@ -1,5 +1,9 @@
 # Kiểm chứng nền tảng — 14/10/2026
 
+## T15 — 20/10/2026
+
+Trên nền main sau PR #9 (`c73dabe`), build frontend/backend pass; `npm test` pass **57 tests API và 23 tests frontend**. Bổ sung xác minh quyền/danh tính trước refresh, xóa cache khi bị từ chối quyền, phục hồi khi online, kiểm tra envelope và che message nội bộ 5xx. Kiểm thử PostgreSQL/HTTP thật xác nhận đặt/hủy xe qua T07 phản ánh đúng lên overview, list và detail Hub. Chi tiết phạm vi và giới hạn tại [execution log T15](test-runs/2026-10-20-t15-dashboard.md); bàn giao tuần 2 tại [báo cáo Minh Tường](reports/2026-10-20-minh-tuong-week2.md). Bổ sung browser–API–PostgreSQL riêng: đặt/hủy, polling tự cập nhật và reset khi đổi quyền pass; không có error/warn console. Chưa phải xác nhận peer review của sinh viên hoặc full T23/T25.
+
 ## Cập nhật Mai Anh — 15/10/2026
 
 Code T09–T11 được bổ sung trực tiếp vào folder dự án gốc; chưa commit/push hoặc có peer review.

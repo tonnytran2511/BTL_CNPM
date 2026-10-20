@@ -26,6 +26,8 @@ Browser dùng `credentials: include`, cùng origin qua proxy. Mutation phải c�
 
 Lỗi có dạng `{statusCode: number, code: "HTTP_<status>", message: string}`; validation message ghép thành chuỗi. Lỗi server không gửi chi tiết SQL/secret. Không tự retry mutation mà chưa thiết kế idempotency.
 
+T15 (20/10): mọi lỗi 5xx, kể cả `HttpException` chứa message nội bộ, trả thông báo chung; mã HTTP và envelope giữ nguyên. Log của bộ lọc cũng chỉ ghi thông báo chung. Lỗi 4xx vẫn giữ message validation/nghiệp vụ để người gọi sửa yêu cầu.
+
 ## Ý nghĩa dữ liệu Hub
 
 - `parking.capacity`: số hàng parking_spaces tại Hub; sức chứa không sao chép vào frontend.
@@ -83,6 +85,8 @@ Kiểu payload baseline tại `packages/contracts/planned.ts`; quy tắc và tes
 API client giữ `RequestError.status`, `RequestError.code` và message từ error envelope; thiếu code dùng `HTTP_<status>`. Lỗi kết nối có status 0; response thành công không đọc được JSON được coi là lỗi 502 phía client. Abort được giữ nguyên để hooks bỏ qua request đã hủy.
 
 Dashboard chỉ có một request refresh tại một thời điểm, polling theo config và cập nhật khi tab trở lại visible. Chi tiết Hub dùng request riêng, không hủy request chậm vì dashboard vừa poll; lỗi tạm giữ dữ liệu gần nhất và cho thử lại. 401 xóa session state phía UI; 403/404 ở chi tiết xóa dữ liệu cũ. Không đổi endpoint hoặc quyền backend trong thay đổi này.
+
+T15 (20/10): một lần refresh kiểm tra `/auth/me` trước khi đọc `/hubs` hoặc `/network/overview`, cùng bộ khóa refresh và cancellation. Nếu ID hoặc role khác phiên UI hiện tại, UI xóa dữ liệu tài khoản/dashboard và yêu cầu đăng nhập lại; không tự chuyển sang tài khoản khác do cookie đổi ở tab khác. Dashboard gặp 403 cũng xóa dữ liệu thay vì giữ cache operator. Đây là reset trạng thái frontend, không thu hồi cookie/session còn hợp lệ trên server. Backend vẫn kiểm tra session/quyền ở từng endpoint. Lỗi mạng/5xx giữ dữ liệu thành công gần nhất, kèm cảnh báo; sự kiện `online` khi tab visible thử refresh ngay, không đợi kỳ polling. Thêm một GET `/auth/me` mỗi refresh; deadline vẫn áp dụng riêng từng HTTP request, chưa có phép đo tải cho thay đổi này.
 
 Mỗi request frontend có deadline `VITE_API_TIMEOUT_MS` từ cấu hình công khai khi build/dev; kiểm tra số nguyên dương trong giới hạn timer 32-bit. Deadline bao gồm cả đọc JSON. Quá hạn trả `RequestError` với status 0, code `REQUEST_TIMEOUT`; hủy từ hook vẫn giữ nguyên cancellation. Timer/listener được dọn khi hoàn tất. Client không tự retry mutation: timeout không chứng minh server chưa xử lý thao tác. Config này thuộc client, không thay đổi payload `/config` của server.
 
