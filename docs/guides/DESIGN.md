@@ -106,3 +106,7 @@ SimulationModule dùng HubsService.snapshot() và settings; engine departures-v1
 ## Tích hợp 18/10/2026
 
 PR #1/#2/#6/#7 được ghép với nền T13. Dashboard, mobility, rental search/reservation và simulation dùng cùng API client có deadline; test runner thu thập toàn bộ API suite. T12 tách SQL khỏi service; đổi trạng thái xe khi bắt đầu điều chuyển qua RentalService trong cùng transaction. Phạm vi T12 chỉ gồm nhật ký sự cố và tạo/bắt đầu/hủy lệnh trước khi chạy; hoàn tất điều chuyển và tác động sự cố lên thuê/sạc còn là workflow chưa triển khai, xem architecture.md và api.md. Chưa coi demo UI/NFR hoặc toàn bộ module là hoàn thành chỉ vì merge PR.
+
+## Tích hợp T08 — 20/10/2026
+
+Nhận/trả dùng TripService và AllocationPort cùng PoolClient; khóa Hub trước xe/chỗ để phối hợp với vận hành. UI hỗ trợ mọi chuyến active của tài khoản; chưa có quy tắc giới hạn một chuyến/người. Gợi ý Hub khi trả thất bại lấy số lượng từ settings.returnHubSuggestionLimit (migration 004), kiểm tra hợp lệ, không giữ chỗ. API client giữ code và details với deadline chung; 5xx không lộ details. T16/T17, scheduler và hoàn tất điều chuyển vẫn ngoài phạm vi tích hợp T08.

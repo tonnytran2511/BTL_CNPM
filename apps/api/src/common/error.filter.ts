@@ -24,10 +24,20 @@ export class ErrorFilter implements ExceptionFilter {
       this.logger.error(
         "Request failed; inspect database availability and application configuration.",
       );
+    // `details` là dữ liệu có cấu trúc do service chủ động đính kèm (ví dụ gợi ý Hub khi trả xe, BR-03).
+    const details =
+      status < 500 && body && typeof body === "object" && "details" in body
+        ? body.details
+        : undefined;
     host
       .switchToHttp()
       .getResponse<Response>()
       .status(status)
-      .json({ statusCode: status, code: `HTTP_${status}`, message });
+      .json({
+        statusCode: status,
+        code: `HTTP_${status}`,
+        message,
+        ...(details === undefined ? {} : { details }),
+      });
   }
 }

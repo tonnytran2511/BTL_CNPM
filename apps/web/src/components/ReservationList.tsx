@@ -11,9 +11,11 @@ interface Props {
   loading: boolean;
   error: string;
   cancelError: string;
+  pickupError: string;
   busyId: string | null;
   now: number;
   onCancel: (reservationId: string) => void;
+  onPickup: (reservationId: string) => void;
 }
 
 function Item({
@@ -24,6 +26,7 @@ function Item({
   onAsk,
   onDismiss,
   onCancel,
+  onPickup,
 }: {
   item: VehicleReservationView;
   now: number;
@@ -32,6 +35,7 @@ function Item({
   onAsk: () => void;
   onDismiss: () => void;
   onCancel: () => void;
+  onPickup: () => void;
 }) {
   const isActive = item.status === "active";
   const left = minutesLeft(item.expiresAt, now);
@@ -72,6 +76,16 @@ function Item({
         <span className={`badge ${item.status}`}>
           {reservationStatusLabel[item.status]}
         </span>
+        {isActive && left > 0 && !confirming && (
+          <button
+            type="button"
+            className="primary compact"
+            disabled={busyId !== null}
+            onClick={onPickup}
+          >
+            {busy ? "Đang xử lý…" : "Nhận xe"}
+          </button>
+        )}
         {isActive &&
           (confirming ? (
             <span className="reservation-confirm">
@@ -120,6 +134,7 @@ export function ReservationList(props: Props) {
       onAsk={() => confirmation.ask(item.id)}
       onDismiss={confirmation.dismiss}
       onCancel={() => confirmation.confirm(item.id)}
+      onPickup={() => props.onPickup(item.id)}
     />
   );
   return (
@@ -143,6 +158,11 @@ export function ReservationList(props: Props) {
       {props.cancelError && (
         <p className="notice error" role="alert">
           {props.cancelError}
+        </p>
+      )}
+      {props.pickupError && (
+        <p className="notice error" role="alert">
+          {props.pickupError}
         </p>
       )}
       {props.loading && !props.loaded && (

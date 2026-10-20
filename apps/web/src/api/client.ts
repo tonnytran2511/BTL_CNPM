@@ -8,6 +8,7 @@ import type {
   VehicleSearchQuery,
   VehicleSearchResult,
   VehicleReservationView,
+  TripView,
   ApiError,
 } from "@emobility/contracts";
 export class RequestError extends Error {
@@ -15,6 +16,7 @@ export class RequestError extends Error {
     message: string,
     readonly status: number,
     readonly code: string = `HTTP_${status}`,
+    readonly details?: unknown,
   ) {
     super(message);
   }
@@ -57,6 +59,9 @@ async function readResponse<T>(path: string, options: RequestInit): Promise<T> {
         "code" in body &&
         typeof body.code === "string"
         ? body.code
+        : undefined,
+      body && typeof body === "object" && "details" in body
+        ? body.details
         : undefined,
     );
   return body as T;
@@ -135,4 +140,15 @@ export const api = {
       `/vehicle-reservations/${encodeURIComponent(id)}/cancel`,
       { method: "POST" },
     ),
+  pickupReservation: (id: string) =>
+    request<TripView>(
+      `/vehicle-reservations/${encodeURIComponent(id)}/pickup`,
+      { method: "POST" },
+    ),
+  trips: (signal?: AbortSignal) => request<TripView[]>("/trips", { signal }),
+  returnTrip: (id: string, targetHubId: string) =>
+    request<TripView>(`/trips/${encodeURIComponent(id)}/return`, {
+      method: "POST",
+      body: JSON.stringify({ targetHubId }),
+    }),
 };

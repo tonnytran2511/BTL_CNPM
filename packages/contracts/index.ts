@@ -70,6 +70,7 @@ export interface NetworkOverview {
   updatedAt: string;
 }
 export interface ApiError {
+  details?: unknown;
   statusCode: number;
   message: string;
   code: string;

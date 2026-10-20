@@ -36,3 +36,7 @@ Không suy từ test tự động ra kết quả đo hiệu năng, demo hay xác
 Giữ các mục chưa có code là chưa kiểm chứng. Chưa tuyên bố T23 pass toàn hệ thống hoặc T25 feature-complete; cần ghi defect theo bước tái hiện, mong đợi/thực tế, mức độ, owner và retest khi ghép bản ứng viên. Chưa cập nhật trạng thái hay phần trăm trên Google Sheets.
 
 AI: Codex hỗ trợ triển khai, kiểm tra và soạn bản nháp này theo yêu cầu Minh Tường. Minh Tường cần đọc, chỉnh sửa, demo và giải thích phần mình; chưa có xác nhận peer review của thành viên khác.
+
+## Bổ sung cùng ngày — sau khi tiếp tục tích hợp
+
+PR #10/T15 đã merge sau CI pass và kiểm tra browser riêng. PR #8/T08 được ghép vào nhánh ứng viên codex/integrate-t08, giữ module T12/T13 và các sửa T15. Đã kiểm tra browser luồng hai chuyến cùng tài khoản: đặt → nhận → chọn đích riêng → trả lần lượt → lịch sử/dashboard/DB khớp. Các lỗi review về UI/phiên cũ, chỉ hiển thị một active, cấu hình gợi ý và thứ tự khóa được sửa trong ứng viên; xem [execution T08](../test-runs/2026-10-20-t08-integration.md). T16–22 của owner và gate T23/T25 vẫn chưa được xác nhận hoàn tất.
