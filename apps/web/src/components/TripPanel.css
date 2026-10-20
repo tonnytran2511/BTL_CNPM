@@ -1,0 +1,53 @@
+/* T08: chuyến thuê của tôi. Dùng biến màu có sẵn trong styles.css. */
+.trips {
+  margin-top: 2rem;
+}
+.trip-current,
+.trip-item {
+  display: grid;
+  grid-template-columns: 1.1fr 1.6fr 1.4fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+}
+.trip-current {
+  border-left: 4px solid var(--green);
+  margin-bottom: 1rem;
+}
+.trip-current small,
+.trip-item small {
+  display: block;
+  color: var(--muted);
+}
+.trip-return {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+}
+.trip-return label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+.trip-list,
+.trip-suggestions {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+.trip-history-title {
+  margin: 1.2rem 0 0.6rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+@media (max-width: 720px) {
+  .trip-current,
+  .trip-item {
+    grid-template-columns: 1fr;
+  }
+}

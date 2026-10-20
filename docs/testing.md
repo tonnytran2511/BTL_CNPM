@@ -72,3 +72,9 @@ Build frontend/backend pass; API 45/45 tests và frontend 18/18 tests pass trên
 Build frontend/backend pass; API 53/53 tests và frontend 18/18 tests pass. `tests/operations.test.mjs` dùng PostgreSQL riêng và HTTP thật: operator-only/validation, mô tả trắng 400, actor/thời gian, resolve/final-state guards, không đổi xe khi tạo/hủy pending, Hub/xe thay đổi sau tạo lệnh, incident mở chặn start, hai lệnh tranh cùng xe, reservation tranh với start và lỗi sau cập nhật xe rollback cả xe/order. Migration T12 chạy cùng migration parking/rental trên database sạch. Giữ toàn bộ test dashboard/auth, mobility, rental và T13.
 
 T12 chưa có UI, hoàn tất điều chuyển, Idempotency-Key hoặc ảnh hưởng incident lên trạng thái vận hành/phiên đang chạy; đây không phải bằng chứng những luồng đó đã triển khai. Chưa chạy lại demo trình duyệt, đo tải hoặc deploy.
+
+## Ứng viên tích hợp PR #8/T08 sau T15 — 20/10/2026
+
+Build frontend/backend pass; full API **77/77 tests** và frontend **28/28 tests** pass; format/diff checks pass. Thêm migration 004 cho giới hạn Hub gợi ý, bảo vệ generation theo user, UI mọi chuyến active, kiểm tra Hub-first lock contention và hết hạn trong lúc chờ khóa. Browser với API/PostgreSQL riêng kiểm tra một tài khoản nhận hai xe, chọn đích chéo, trả lần lượt, lịch sử/dashboard và DB khớp; không có error/warn console trong luồng đó. Giữ regression dashboard/auth, mobility, operations và simulation.
+
+Chi tiết tại [execution T08](test-runs/2026-10-20-t08-integration.md). Đây là ứng viên chờ review/tích hợp vào main, không phải xác nhận toàn bộ T16/T17 hoặc T23/T25 hoàn thành. PR #10/T15 đã merge trước đó.

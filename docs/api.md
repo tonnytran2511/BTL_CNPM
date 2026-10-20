@@ -44,7 +44,7 @@ Các endpoint dưới đây là đề xuất, **chưa tồn tại**; chủ modul
 
 | Chủ module | Đề xuất                                                                                    |
 | ---------- | ------------------------------------------------------------------------------------------ |
-| TV2        | POST /vehicle-reservations/:id/pickup; POST /trips/:id/return (tìm/đặt/hủy đã có bên dưới) |
+| TV2        | Nhận/trả và danh sách chuyến đã triển khai bên dưới; hết hạn tự động còn thuộc T16         |
 | TV3        | Đã triển khai local các endpoint `/mobility` bên dưới; scheduler/phiên sạc còn chờ tuần 2. |
 | TV4        | POST/PATCH /hubs (incident/redistribution đã triển khai bên trên)                          |
 | TV5        | POST /simulations; GET /simulations/:id; GET /simulations                                  |
@@ -107,7 +107,7 @@ Mọi endpoint cần đăng nhập (cookie session). `userId` lấy từ session
 - Đặt xe (BR-01): xe phải `available`, thuộc Hub `active`, pin không thấp hơn `minimumRentalBatteryPercent`. Xe chuyển `reserved`, tạo reservation `active` với `expiresAt = now + reservationHoldMinutes` (settings, tính bằng đồng hồ DB). Tất cả trong một transaction; hai người đặt cùng xe thì đúng một người thành công (khóa hàng xe + cập nhật có điều kiện + unique index `vehicle_reservations_active_vehicle_idx`).
 - Hủy xe: chỉ chủ lượt đặt, chỉ khi `active`. Reservation thành `cancelled` (`closedAt` được ghi) và xe `reserved → available` bằng cập nhật có điều kiện: nếu xe đã bị đổi sang trạng thái khác (ví dụ sự cố, BR-10) thì không ghi đè.
 - Lỗi vẫn theo dạng `{statusCode, code: "HTTP_<status>", message}`; chưa có mã lỗi nghiệp vụ riêng.
-- Chưa làm: tự động chuyển `expired` khi quá hạn (T16), nhận xe `fulfilled` (T08), Idempotency-Key (BR-11).
+- Chưa làm: tự động chuyển `expired` khi quá hạn (T16), Idempotency-Key (BR-11).
 
 ## T13 Simulation
 
@@ -118,3 +118,19 @@ Mọi endpoint cần đăng nhập (cookie session). `userId` lấy từ session
 Payload incident: `{resourceType: "vehicle" | "charging_point" | "hub", resourceId, description}`; description phải chứa ký tự không trắng, trim trước khi lưu. Payload redistribution: `{sourceHubId, targetHubId, vehicleIds}`; Hub khác nhau, danh sách không trống/trùng. ID/actor lấy từ session; field ngoài DTO bị từ chối. Hub/xe sai trạng thái hoặc xe có incident đang mở chặn tạo/bắt đầu điều chuyển; start kiểm tra lại trong transaction. Hai lệnh hoặc reservation/start tranh cùng xe chỉ một thao tác chiếm được xe.
 
 Incident hiện chỉ ghi nhận/resolve; chưa tự đổi trạng thái vận hành hoặc xử lý reservation/trip/charging. Lệnh in_progress chưa có endpoint hoàn tất hay hủy; vị trí/chỗ nguồn được giữ đến workflow điều chuyển tiếp theo. Chưa có Idempotency-Key cho T12; không tự replay POST khi timeout. Các giới hạn này là phần chưa triển khai, không phải thay đổi quy tắc BR-08/BR-10/BR-11.
+
+## T08 — nhận/trả và lịch sử chuyến
+
+| Method / path                         | Quyền                               | Response        |
+| ------------------------------------- | ----------------------------------- | --------------- |
+| POST /vehicle-reservations/:id/pickup | Chủ reservation                     | 200, TripView   |
+| POST /trips/:id/return                | Chủ trip; body `{targetHubId}`      | 200, TripView   |
+| GET /trips                            | Đăng nhập; chỉ chuyến của người gọi | 200, TripView[] |
+
+ID/body sai 400, chưa đăng nhập 401, sai chủ 403, không tồn tại 404, sai trạng thái/hết hạn/Hub đầy hoặc inactive 409. Nhận xe chỉ trước expires_at, từ reserved tại Hub nguồn active; trong cùng transaction tạo trip active, reservation fulfilled, xe in_use/hub_id null và giải phóng chỗ nguồn. Trả xe chỉ khi in_use; claim chỗ đích và hoàn tất trip/cập nhật vị trí cùng transaction. Pin cuối lấy pin hiện có, chưa có telemetry/hao pin.
+
+Lặp pickup của reservation fulfilled trả lại trip cũ. Lặp return của trip completed với cùng đích trả kết quả cũ; khác đích 409. Đây là xử lý theo trạng thái, chưa phải Idempotency-Key tổng quát T17. Không tự retry POST khi timeout.
+
+Hub đích đầy/inactive: rollback và trả 409 với `details: {suggestedHubs: HubSuggestion[]}`. Gợi ý chỉ là số liệu tại lúc đọc, không giữ chỗ; lấy tối đa `settings.returnHubSuggestionLimit`, số nguyên dương trong phạm vi integer PostgreSQL, được kiểm tra hợp lệ (thiếu/sai → 500 chung). Migration 004 lưu baseline 5 từ T08, có thể đổi trong DB; không có fallback/hằng số giới hạn trong service/UI. Điều kiện chỗ trống loại chỗ đã cam kết cho lịch đỗ còn hiệu lực như AllocationPort.
+
+GET trips trả mọi chuyến active và tối đa 100 chuyến completed mới nhất, sắp thời điểm giảm dần; UI có điều khiển trả riêng cho từng chuyến active, không giả định mỗi người chỉ thuê một xe. RequestError giữ đồng thời code, status và details; filter chỉ chuyển tiếp details cho 4xx, không cho 5xx. Module mới sử dụng cùng API client/deadline với dashboard, mobility và simulation.

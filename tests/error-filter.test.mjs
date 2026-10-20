@@ -31,7 +31,10 @@ test("T15 all server failures redact internal messages in responses and logs", (
   for (const error of [
     new Error(secret),
     new HttpException(secret, 500),
-    new HttpException({ message: [secret], query: secret }, 503),
+    new HttpException(
+      { message: [secret], query: secret, details: { internal: secret } },
+      503,
+    ),
   ]) {
     const response = responseFor(error);
     assert.ok(response.statusCode >= 500);
@@ -44,6 +47,19 @@ test("T15 all server failures redact internal messages in responses and logs", (
     assert.equal(JSON.stringify(response).includes(secret), false);
     assert.equal(response.logs.length, 1);
   }
+});
+
+test("T08 safe client error details survive the shared filter", () => {
+  const details = { suggestedHubs: [{ id: "test-hub", freeSpaces: 1 }] };
+  assert.deepEqual(
+    responseFor(new HttpException({ message: "Full Hub", details }, 409)).body,
+    {
+      statusCode: 409,
+      code: "HTTP_409",
+      message: "Full Hub",
+      details,
+    },
+  );
 });
 
 test("T15 validation messages remain actionable and client errors keep their status", () => {

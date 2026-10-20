@@ -23,8 +23,8 @@ Nguồn UML use-case diagram: [sinh viên](diagrams/use-cases-student.puml), [v�
 | UC-02 | Xem danh sách / chi tiết Hub | FR-01        | Leader               | Có code                            |
 | UC-03 | Tìm xe thuê phù hợp          | FR-02        | TV2                  | Thiết kế                           |
 | UC-04 | Đặt / hủy đặt xe             | FR-03        | TV2                  | Thiết kế                           |
-| UC-05 | Nhận xe                      | FR-04        | TV2 + TV3            | Thiết kế                           |
-| UC-06 | Trả xe                       | FR-04        | TV2 + TV3            | Thiết kế                           |
+| UC-05 | Nhận xe                      | FR-04        | TV2 + TV3            | Có code T08, kiểm tra hạn giữ      |
+| UC-06 | Trả xe                       | FR-04        | TV2 + TV3            | Có code T08, allocation nguyên tử  |
 | UC-07 | Đăng ký xe cá nhân           | FR-05        | TV3                  | Thiết kế                           |
 | UC-08 | Đặt / sử dụng chỗ đỗ         | FR-05        | TV3                  | Thiết kế                           |
 | UC-09 | Yêu cầu sạc                  | FR-06        | TV3                  | Thiết kế                           |
@@ -186,3 +186,7 @@ Nguồn UML use-case diagram: [sinh viên](diagrams/use-cases-student.puml), [v�
 ## Những điểm cần chốt cùng chủ module
 
 TV2/TV3 chốt trạng thái xe sau trả và ngưỡng pin; TV3 chốt check-in/no-show/quá giờ và queue khi cổng không hoạt động; TV4 chốt inactive Hub và hủy điều chuyển đang chạy; TV5 chốt demand/travel/charging model và đơn vị chỉ số. Leader tổng hợp quyết định vào BR/DESIGN và cập nhật testcase trước merge.
+
+### Cập nhật UC-05/06 theo T08 ngày 20/10
+
+Nhận xe fulfilled và trả xe completed đã có controller/service/UI; chi tiết API và repeat semantics tại api.md. UC-04/05 chưa có scheduler tự hết hạn T16. UC-05 chưa kiểm tra lại ngưỡng pin khi đã giữ xe (T17). UC-06 hiển thị mọi chuyến active, chọn đích riêng; không thêm giới hạn một chuyến mỗi người khi backend chưa có rule. Test trip.test.mjs gồm quyền, trạng thái, rollback, cạnh tranh chỗ, cấu hình gợi ý và thứ tự khóa Hub/xe; đây không phải xác nhận tất cả testcase IT-10–16 hoặc T17 đã đạt.

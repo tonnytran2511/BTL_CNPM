@@ -4,6 +4,7 @@ import { SimulationPage } from "./pages/SimulationPage";
 import { useAppPage } from "./hooks/useAppPage";
 import { useHubDetail } from "./hooks/useHubDetail";
 import { useRental } from "./hooks/useRental";
+import { TripPanel } from "./components/TripPanel";
 import { ReservationList } from "./components/ReservationList";
 import { LoginForm } from "./components/LoginForm";
 import { HubCard } from "./components/HubCard";
@@ -22,11 +23,17 @@ export function App() {
     model.sessionExpired,
   );
   const mobility = useMobility(model.user, model.refresh);
-  const { vehicles, reservations, reserve, cancel } = useRental(
-    model.user?.id,
-    model.updatedAt,
-    model.refresh,
-  );
+  const {
+    vehicles,
+    reservations,
+    trips,
+    tripTarget,
+    reserve,
+    cancel,
+    pickup,
+    giveBack,
+    busyId,
+  } = useRental(model.user?.id, model.updatedAt, model.refresh);
   if (model.booting)
     return (
       <main className="center-state" role="status">
@@ -185,7 +192,7 @@ export function App() {
               onMinBattery={vehicles.setMinBattery}
               onReset={vehicles.reset}
               onReserve={reserve}
-              busyId={reservations.busyId}
+              busyId={busyId}
               reserveError={reservations.reserveError}
             />
             <ReservationList
@@ -195,9 +202,26 @@ export function App() {
               loading={reservations.loading}
               error={reservations.error}
               cancelError={reservations.cancelError}
-              busyId={reservations.busyId}
+              pickupError={trips.pickupError}
+              busyId={busyId}
               now={reservations.now}
               onCancel={cancel}
+              onPickup={pickup}
+            />
+            <TripPanel
+              hubs={model.hubs}
+              active={trips.active}
+              history={trips.history}
+              loaded={trips.loaded}
+              loading={trips.loading}
+              error={trips.error}
+              returnError={trips.returnError}
+              suggestions={trips.suggestions}
+              suggestionTripId={trips.suggestionTripId}
+              busyId={busyId}
+              onReturn={giveBack}
+              targets={tripTarget.targets}
+              onTarget={tripTarget.select}
             />
             {hub.selectedId && (
               <HubDetailPanel

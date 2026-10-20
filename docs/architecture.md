@@ -263,3 +263,38 @@ stateDiagram-v2
 ```
 
 Đây là phạm vi T12: chưa có endpoint hoàn tất/hoàn tác lệnh đang chạy hoặc UI quản trị. `in_progress` giữ vị trí/chỗ nguồn cho đến workflow di chuyển thực tế ở task tiếp theo; không tự chiếm chỗ đích. Incident hiện là nhật ký open/resolved; không tự chuyển Hub inactive, xe maintenance hay cổng failed, và không tự xử lý reservation/trip/charging. Tác động của sự cố lên vận hành theo BR-08/BR-10 cần service của chủ module triển khai tiếp. Chưa có Idempotency-Key cho T07/T12; client không tự retry mutation.
+
+## T08 — tích hợp nhận/trả xe
+
+ReservationController/TripController → TripService → RentalRepository/RentalTx → PostgreSQL. TripService gọi AllocationPort của MobilityModule với cùng PoolClient; không tự cập nhật chỗ đỗ. Thứ tự khóa ở nhánh cấp/giải phóng là Hub → xe → chỗ, sau khi đã khóa reservation/trip riêng của thao tác. Cách này tránh vòng khóa ngược với các caller Hub-first; kiểm tra contention trên PostgreSQL nằm trong trip.test.mjs.
+
+Frontend App chỉ nối props/handlers: useRental điều phối đặt/hủy/nhận/trả và refresh; useTrips giữ trạng thái tải/mutation theo generation của tài khoản; useTripTarget giữ Hub đích riêng theo tripId. TripPanel hiển thị mọi chuyến active. Phản hồi mutation của phiên cũ không sửa lỗi, gợi ý hoặc mở khóa mutation của phiên mới. Giữ simulation, mobility, dashboard retry và request deadline khi giải quyết conflict PR #8.
+
+```mermaid
+sequenceDiagram
+  actor Student
+  participant Hook as useRental / useTrips
+  participant Trip as TripService
+  participant Tx as RentalTx / PostgreSQL
+  participant Allocation as AllocationPort
+  Student->>Hook: nhận xe
+  Hook->>Trip: POST pickup + session
+  Trip->>Tx: BEGIN; khóa reservation, Hub nguồn, xe
+  Trip->>Allocation: giải phóng chỗ (cùng PoolClient)
+  Trip->>Tx: reservation fulfilled; xe in_use; INSERT trip; COMMIT
+  Trip-->>Hook: TripView
+  Hook->>Hook: tải lại xe/chuyến/dashboard
+  Student->>Hook: trả xe vào Hub đã chọn
+  Hook->>Trip: POST return + targetHubId
+  Trip->>Tx: BEGIN; khóa trip, Hub đích, xe
+  Trip->>Allocation: chiếm chỗ hợp lệ (cùng PoolClient)
+  alt đủ điều kiện
+    Trip->>Tx: hoàn tất trip; xe available tại đích; COMMIT
+    Trip-->>Hook: TripView
+  else không đủ chỗ / Hub inactive
+    Trip->>Tx: ROLLBACK
+    Trip-->>Hook: 409 + suggestedHubs từ cấu hình
+  end
+```
+
+Chưa có tự động hết hạn T16, kiểm tra pin sau khi đã giữ xe hoặc telemetry T17; không coi phạm vi T08 là toàn bộ hardening tuần 2.

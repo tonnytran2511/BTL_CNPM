@@ -2,6 +2,32 @@ import { afterEach, expect, it, vi } from "vitest";
 import { api, RequestError } from "./client";
 
 afterEach(() => vi.unstubAllGlobals());
+it("keeps structured trip-return suggestions alongside the error code", async () => {
+  const details = {
+    suggestedHubs: [
+      { id: "test-hub", name: "Test", location: "Test", freeSpaces: 1 },
+    ],
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          statusCode: 409,
+          code: "HTTP_409",
+          message: "Full Hub",
+          details,
+        }),
+        { status: 409 },
+      ),
+    ),
+  );
+  await expect(api.returnTrip("test-trip", "test-hub")).rejects.toMatchObject({
+    status: 409,
+    code: "HTTP_409",
+    details,
+  });
+});
 it("preserves the backend error code and includes credentials", async () => {
   const fetchMock = vi.fn().mockResolvedValue(
     new Response(
