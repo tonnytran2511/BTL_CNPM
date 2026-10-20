@@ -3,6 +3,7 @@ export type * from "./simulation";
 export type * from "./planned";
 export type * from "./mobility";
 export type * from "./rental";
+export type * from "./hub-management";
 export interface User {
   id: string;
   email: string;
