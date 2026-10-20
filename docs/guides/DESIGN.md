@@ -29,6 +29,7 @@ Frontend → API → services/domain → data access → database.
 - Backend triển khai theo module trong cùng một ứng dụng để giảm chi phí tích hợp.
 - Auth kiểm tra danh tính và quyền tại backend; các service kiểm tra quyền sở hữu tài nguyên.
 - Dashboard đọc trạng thái tổng hợp từ API; polling là phương án ban đầu, chu kỳ cập nhật cấu hình được. HTTP client có deadline theo `VITE_API_TIMEOUT_MS` được kiểm tra khi build/dev, hủy request chậm để UI có thể phục hồi. Deadline không đảm bảo server đã hủy mutation; không tự replay thao tác gửi dữ liệu.
+- T15 (20/10): mỗi refresh xác minh lại danh tính/role qua `/auth/me` trước khi đọc tài nguyên. Đổi tài khoản/quyền hoặc dashboard bị từ chối 403 thì xóa cache phía UI và yêu cầu đăng nhập lại. Khi mạng trở lại và tab visible, thử refresh ngay; lỗi tạm vẫn giữ dữ liệu có timestamp cũ. Backend tiếp tục quyết định quyền ở từng request.
 - Simulator lấy snapshot chỉ đọc; chạy trên trạng thái riêng và lưu kết quả riêng.
 - Đề xuất simulation không tự thay đổi vận hành. Khi thực thi, tạo lệnh nghiệp vụ và kiểm tra lại điều kiện hiện tại.
 

@@ -1,5 +1,7 @@
 # Nhật ký hỗ trợ AI
 
+20/10/2026: Theo yêu cầu Minh Tường thực hiện task tuần 2 từ bảng phân công, Codex hỗ trợ T15: rà polling/auth/error, xác minh danh tính/role trước refresh, xử lý dashboard 403 và sự kiện online, che message nội bộ 5xx; bổ sung regression tests frontend và kiểm tra API/PostgreSQL xuyên module đặt/hủy xe. Codex hỗ trợ soạn execution log và phần báo cáo tuần 2 T24, ghi rõ các gate T23/T25 chưa đủ điều kiện. Kiểm thử tự động không thay thế peer review, demo và khả năng giải thích của Minh Tường; không tự cập nhật tiến độ bảng Google Sheets.
+
 14/10/2026: Codex hỗ trợ dự thảo yêu cầu/thiết kế, đề xuất stack, khởi tạo code nền tảng, migration/seed, auth/dashboard và integration test. Nội dung trong repository được AI tạo/chỉnh sửa với chỉ dẫn của nhóm trưởng.
 
 Nhóm cần tự review, chỉnh sửa và chạy lại; ghi rõ các phần đã được thành viên kiểm tra hoặc phát triển thêm. Không coi nhật ký này là khai báo báo cáo cuối đã hoàn tất, và không khẳng định review của sinh viên khi chưa thực hiện.

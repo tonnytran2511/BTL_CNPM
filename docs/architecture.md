@@ -18,6 +18,32 @@ flowchart LR
 
 Auth guard chạy trước controller; public endpoints được đánh dấu rõ. HubsService lọc theo role và tổng hợp overview; repositories chứa SQL. Kiểu response dùng chung ở packages/contracts là contract thuần, không chứa code backend.
 
+## T15 — refresh dashboard và thay đổi quyền (20/10/2026)
+
+Logic nằm trong `useFoundation`; UI chỉ hiển thị dữ liệu và nối handler. Polling, nút làm mới, tab visible và mạng trở lại dùng cùng một khóa request. Danh tính/role được đọc lại trước tài nguyên; backend guard vẫn kiểm tra từng request. Reset phía UI làm các hook phụ thuộc user dọn dữ liệu phiên cũ, không gọi logout thay cho người dùng.
+
+```mermaid
+sequenceDiagram
+  participant Hook as useFoundation
+  participant API as API client / deadline
+  participant Auth as Backend AuthGuard
+  participant Hubs as HubsService / repository
+  Hook->>API: refresh (poll / manual / visible / online)
+  API->>Auth: GET /auth/me + cookie
+  Auth-->>Hook: user hoặc 401
+  alt ID hoặc role thay đổi / 401
+    Hook->>Hook: xóa dữ liệu và yêu cầu đăng nhập lại
+  else danh tính và role khớp
+    Hook->>API: GET overview (operator) hoặc hubs (student)
+    API->>Auth: xác minh session và quyền lại
+    Auth->>Hubs: đọc dữ liệu được phép
+    Hubs-->>Hook: trạng thái tài nguyên + thời điểm
+    Hook->>Hook: cập nhật dashboard / chi tiết Hub
+  end
+```
+
+Nếu request tài nguyên trả 403, UI xóa cache; mạng/5xx giữ dữ liệu và timestamp cũ kèm lỗi. `ErrorFilter` chuẩn hóa `{statusCode, code, message}`, che message nội bộ cho mọi 5xx. Không thêm bảng, migration hoặc endpoint.
+
 Chọn một backend theo module để ghép công việc của 5 người và demo local đơn giản. Đánh đổi: các module triển khai cùng một ứng dụng; migration/hợp đồng cần review chung. Chưa cần microservice hoặc message broker.
 
 ## Class diagram nền tảng

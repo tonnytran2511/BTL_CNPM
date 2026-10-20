@@ -72,6 +72,16 @@ export function useFoundation() {
     inFlight.current = true;
     setRefreshing(true);
     try {
+      // A session cookie can change in another tab; roles can change server-side.
+      const currentUser = await api.me(controller.signal);
+      if (current !== generation.current || controller.signal.aborted) return;
+      if (currentUser.id !== user.id || currentUser.role !== user.role) {
+        reset();
+        setError(
+          "Tài khoản hoặc quyền truy cập đã thay đổi. Vui lòng đăng nhập lại.",
+        );
+        return;
+      }
       const next =
         user.role === "operator"
           ? await api.overview(controller.signal)
@@ -93,6 +103,11 @@ export function useFoundation() {
         sessionExpired();
         return;
       }
+      if (e instanceof RequestError && e.status === 403) {
+        reset();
+        setError("Quyền truy cập đã thay đổi. Vui lòng đăng nhập lại.");
+        return;
+      }
       setError(e instanceof Error ? e.message : "Không thể cập nhật dữ liệu.");
     } finally {
       if (activeRequest.current === controller) {
@@ -101,7 +116,7 @@ export function useFoundation() {
         setRefreshing(false);
       }
     }
-  }, [user, sessionExpired]);
+  }, [user, sessionExpired, reset]);
   useEffect(() => {
     if (!config || !user) return;
     void refresh();
@@ -110,9 +125,11 @@ export function useFoundation() {
     };
     const interval = window.setInterval(refreshVisible, config.pollIntervalMs);
     document.addEventListener("visibilitychange", refreshVisible);
+    window.addEventListener("online", refreshVisible);
     return () => {
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", refreshVisible);
+      window.removeEventListener("online", refreshVisible);
       generation.current += 1;
       activeRequest.current?.abort();
       activeRequest.current = null;
