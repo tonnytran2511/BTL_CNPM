@@ -5,12 +5,12 @@ rectangle "Smart E-Mobility Hub — luồng vận hành" {
   usecase "UC-01\nĐăng nhập / đăng xuất" as UC01
   usecase "UC-02\nXem Hub và tài nguyên" as UC02
   usecase "UC-09\nYêu cầu sạc xe thuê" as UC09
-  usecase "UC-10\nPhân bổ / quản lý phiên sạc" as UC10
+  usecase "UC-10\nPhân bổ / quản lý phiên sạc" as UC10 <<planned>>
   usecase "UC-11\nGiám sát mạng lưới" as UC11
-  usecase "UC-12\nQuản lý Hub / tài nguyên" as UC12
-  usecase "UC-13\nXử lý sự cố" as UC13
-  usecase "UC-14\nĐiều chuyển xe" as UC14
-  usecase "UC-15\nWhat-if và đề xuất" as UC15
+  usecase "UC-12\nQuản lý Hub / tài nguyên" as UC12 <<planned>>
+  usecase "UC-13\nXử lý sự cố" as UC13 <<partial>>
+  usecase "UC-14\nĐiều chuyển xe" as UC14 <<partial>>
+  usecase "UC-15\nWhat-if và đề xuất" as UC15 <<partial>>
 }
 Operator --> UC01
 Operator --> UC02
@@ -26,4 +26,20 @@ note bottom of UC15
   Áp dụng đề xuất là thao tác riêng,
   cần kiểm tra lại trạng thái thực.
 end note
+note bottom of UC12
+  T14: T35 chưa có code/PR, còn chờ owner.
+end note
+note bottom of UC13
+  T12 chỉ ghi và resolve incident qua API.
+  Tác động tài nguyên và UI chưa có.
+end note
+note bottom of UC14
+  Có tạo/start/cancel pending qua API.
+  Chưa có hoàn tất điều chuyển hoặc UI.
+end note
+legend bottom
+  T14 — 20/10/2026
+  planned: chưa triển khai
+  partial: chỉ có phạm vi ghi tại use-cases.md
+endlegend
 @enduml

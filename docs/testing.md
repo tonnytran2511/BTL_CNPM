@@ -1,5 +1,11 @@
 # Kiểm chứng nền tảng — 14/10/2026
 
+## T14 — demo tích hợp 20/10/2026
+
+Trên nền main `435f7a0` sau PR #11, `npm test` pass **77 tests API và 28 tests frontend**; build API/web, format và kiểm tra whitespace pass. Đã demo Chrome → API → PostgreSQL cùng instance: rental, lịch đỗ/check-in/out, queue sạc, reload và simulation. T12 create/resolve incident và create/cancel redistribution được kiểm tra bằng HTTP API. Hash 13 bảng nghiệp vụ trước/sau simulation khớp. Chi tiết và giới hạn tại [bàn giao T14](../demo/T14-integrated-demo.md), [runtime evidence](../demo/evidence/T14-runtime.json).
+
+Runner `npm run demo:t14` khởi tạo DB/credentials riêng, kiểm tra health và phục vụ UI qua proxy. Đã smoke đăng nhập và xác nhận SIGINT dừng API/DB, xóa thư mục tạm. Không thay thế kiểm thử triển khai production. T35 chưa có code/PR; TXT download chưa xác minh; chưa có peer review sinh viên, nên không kết luận full gate T14 đã pass.
+
 ## T15 — 20/10/2026
 
 Trên nền main sau PR #9 (`c73dabe`), build frontend/backend pass; `npm test` pass **57 tests API và 23 tests frontend**. Bổ sung xác minh quyền/danh tính trước refresh, xóa cache khi bị từ chối quyền, phục hồi khi online, kiểm tra envelope và che message nội bộ 5xx. Kiểm thử PostgreSQL/HTTP thật xác nhận đặt/hủy xe qua T07 phản ánh đúng lên overview, list và detail Hub. Chi tiết phạm vi và giới hạn tại [execution log T15](test-runs/2026-10-20-t15-dashboard.md); bàn giao tuần 2 tại [báo cáo Minh Tường](reports/2026-10-20-minh-tuong-week2.md). Bổ sung browser–API–PostgreSQL riêng: đặt/hủy, polling tự cập nhật và reset khi đổi quyền pass; không có error/warn console. Chưa phải xác nhận peer review của sinh viên hoặc full T23/T25.

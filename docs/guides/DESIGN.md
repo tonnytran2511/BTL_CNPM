@@ -1,5 +1,11 @@
 # Smart E-Mobility Hub — định hướng thiết kế
 
+## T14 — đối chiếu bản tích hợp ngày 20/10/2026
+
+Main `435f7a0` sau PR #11 có rental T08, mobility T09–T11, operations T12 và simulation T13 cùng nền auth/dashboard. Demo Chrome trên DB tạm đã chạy thuê xe, đặt/check-in/out, queue sạc, simulation; T12 được kiểm tra qua API do chưa có UI. Bằng chứng và giới hạn tại `demo/T14-integrated-demo.md`, `docs/defects.md`. Các ghi chú lịch sử phía dưới mô tả thời điểm triển khai cũ, không thay thế trạng thái mới này.
+
+Theo xác nhận Minh Tường, T35 còn chờ Quỳnh Anh và không được triển khai thay trong T14. Chưa nghiệm thu đủ gate T14 hoặc công bố feature-complete; scheduler/phiên sạc, hoàn tất điều chuyển và simulation mở rộng vẫn là phạm vi tuần 2. Runner `npm run demo:t14` chỉ tạo fixture cô lập; seed không trở thành nguồn trạng thái vận hành/UI.
+
 Trạng thái: nền tảng đã triển khai; thiết kế nghiệp vụ của các module thành viên tiếp tục được review.
 Nguồn: `Assignment_SoftwareEngineering_HK261.pdf` và `Guideline and Rubric.pdf`.
 

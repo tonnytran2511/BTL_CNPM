@@ -1,6 +1,6 @@
 # Kiến trúc và dữ liệu nền tảng
 
-Sơ đồ này phản ánh bản đang triển khai. Các module nghiệp vụ chưa có code được liệt kê riêng trong tài liệu API và bàn giao.
+Sơ đồ này phản ánh bản đang triển khai. Phạm vi module đã triển khai và còn chờ được phân biệt tại tài liệu API và báo cáo T14.
 
 ```mermaid
 flowchart LR
@@ -100,7 +100,7 @@ classDiagram
   HubsRepository --> Database
 ```
 
-Các dependency được inject bằng Nest. Class diagram này chỉ mô tả module đang có code; chưa bao gồm các class thuộc nhiệm vụ TV2–TV5.
+Các dependency được inject bằng Nest. Class diagram này chỉ mô tả lớp nền tảng; các module rental, mobility, operations và simulation đã có code được bổ sung ở các phần sau.
 
 ## ERD đã triển khai
 
@@ -298,3 +298,46 @@ sequenceDiagram
 ```
 
 Chưa có tự động hết hạn T16, kiểm tra pin sau khi đã giữ xe hoặc telemetry T17; không coi phạm vi T08 là toàn bộ hardening tuần 2.
+
+## T14 — ranh giới module trên một bản tích hợp
+
+```mermaid
+flowchart LR
+  UI[React UI] --> Hooks[Hooks / API client]
+  Hooks --> Guard[Session / role guard + DTO]
+  Guard --> Hubs[HubsService]
+  Guard --> Trip[TripService / ReservationService]
+  Guard --> Mobility[MobilityService / AllocationPort]
+  Guard --> Operations[OperationsService]
+  Guard --> Simulation[SimulationService]
+  Trip --> Mobility
+  Operations --> Rental[RentalService]
+  Simulation --> Hubs
+  Simulation --> Engine[Engine thuần departures-v1]
+  Hubs --> Repo[Repository từng module]
+  Trip --> Repo
+  Mobility --> Repo
+  Operations --> Repo
+  Rental --> Repo
+  Repo --> DB[(PostgreSQL)]
+```
+
+Trip và allocation dùng cùng PoolClient để xe/chỗ/trip commit nguyên tử. Operations chỉ gọi RentalService để giữ xe khi start; chưa hoàn tất điều chuyển. Simulation đọc snapshot nhất quán và settings, engine không truy cập DB; không áp dụng kết quả lên vận hành. T35 còn chờ, nên không có mũi tên CRUD Hub/UI quản trị trong phần đã triển khai.
+
+```mermaid
+erDiagram
+  users ||--o{ vehicle_reservations : owns
+  vehicles ||--o{ vehicle_reservations : reserved
+  hubs ||--o{ vehicle_reservations : source
+  vehicle_reservations ||--o| trips : fulfils
+  users ||--o{ trips : rides
+  vehicles ||--o{ trips : used_by
+  hubs ||--o{ trips : source_or_target
+  users ||--o{ incidents : reports
+  users ||--o{ redistributions : creates
+  hubs ||--o{ redistributions : source_or_target
+  redistributions ||--|{ redistribution_vehicles : contains
+  vehicles ||--o{ redistribution_vehicles : assigned
+```
+
+ERD trên bổ sung quan hệ các bảng migration 002 operations và 003 rental; cột/constraint chi tiết vẫn theo SQL đã chia sẻ. `incidents.resource_id` là tham chiếu đa hình được service kiểm tra theo resource_type, không phải FK trực tiếp tới một bảng duy nhất. Bảng charging_sessions đã có schema nhưng chưa có vòng đời chạy phiên; không suy từ ERD ra tính năng đã hoàn thành.
