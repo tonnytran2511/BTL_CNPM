@@ -105,3 +105,7 @@ SimulationModule dùng HubsService.snapshot() và settings; engine departures-v1
 ## Tích hợp 18/10/2026
 
 PR #1/#2/#6/#7 được ghép với nền T13. Dashboard, mobility, rental search/reservation và simulation dùng cùng API client có deadline; test runner thu thập toàn bộ API suite. T12 tách SQL khỏi service; đổi trạng thái xe khi bắt đầu điều chuyển qua RentalService trong cùng transaction. Phạm vi T12 chỉ gồm nhật ký sự cố và tạo/bắt đầu/hủy lệnh trước khi chạy; hoàn tất điều chuyển và tác động sự cố lên thuê/sạc còn là workflow chưa triển khai, xem architecture.md và api.md. Chưa coi demo UI/NFR hoặc toàn bộ module là hoàn thành chỉ vì merge PR.
+
+## T18 — 20/10/2026, nền tích hợp c73dabe
+
+MobilityModule export ChargingAllocationService để giữ cổng cho xe cá nhân, dùng cùng transaction của caller. Khóa Hub → xe → request → point; kiểm tra lại quyền operator, chủ xe, vị trí, pin và cổng; đổi point occupied, request allocated và tạo session scheduled nguyên tử. Gửi lặp cùng request/point trả phiên active hiện có. Chưa có scheduler hoặc API start/complete/cancel (T19), chưa có xử lý gián đoạn (T20). RentalService hiện có search/reservation và ranh giới điều chuyển nhưng chưa có thao tác giữ/đổi trạng thái xe cho sạc; phối hợp Duy Tân tại điểm này, không tự sửa module rental. T18 chờ review/tích hợp; chi tiết docs/allocation-safety.md.
