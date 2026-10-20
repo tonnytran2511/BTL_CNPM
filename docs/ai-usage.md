@@ -36,3 +36,5 @@ Nhóm cần tự review, chỉnh sửa và chạy lại; ghi rõ các phần đ�
 18/10/2026: Codex hỗ trợ nhóm trưởng giải quyết conflict PR #7 với #1/#2/#5/#6, tách DTO/repository/service, chuyển cập nhật trạng thái xe qua RentalService trong cùng transaction, từ chối description trắng bằng 400 và thêm test PostgreSQL/HTTP cho T12/rental concurrency/rollback. Cập nhật tài liệu phạm vi chưa triển khai; không khẳng định peer review/demo của thành viên.
 
 20/10/2026: Theo yêu cầu Mai Anh, Codex chuyển phần T18 sang worktree riêng trên nền main c73dabe trong folder BTL_CNPM-main (2), giữ các module đã tích hợp. Bổ sung service/repository/model giữ cổng xe cá nhân nguyên tử, test PostgreSQL đồng thời/rollback và tài liệu. npm test trên nền tích hợp pass 54 API + 18 frontend tests. Không viết thay rental/incident; các contract chưa có được ghi rõ. T18 được lưu commit local để T19 kế thừa; chưa push, peer review/merge phần mới.
+
+T19: Codex hỗ trợ điều phối sạc xe cá nhân, UI operator, kiểm thử và tài liệu. Quy tắc ưu tiên là đề xuất cần review; chưa tích hợp sạc xe thuê hoặc sự cố cổng.

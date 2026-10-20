@@ -109,3 +109,7 @@ PR #1/#2/#6/#7 được ghép với nền T13. Dashboard, mobility, rental searc
 ## T18 — 20/10/2026, nền tích hợp c73dabe
 
 MobilityModule export ChargingAllocationService để giữ cổng cho xe cá nhân, dùng cùng transaction của caller. Khóa Hub → xe → request → point; kiểm tra lại quyền operator, chủ xe, vị trí, pin và cổng; đổi point occupied, request allocated và tạo session scheduled nguyên tử. Gửi lặp cùng request/point trả phiên active hiện có. Chưa có scheduler hoặc API start/complete/cancel (T19), chưa có xử lý gián đoạn (T20). RentalService hiện có search/reservation và ranh giới điều chuyển nhưng chưa có thao tác giữ/đổi trạng thái xe cho sạc; phối hợp Duy Tân tại điểm này, không tự sửa module rental. T18 chờ review/tích hợp; chi tiết docs/allocation-safety.md.
+
+## T19 — điều phối sạc xe cá nhân
+
+Đã triển khai local, chờ review: UI → useChargingManager → charging API → ChargingWorkflowService → repository. Thuật toán ưu tiên là hàm thuần, ngưỡng lấy settings. Phân bổ dùng ChargingAllocationService trong cùng transaction; kết thúc ghi pin quan sát và giải phóng cổng cùng transaction. Chi tiết và các phần chờ tại [charging-scheduler.md](../charging-scheduler.md).

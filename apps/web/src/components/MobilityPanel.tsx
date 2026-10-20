@@ -330,8 +330,8 @@ export function MobilityPanel({ model: m, hubs }: Props) {
         </div>
         <h3>Yêu cầu sạc</h3>
         <p className="muted">
-          Danh sách theo thời điểm gửi. Điều phối ưu tiên và chạy phiên sạc sẽ
-          được bổ sung ở giai đoạn tiếp theo.
+          Danh sách theo thời điểm gửi. Người vận hành phân bổ cổng và cập nhật
+          phiên sạc cho xe cá nhân đủ điều kiện.
         </p>
         {!m.queue.length && <p className="empty">Chưa có yêu cầu sạc.</p>}
         <div className="mobility-list">

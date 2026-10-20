@@ -12,6 +12,8 @@ import { VehicleSearch } from "./components/VehicleSearch";
 import { formatNumber, formatTime } from "./utils/format";
 import { useMobility } from "./hooks/useMobility";
 import { MobilityPanel } from "./components/MobilityPanel";
+import { useChargingManager } from "./hooks/useChargingManager";
+import { ChargingManager } from "./components/ChargingManager";
 export function App() {
   const model = useFoundation();
   const simulation = useSimulation(model.user);
@@ -22,6 +24,7 @@ export function App() {
     model.sessionExpired,
   );
   const mobility = useMobility(model.user, model.refresh);
+  const chargingManager = useChargingManager(model.user, model.refresh);
   const { vehicles, reservations, reserve, cancel } = useRental(
     model.user?.id,
     model.updatedAt,
@@ -174,6 +177,9 @@ export function App() {
               </div>
             </section>
             <MobilityPanel model={mobility} hubs={model.hubs} />
+            {model.user.role === "operator" && (
+              <ChargingManager model={chargingManager} hubs={model.hubs} />
+            )}
             <VehicleSearch
               hubs={model.hubs}
               filter={vehicles.filter}

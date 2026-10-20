@@ -76,3 +76,7 @@ Worktree T18 trong folder BTL_CNPM-main (2) bắt đầu từ main c73dabe. npm 
 T18 kiểm tra tranh chỗ/cổng, trùng lịch theo xe và theo chỗ, gửi lại cùng key, hold còn/hết hạn, xe quá giờ, request không giữ hai point, point failed/sai Hub, actor sai quyền, xe rời Hub, rollback sau lỗi và allocation/check-out đồng thời. Xem tests/allocation-safety-check.mjs và docs/allocation-safety.md. Không coi các test này là bằng chứng module xe thuê đã có tích hợp charging, T08 đã merge hoặc đã nghiệm thu toàn bộ tuần 2.
 
 Bản T18 cũ trên nền tuần 1 pass 17 tests; đó không phải số test của nền tích hợp. T19/T20 chưa triển khai. Phần mới chưa có peer review/merge hoặc kiểm chứng production.
+
+## T19
+
+`npm.cmd test` đã pass 59 kiểm thử backend và 18 frontend. Bổ sung kiểm thử thứ tự ưu tiên và luồng sạc với PostgreSQL/HTTP độc lập, gồm gửi lặp và hoàn tất/hủy đồng thời. Xem [bàn giao T19](charging-scheduler.md); chưa kiểm tra trực quan thủ công màn hình mới.
