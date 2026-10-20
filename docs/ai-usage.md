@@ -36,3 +36,5 @@ Nhóm cần tự review, chỉnh sửa và chạy lại; ghi rõ các phần đ�
 18/10/2026: Codex hỗ trợ nhóm trưởng tích hợp PR #6 với main sau #1/#2/#5; sửa hàm format trùng, tách orchestration/xác nhận khỏi UI, ngăn phản hồi mutation cũ ảnh hưởng phiên mới và bổ sung regression tests. Tác giả cần demo và giải thích phần T07.
 
 18/10/2026: Codex hỗ trợ nhóm trưởng giải quyết conflict PR #7 với #1/#2/#5/#6, tách DTO/repository/service, chuyển cập nhật trạng thái xe qua RentalService trong cùng transaction, từ chối description trắng bằng 400 và thêm test PostgreSQL/HTTP cho T12/rental concurrency/rollback. Cập nhật tài liệu phạm vi chưa triển khai; không khẳng định peer review/demo của thành viên.
+
+20/10/2026: Codex tiếp tục kiểm tra T15 trong IAB với Nest API/PostgreSQL tạm riêng: đặt/hủy, polling tự nhận thay đổi DB và đổi role operator về student làm UI reset. Đã dọn fixture; không dùng dữ liệu vận hành. Kiểm tra này không thay cho peer review/demo của thành viên.
