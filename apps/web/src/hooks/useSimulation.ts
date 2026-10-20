@@ -81,6 +81,11 @@ export function useSimulation(user: User | null) {
     error,
     busy,
     run,
+    clearResults: () => {
+      if (pending.current) return;
+      setResult(null);
+      setError("");
+    },
     randomize: () => {
       if (!limits || pending.current) return;
       const values = crypto.getRandomValues(new Uint32Array(5));
