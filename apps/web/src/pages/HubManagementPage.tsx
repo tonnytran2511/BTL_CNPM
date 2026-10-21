@@ -1,18 +1,7 @@
-import { useState, type FormEvent } from "react";
-import type { useHubManagement } from "../hooks/useHubManagement";
-type Model = ReturnType<typeof useHubManagement>;
-export function HubManagementPage({ model }: { model: Model }) {
-  const [code, setCode] = useState("");
-  const [name, setName] = useState("");
-  const [location, setLocation] = useState("");
-  const create = (e: FormEvent) => {
-    e.preventDefault();
-    void model.create({ code, name, location }).then(() => {
-      setCode("");
-      setName("");
-      setLocation("");
-    });
-  };
+import type { HubDetail } from "@emobility/contracts";
+import type { HubEditForm, HubManagementModel } from "../models/hubManagement";
+
+export function HubManagementPage({ model }: { model: HubManagementModel }) {
   return (
     <section className="hub-admin">
       <div className="hero">
@@ -34,15 +23,17 @@ export function HubManagementPage({ model }: { model: Model }) {
           {model.error}
         </p>
       )}
-      <form className="hub-admin-create" onSubmit={create}>
+      <form className="hub-admin-create" onSubmit={model.submitCreate}>
         <h2>Tạo Hub</h2>
         <label>
           Mã Hub
           <input
             required
             maxLength={32}
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
+            value={model.createForm.code}
+            onChange={(event) =>
+              model.changeCreateField("code", event.currentTarget.value)
+            }
           />
         </label>
         <label>
@@ -50,8 +41,10 @@ export function HubManagementPage({ model }: { model: Model }) {
           <input
             required
             maxLength={120}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={model.createForm.name}
+            onChange={(event) =>
+              model.changeCreateField("name", event.currentTarget.value)
+            }
           />
         </label>
         <label>
@@ -59,8 +52,10 @@ export function HubManagementPage({ model }: { model: Model }) {
           <input
             required
             maxLength={240}
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            value={model.createForm.location}
+            onChange={(event) =>
+              model.changeCreateField("location", event.currentTarget.value)
+            }
           />
         </label>
         <button className="primary" disabled={model.busy}>
@@ -74,51 +69,56 @@ export function HubManagementPage({ model }: { model: Model }) {
     </section>
   );
 }
+
 function HubEditor({
   hub,
   model,
 }: {
-  hub: Model["hubs"][number];
-  model: Model;
+  hub: HubDetail;
+  model: HubManagementModel;
 }) {
-  const [name, setName] = useState(hub.name);
-  const [location, setLocation] = useState(hub.location);
-  const [status, setStatus] = useState(hub.status);
-  const [capacity, setCapacity] = useState(String(hub.parking.capacity));
-  const [point, setPoint] = useState("");
-  const save = (e: FormEvent) => {
-    e.preventDefault();
-    void model.update(hub.id, { name, location, status });
-  };
-  const changeCapacity = (e: FormEvent) => {
-    e.preventDefault();
-    void model.capacity(hub.id, Number(capacity));
-  };
+  const form = model.editForms[hub.id];
+  if (!form) return null;
+
   return (
     <article className="hub-admin-card">
-      <form onSubmit={save}>
+      <form onSubmit={(event) => model.submitUpdate(hub.id, event)}>
         <h2>{hub.name}</h2>
         <label>
           Tên Hub
           <input
             required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={form.name}
+            onChange={(event) =>
+              model.changeHubField(hub.id, "name", event.currentTarget.value)
+            }
           />
         </label>
         <label>
           Vị trí
           <input
             required
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            value={form.location}
+            onChange={(event) =>
+              model.changeHubField(
+                hub.id,
+                "location",
+                event.currentTarget.value,
+              )
+            }
           />
         </label>
         <label>
           Trạng thái
           <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as "active" | "inactive")}
+            value={form.status}
+            onChange={(event) =>
+              model.changeHubField(
+                hub.id,
+                "status",
+                event.currentTarget.value as HubEditForm["status"],
+              )
+            }
           >
             <option value="active">Đang hoạt động</option>
             <option value="inactive">Ngừng hoạt động</option>
@@ -131,19 +131,12 @@ function HubEditor({
           type="button"
           className="danger"
           disabled={model.busy}
-          onClick={() => {
-            if (
-              window.confirm(
-                `Xóa Hub ${hub.name}? Chỉ xóa được Hub chưa có dữ liệu liên quan.`,
-              )
-            )
-              void model.remove(hub.id);
-          }}
+          onClick={() => model.removeHub(hub.id)}
         >
           Xóa Hub
         </button>
       </form>
-      <form onSubmit={changeCapacity}>
+      <form onSubmit={(event) => model.submitCapacity(hub.id, event)}>
         <h3>Chỗ đỗ</h3>
         <p>
           {hub.parking.occupied} đang có xe · {hub.parking.held} đang được giữ
@@ -154,8 +147,14 @@ function HubEditor({
             type="number"
             min="0"
             required
-            value={capacity}
-            onChange={(e) => setCapacity(e.target.value)}
+            value={form.capacity}
+            onChange={(event) =>
+              model.changeHubField(
+                hub.id,
+                "capacity",
+                event.currentTarget.value,
+              )
+            }
           />
         </label>
         <button className="secondary" disabled={model.busy}>
@@ -165,33 +164,34 @@ function HubEditor({
       <div>
         <h3>Cổng sạc</h3>
         <ul>
-          {hub.chargingPoints.map((p) => (
-            <li key={p.id}>
-              {p.code} · {p.status}
+          {hub.chargingPoints.map((point) => (
+            <li key={point.id}>
+              {point.code} · {point.status}
               <button
                 type="button"
                 className="text-button"
                 disabled={model.busy}
-                onClick={() => void model.removePoint(hub.id, p.id)}
+                onClick={() => model.removeChargingPoint(hub.id, point.id)}
               >
                 Xóa
               </button>
             </li>
           ))}
         </ul>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            void model.addPoint(hub.id, point).then(() => setPoint(""));
-          }}
-        >
+        <form onSubmit={(event) => model.submitChargingPoint(hub.id, event)}>
           <label>
             Mã cổng sạc
             <input
               required
               maxLength={32}
-              value={point}
-              onChange={(e) => setPoint(e.target.value)}
+              value={form.chargingPointCode}
+              onChange={(event) =>
+                model.changeHubField(
+                  hub.id,
+                  "chargingPointCode",
+                  event.currentTarget.value,
+                )
+              }
             />
           </label>
           <button className="secondary" disabled={model.busy}>

@@ -33,6 +33,7 @@ function fixture(overrides = {}) {
     addSpace: async (_client, _hub, code) => calls.push(["addSpace", code]),
     hasOpenIncident: async () => false,
     delete: async () => true,
+    lockChargingPoint: async () => true,
     hasOpenChargingIncident: async () => false,
     deleteChargingPoint: async () => true,
     create: async (_client, input) => input,
@@ -110,4 +111,45 @@ test("T35 protects Hub and charging point records with open incidents", async ()
     status(409),
   );
   assert.deepEqual(calls, []);
+});
+
+test("T35 locks a charging point before checking incidents and deleting it", async () => {
+  const order = [];
+  const blocked = fixture({
+    lockChargingPoint: async () => {
+      order.push("lock");
+      return true;
+    },
+    hasOpenChargingIncident: async () => {
+      order.push("incident");
+      return true;
+    },
+    deleteChargingPoint: async () => {
+      order.push("delete");
+      return true;
+    },
+  });
+  await assert.rejects(
+    blocked.service.removeChargingPoint(hubId, randomUUID()),
+    status(409),
+  );
+  assert.deepEqual(order, ["lock", "incident"]);
+
+  order.length = 0;
+  const allowed = fixture({
+    lockChargingPoint: async () => {
+      order.push("lock");
+      return true;
+    },
+    hasOpenChargingIncident: async () => {
+      order.push("incident");
+      return false;
+    },
+    deleteChargingPoint: async () => {
+      order.push("delete");
+      return true;
+    },
+  });
+  await allowed.service.removeChargingPoint(hubId, randomUUID());
+  assert.deepEqual(order, ["lock", "incident", "delete"]);
 });

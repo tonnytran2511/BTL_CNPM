@@ -146,6 +146,20 @@ export class HubManagementRepository {
       ).rowCount,
     );
   }
+  async lockChargingPoint(
+    client: PoolClient,
+    hubId: string,
+    pointId: string,
+  ) {
+    return Boolean(
+      (
+        await client.query(
+          "SELECT id FROM charging_points WHERE id=$1 AND hub_id=$2 FOR UPDATE",
+          [pointId, hubId],
+        )
+      ).rowCount,
+    );
+  }
   async hasOpenChargingIncident(client: PoolClient, pointId: string) {
     return Boolean(
       (

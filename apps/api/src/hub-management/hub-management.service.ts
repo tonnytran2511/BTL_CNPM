@@ -108,6 +108,8 @@ export class HubManagementService {
   }
   async removeChargingPoint(id: string, pointId: string) {
     return this.withHub(id, async (client) => {
+      if (!(await this.repo.lockChargingPoint(client, id, pointId)))
+        throw new NotFoundException("Không tìm thấy cổng sạc.");
       if (await this.repo.hasOpenChargingIncident(client, pointId))
         throw new ConflictException(
           "Không thể xóa cổng sạc đang có sự cố chưa xử lý.",
