@@ -146,11 +146,7 @@ export class HubManagementRepository {
       ).rowCount,
     );
   }
-  async lockChargingPoint(
-    client: PoolClient,
-    hubId: string,
-    pointId: string,
-  ) {
+  async lockChargingPoint(client: PoolClient, hubId: string, pointId: string) {
     return Boolean(
       (
         await client.query(

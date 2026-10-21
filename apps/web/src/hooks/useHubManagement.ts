@@ -21,9 +21,7 @@ function editFormFromHub(hub: HubDetail): HubEditForm {
   };
 }
 
-export function useHubManagement(
-  enabled: boolean,
-): HubManagementModel {
+export function useHubManagement(enabled: boolean): HubManagementModel {
   const [hubs, setHubs] = useState<HubDetail[]>([]);
   const [editForms, setEditForms] = useState<Record<string, HubEditForm>>({});
   const [createForm, setCreateForm] = useState<HubCreateForm>(emptyCreateForm);
