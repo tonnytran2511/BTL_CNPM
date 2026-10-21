@@ -38,6 +38,10 @@ export function useFoundation() {
     reset();
     setError("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
   }, [reset]);
+  const accessRevoked = useCallback(() => {
+    reset();
+    setError("Quyền truy cập đã thay đổi. Vui lòng đăng nhập lại.");
+  }, [reset]);
   const initialize = useCallback(async (signal?: AbortSignal) => {
     setBooting(true);
     setError("");
@@ -179,6 +183,7 @@ export function useFoundation() {
     login,
     logout,
     sessionExpired,
+    accessRevoked,
     refresh,
     retry: () => initialize(),
     stats: dashboardStats(hubs, overview),

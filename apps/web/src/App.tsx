@@ -20,7 +20,10 @@ export function App() {
   const simulation = useSimulation(model.user);
   const page = useAppPage(model.user?.role);
   const hubManagement = useHubManagement(
+    model.user,
     model.user?.role === "operator" && page === "hub-management",
+    model.sessionExpired,
+    model.accessRevoked,
   );
   const hub = useHubDetail(
     model.user?.id,
