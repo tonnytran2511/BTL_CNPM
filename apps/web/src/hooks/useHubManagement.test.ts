@@ -114,9 +114,13 @@ describe("Hub management session and edit state", () => {
     await settle();
     act(() => result.current.changeHubField(hub.id, "name", "Renamed"));
 
-    const disabledHub: HubDetail = { ...hub, status: "inactive" };
-    vi.mocked(api.hubs).mockResolvedValueOnce([disabledHub]);
-    vi.mocked(api.detail).mockResolvedValueOnce(disabledHub);
+    let serverHub: HubDetail = { ...hub, status: "inactive" };
+    vi.mocked(api.hubs).mockImplementation(async () => [serverHub]);
+    vi.mocked(api.detail).mockImplementation(async () => serverHub);
+    vi.mocked(api.updateHub).mockImplementation(async (_hubId, changes) => {
+      serverHub = { ...serverHub, ...changes };
+      return {} as never;
+    });
     await act(async () => result.current.refresh());
     expect(result.current.editForms[hub.id].status).toBe("inactive");
 
@@ -128,6 +132,37 @@ describe("Hub management session and edit state", () => {
 
     expect(api.updateHub).toHaveBeenCalledWith(hub.id, { name: "Renamed" });
     expect(result.current.editForms[hub.id].status).toBe("inactive");
+    expect(result.current.editForms[hub.id].name).toBe("Renamed");
+  });
+
+  it("clears busy when a mutation finishes after leaving the management page", async () => {
+    const mutation = deferred<unknown>();
+    vi.mocked(api.addChargingPoint).mockReturnValueOnce(mutation.promise);
+    const { result, rerender } = setup();
+    await settle();
+    act(() =>
+      result.current.changeHubField(hub.id, "chargingPointCode", "CP-3"),
+    );
+
+    let submit!: Promise<void>;
+    act(() => {
+      submit = result.current.submitChargingPoint(hub.id, {
+        preventDefault: vi.fn(),
+      } as never);
+    });
+    await settle();
+    expect(result.current.busy).toBe(true);
+
+    rerender({ user: operator, enabled: false });
+    await act(async () => {
+      mutation.resolve({});
+      await submit;
+    });
+    expect(result.current.busy).toBe(false);
+
+    rerender({ user: operator, enabled: true });
+    await settle();
+    expect(result.current.busy).toBe(false);
   });
 
   it("updates a clean capacity field when refreshed from the API", async () => {

@@ -94,6 +94,7 @@ export function useHubManagement(
   const enabledRef = useRef(enabled);
   const controllers = useRef(new Set<AbortController>());
   const refreshController = useRef<AbortController | null>(null);
+  const pendingMutations = useRef(new Map<User, number>());
   sessionRef.current = session;
   enabledRef.current = enabled;
   if (previousSessionRef.current !== session) {
@@ -245,6 +246,10 @@ export function useHubManagement(
       return false;
     const controller = new AbortController();
     controllers.current.add(controller);
+    pendingMutations.current.set(
+      owner,
+      (pendingMutations.current.get(owner) ?? 0) + 1,
+    );
     update(owner, (current) => ({ ...current, busy: true, error: "" }));
     try {
       const currentUser = await api.me(controller.signal);
@@ -284,7 +289,19 @@ export function useHubManagement(
       return false;
     } finally {
       controllers.current.delete(controller);
-      update(owner, (current) => ({ ...current, busy: false }));
+      const pending = pendingMutations.current.get(owner) ?? 0;
+      if (pending <= 1) {
+        pendingMutations.current.delete(owner);
+        if (
+          sessionRef.current === owner &&
+          invalidatedSessionRef.current !== owner
+        )
+          setStored((current) =>
+            current.session === owner ? { ...current, busy: false } : current,
+          );
+      } else {
+        pendingMutations.current.set(owner, pending - 1);
+      }
     }
   };
 
