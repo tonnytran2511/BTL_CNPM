@@ -68,6 +68,7 @@ try {
     simulationMaximumSteps: (v) => Number.isSafeInteger(v) && v > 0,
     simulationMaximumArrivalsPerStep: (v) => Number.isSafeInteger(v) && v > 0,
     reservationHoldMinutes: (v) => Number.isInteger(v) && v > 0,
+    reservationExpirySweepSeconds: (v) => Number.isInteger(v) && v > 0,
     minimumRentalBatteryPercent: (v) =>
       Number.isInteger(v) && v >= 0 && v <= 100,
   };

@@ -35,7 +35,6 @@ export interface Trip {
   startBatteryPercent: number;
   endBatteryPercent: number | null;
 }
-
 export type VehicleReservationState =
   "active" | "cancelled" | "expired" | "fulfilled";
 
@@ -53,4 +52,26 @@ export interface VehicleReservationView {
     batteryPercent: number;
   };
   hub: { id: string; name: string; location: string };
+}
+
+/** Một chuyến thuê của chính người dùng. Thời gian là ISO 8601 (UTC). */
+export interface TripView {
+  id: string;
+  status: TripStatus;
+  reservationId: string;
+  startedAt: string;
+  endedAt: string | null;
+  startBatteryPercent: number;
+  endBatteryPercent: number | null;
+  vehicle: { id: string; code: string; type: RentalVehicleType };
+  sourceHub: { id: string; name: string };
+  targetHub: { id: string; name: string } | null;
+}
+
+/** Hub còn chỗ trả xe, gợi ý khi Hub đích đầy (BR-03). */
+export interface HubSuggestion {
+  id: string;
+  name: string;
+  location: string;
+  freeSpaces: number;
 }

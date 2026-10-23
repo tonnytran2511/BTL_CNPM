@@ -1,0 +1,55 @@
+BÁO CÁO MÔ PHỎNG TĂNG NHU CẦU
+Mô hình: departures-v1
+Hub: Hub ga Metro
+Hub ID: 93c83646-f7db-4a9b-be5e-8ea83c796027
+Snapshot (UTC): 2026-10-23T04:37:31.159Z
+
+THAM SỐ LẦN CHẠY
+Thời lượng: 60 phút
+Bước thời gian: 5 phút
+Seed: 42
+Nhu cầu ban đầu: 0.2 yêu cầu/bước
+Nhu cầu kịch bản: 2 yêu cầu/bước
+Pin tối thiểu: 20%
+Giới hạn số bước: 288
+Giới hạn nhu cầu: 1000 yêu cầu/bước
+Xe đủ điều kiện đầu kỳ: 1
+
+SO SÁNH KẾT QUẢ (ban đầu | kịch bản)
+Tổng yêu cầu: 6 | 27
+Được phục vụ: 1 | 1
+Không được phục vụ: 5 | 26
+Xe còn lại: 0 | 0
+
+DIỄN BIẾN BAN ĐẦU
+Phút	Nhu cầu	Phục vụ	Không phục vụ	Xe còn lại
+5	1	1	0	0
+10	1	0	1	0
+15	1	0	1	0
+20	1	0	1	0
+25	0	0	0	0
+30	0	0	0	0
+35	0	0	0	0
+40	1	0	1	0
+45	0	0	0	0
+50	0	0	0	0
+55	1	0	1	0
+60	0	0	0	0
+
+DIỄN BIẾN KỊCH BẢN
+Phút	Nhu cầu	Phục vụ	Không phục vụ	Xe còn lại
+5	1	1	0	0
+10	3	0	3	0
+15	2	0	2	0
+20	2	0	2	0
+25	3	0	3	0
+30	3	0	3	0
+35	2	0	2	0
+40	3	0	3	0
+45	0	0	0	0
+50	3	0	3	0
+55	3	0	3	0
+60	2	0	2	0
+
+PHẠM VI VÀ GIẢ ĐỊNH
+Mỗi xe đủ điều kiện phục vụ tối đa một yêu cầu rời Hub. Chưa mô phỏng trả xe, sạc, hàng chờ hoặc điều chuyển. Nhu cầu được sinh theo mô hình giả lập, chưa phải dự báo thực tế. Baseline và kịch bản dùng cùng snapshot và seed. Không thay đổi dữ liệu vận hành.

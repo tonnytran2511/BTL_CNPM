@@ -27,6 +27,7 @@ Nhóm trưởng chuẩn bị baseline này để các module có cùng cách x�
 | Key dự kiến trong settings       | Đơn vị / validation                                   | Owner |
 | -------------------------------- | ----------------------------------------------------- | ----- |
 | reservationHoldMinutes           | Số nguyên dương                                       | TV2   |
+| reservationExpirySweepSeconds    | Số nguyên dương (chu kỳ scheduler nhả xe hết hạn)     | TV2   |
 | minimumRentalBatteryPercent      | 0–100                                                 | TV2   |
 | maximumParkingDurationMinutes    | Số nguyên dương                                       | TV3   |
 | chargingUrgencyWindowMinutes     | Số nguyên không âm                                    | TV3   |

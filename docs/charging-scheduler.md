@@ -59,3 +59,7 @@ Tích hợp sạc xe thuê không còn chờ Duy Tân. Phần sự cố cổng, 
 ## Khai báo AI
 
 Codex hỗ trợ code, kiểm thử và tài liệu; Mai Anh cần đọc và giải thích quy tắc ưu tiên, khóa dữ liệu và giới hạn trước khi bàn giao.
+
+## Cập nhật nền 23/10/2026
+
+T19 đã ghép main e918f9d gồm T18/T08/T16/T35; build và 102 API + 48 frontend tests pass. RentalChargingModule tách thành module lá để MobilityModule không phụ thuộc vòng vào RentalModule khi TripService dùng AllocationPort. Phần thông tin T19 đã được thêm vào README nhánh. Chỉ local, chờ publish/review.

@@ -26,6 +26,8 @@ Browser dùng `credentials: include`, cùng origin qua proxy. Mutation phải c�
 
 Lỗi có dạng `{statusCode: number, code: "HTTP_<status>", message: string}`; validation message ghép thành chuỗi. Lỗi server không gửi chi tiết SQL/secret. Không tự retry mutation mà chưa thiết kế idempotency.
 
+T15 (20/10): mọi lỗi 5xx, kể cả `HttpException` chứa message nội bộ, trả thông báo chung; mã HTTP và envelope giữ nguyên. Log của bộ lọc cũng chỉ ghi thông báo chung. Lỗi 4xx vẫn giữ message validation/nghiệp vụ để người gọi sửa yêu cầu.
+
 ## Ý nghĩa dữ liệu Hub
 
 - `parking.capacity`: số hàng parking_spaces tại Hub; sức chứa không sao chép vào frontend.
@@ -42,12 +44,27 @@ Các endpoint dưới đây là đề xuất, **chưa tồn tại**; chủ modul
 
 | Chủ module | Đề xuất                                                                                    |
 | ---------- | ------------------------------------------------------------------------------------------ |
-| TV2        | POST /vehicle-reservations/:id/pickup; POST /trips/:id/return (tìm/đặt/hủy đã có bên dưới) |
+| TV2        | Nhận/trả và danh sách chuyến đã triển khai bên dưới; hết hạn tự động còn thuộc T16         |
 | TV3        | Đã triển khai local các endpoint `/mobility` bên dưới; scheduler/phiên sạc còn chờ tuần 2. |
-| TV4        | POST/PATCH /hubs (incident/redistribution đã triển khai bên trên)                          |
+| TV4        | Hub CRUD/cấu hình tài nguyên; incident/redistribution đã triển khai bên trên               |
 | TV5        | POST /simulations; GET /simulations/:id; GET /simulations                                  |
 
-TV4 đã triển khai các endpoint incident và redistribution nêu ở trên. `POST /redistributions` chỉ tạo lệnh `pending`; `start` kiểm tra lại Hub, xe available tại nguồn và incident đang mở trong transaction rồi chuyển xe sang `redistributing`. `cancel` chỉ áp dụng trước khi bắt đầu. Hoàn tất điều chuyển cần allocation service của TV3 để chiếm chỗ ở Hub đích; endpoint hoàn tất chưa được bật cho đến khi service đó được tích hợp.
+TV4 đã triển khai các endpoint quản trị Hub/tài nguyên ở dưới cùng với incident và redistribution nêu ở trên. `POST /redistributions` chỉ tạo lệnh `pending`; `start` kiểm tra lại Hub, xe available tại nguồn và incident đang mở trong transaction rồi chuyển xe sang `redistributing`. `cancel` chỉ áp dụng trước khi bắt đầu. Hoàn tất điều chuyển cần allocation service của TV3 để chiếm chỗ ở Hub đích; endpoint hoàn tất chưa được bật cho đến khi service đó được tích hợp.
+
+## T35 — Quản trị Hub và tài nguyên
+
+Các endpoint dưới đây dành cho operator. Tạo Hub chuẩn hóa code thành chữ hoa. Sửa thông tin không sửa tài nguyên đang vận hành; xóa chỉ thành công khi không còn tham chiếu dữ liệu và không có incident Hub đang mở.
+
+| Method / path                             | Input                                               | Response / quy tắc                                                                       |
+| ----------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| POST /hubs                                | `{code,name,location}`                              | 201; code duy nhất, 409 nếu trùng                                                        |
+| PATCH /hubs/:id                           | `{name?,location?,status?}`                         | 200; chỉ sửa trường gửi lên; 404 nếu không có Hub                                        |
+| DELETE /hubs/:id                          | —                                                   | 200 `{success:true}`; 404 nếu không có; 409 nếu còn dữ liệu liên quan/sự cố mở           |
+| PUT /hubs/:id/parking-capacity            | `{capacity}` (0–setting `maxParkingCapacityPerHub`) | 200 `{hubId,capacity}`; tạo/xóa hàng `parking_spaces` trong transaction                  |
+| POST /hubs/:id/charging-points            | `{code}`                                            | 201 cổng sạc trạng thái mặc định `available`; code duy nhất tại Hub                      |
+| DELETE /hubs/:id/charging-points/:pointId | —                                                   | 200 `{success:true}`; 404 nếu không có/khác Hub; 409 nếu occupied/có session/incident mở |
+
+`maxParkingCapacityPerHub` được lưu trong `settings` (migration 005, mặc định 5000) và đọc lại khi cấu hình. Giảm sức chứa không thể thấp hơn số chỗ occupied hoặc held còn hạn. Chỗ bị xóa phải available và không có booking tham chiếu (kể cả lịch sử); nếu không đủ chỗ an toàn thì toàn bộ thao tác rollback. Xóa cổng khóa Hub rồi cổng trước khi đọc incident để không xóa tài nguyên vừa có sự cố đồng thời. Tạo/xóa cổng sạc không thay đổi trạng thái vận hành của các cổng còn lại. Request DTO từ chối field ngoài danh sách.
 
 Không thêm endpoint success giả hoặc dữ liệu mẫu trong component để thay phần chưa triển khai.
 
@@ -84,6 +101,8 @@ API client giữ `RequestError.status`, `RequestError.code` và message từ err
 
 Dashboard chỉ có một request refresh tại một thời điểm, polling theo config và cập nhật khi tab trở lại visible. Chi tiết Hub dùng request riêng, không hủy request chậm vì dashboard vừa poll; lỗi tạm giữ dữ liệu gần nhất và cho thử lại. 401 xóa session state phía UI; 403/404 ở chi tiết xóa dữ liệu cũ. Không đổi endpoint hoặc quyền backend trong thay đổi này.
 
+T15 (20/10): một lần refresh kiểm tra `/auth/me` trước khi đọc `/hubs` hoặc `/network/overview`, cùng bộ khóa refresh và cancellation. Nếu ID hoặc role khác phiên UI hiện tại, UI xóa dữ liệu tài khoản/dashboard và yêu cầu đăng nhập lại; không tự chuyển sang tài khoản khác do cookie đổi ở tab khác. Dashboard gặp 403 cũng xóa dữ liệu thay vì giữ cache operator. Đây là reset trạng thái frontend, không thu hồi cookie/session còn hợp lệ trên server. Backend vẫn kiểm tra session/quyền ở từng endpoint. Lỗi mạng/5xx giữ dữ liệu thành công gần nhất, kèm cảnh báo; sự kiện `online` khi tab visible thử refresh ngay, không đợi kỳ polling. Thêm một GET `/auth/me` mỗi refresh; deadline vẫn áp dụng riêng từng HTTP request, chưa có phép đo tải cho thay đổi này.
+
 Mỗi request frontend có deadline `VITE_API_TIMEOUT_MS` từ cấu hình công khai khi build/dev; kiểm tra số nguyên dương trong giới hạn timer 32-bit. Deadline bao gồm cả đọc JSON. Quá hạn trả `RequestError` với status 0, code `REQUEST_TIMEOUT`; hủy từ hook vẫn giữ nguyên cancellation. Timer/listener được dọn khi hoàn tất. Client không tự retry mutation: timeout không chứng minh server chưa xử lý thao tác. Config này thuộc client, không thay đổi payload `/config` của server.
 
 ## GET /vehicles (T06, đã triển khai)
@@ -94,16 +113,17 @@ Query tùy chọn: `hubId` (UUID), `type` (`electric_bicycle` | `electric_motorc
 
 Mọi endpoint cần đăng nhập (cookie session). `userId` lấy từ session, không nhận từ body; field ngoài DTO bị từ chối 400. Mutation phải có Origin đúng `WEB_ORIGIN` khi mang cookie.
 
-| Method / path                         | Response                   | Trạng thái                                                                        |
-| ------------------------------------- | -------------------------- | --------------------------------------------------------------------------------- |
-| GET /vehicle-reservations             | `VehicleReservationView[]` | 200; chỉ lượt của chính người gọi, mới nhất trước, tối đa 100; chưa đăng nhập 401 |
-| POST /vehicle-reservations            | `VehicleReservationView`   | 201; body `{vehicleId}` sai 400; xe không tồn tại 404; xe không còn đặt được 409  |
-| POST /vehicle-reservations/:id/cancel | `VehicleReservationView`   | 200; id sai 400; không tồn tại 404; không phải chủ 403; không còn `active` 409    |
+| Method / path                         | Response                   | Trạng thái                                                                                     |
+| ------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------- |
+| GET /vehicle-reservations             | `VehicleReservationView[]` | 200; chỉ lượt của chính người gọi, mới nhất trước, tối đa 100; chưa đăng nhập 401              |
+| POST /vehicle-reservations            | `VehicleReservationView`   | 201; body `{vehicleId}` sai 400; xe không tồn tại 404; xe không còn đặt được 409               |
+| POST /vehicle-reservations/:id/cancel | `VehicleReservationView`   | 200; id sai 400; không tồn tại 404; không phải chủ 403; không còn `active` hoặc đã hết hạn 409 |
 
 - Đặt xe (BR-01): xe phải `available`, thuộc Hub `active`, pin không thấp hơn `minimumRentalBatteryPercent`. Xe chuyển `reserved`, tạo reservation `active` với `expiresAt = now + reservationHoldMinutes` (settings, tính bằng đồng hồ DB). Tất cả trong một transaction; hai người đặt cùng xe thì đúng một người thành công (khóa hàng xe + cập nhật có điều kiện + unique index `vehicle_reservations_active_vehicle_idx`).
 - Hủy xe: chỉ chủ lượt đặt, chỉ khi `active`. Reservation thành `cancelled` (`closedAt` được ghi) và xe `reserved → available` bằng cập nhật có điều kiện: nếu xe đã bị đổi sang trạng thái khác (ví dụ sự cố, BR-10) thì không ghi đè.
 - Lỗi vẫn theo dạng `{statusCode, code: "HTTP_<status>", message}`; chưa có mã lỗi nghiệp vụ riêng.
-- Chưa làm: tự động chuyển `expired` khi quá hạn (T16), nhận xe `fulfilled` (T08), Idempotency-Key (BR-11).
+- Hết hạn (T16, BR-01): reservation `active` có `expires_at <= now()` (đồng hồ DB) chuyển `expired`, ghi `closedAt`, xe `reserved → available` (cập nhật có điều kiện, không ghi đè xe đã sang trạng thái khác) trong một transaction, khóa theo thứ tự reservation → xe. Được kích hoạt bởi: scheduler nội bộ chu kỳ `reservationExpirySweepSeconds`; trước khi đặt xe, liệt kê lượt đặt, tìm xe; và khi hủy một lượt đã quá hạn (commit việc nhả xe rồi trả 409). Quét lặp/song song an toàn vì từng reservation được khóa và kiểm tra lại.
+- Chưa làm: Idempotency-Key (BR-11).
 
 ## T13 Simulation
 
@@ -114,6 +134,22 @@ Mọi endpoint cần đăng nhập (cookie session). `userId` lấy từ session
 Payload incident: `{resourceType: "vehicle" | "charging_point" | "hub", resourceId, description}`; description phải chứa ký tự không trắng, trim trước khi lưu. Payload redistribution: `{sourceHubId, targetHubId, vehicleIds}`; Hub khác nhau, danh sách không trống/trùng. ID/actor lấy từ session; field ngoài DTO bị từ chối. Hub/xe sai trạng thái hoặc xe có incident đang mở chặn tạo/bắt đầu điều chuyển; start kiểm tra lại trong transaction. Hai lệnh hoặc reservation/start tranh cùng xe chỉ một thao tác chiếm được xe.
 
 Incident hiện chỉ ghi nhận/resolve; chưa tự đổi trạng thái vận hành hoặc xử lý reservation/trip/charging. Lệnh in_progress chưa có endpoint hoàn tất hay hủy; vị trí/chỗ nguồn được giữ đến workflow điều chuyển tiếp theo. Chưa có Idempotency-Key cho T12; không tự replay POST khi timeout. Các giới hạn này là phần chưa triển khai, không phải thay đổi quy tắc BR-08/BR-10/BR-11.
+
+## T08 — nhận/trả và lịch sử chuyến
+
+| Method / path                         | Quyền                               | Response        |
+| ------------------------------------- | ----------------------------------- | --------------- |
+| POST /vehicle-reservations/:id/pickup | Chủ reservation                     | 200, TripView   |
+| POST /trips/:id/return                | Chủ trip; body `{targetHubId}`      | 200, TripView   |
+| GET /trips                            | Đăng nhập; chỉ chuyến của người gọi | 200, TripView[] |
+
+ID/body sai 400, chưa đăng nhập 401, sai chủ 403, không tồn tại 404, sai trạng thái/hết hạn/Hub đầy hoặc inactive 409. Nhận xe chỉ trước expires_at, từ reserved tại Hub nguồn active; trong cùng transaction tạo trip active, reservation fulfilled, xe in_use/hub_id null và giải phóng chỗ nguồn. Trả xe chỉ khi in_use; claim chỗ đích và hoàn tất trip/cập nhật vị trí cùng transaction. Pin cuối lấy pin hiện có, chưa có telemetry/hao pin.
+
+Lặp pickup của reservation fulfilled trả lại trip cũ. Lặp return của trip completed với cùng đích trả kết quả cũ; khác đích 409. Đây là xử lý theo trạng thái, chưa phải Idempotency-Key tổng quát T17. Không tự retry POST khi timeout.
+
+Hub đích đầy/inactive: rollback và trả 409 với `details: {suggestedHubs: HubSuggestion[]}`. Gợi ý chỉ là số liệu tại lúc đọc, không giữ chỗ; lấy tối đa `settings.returnHubSuggestionLimit`, số nguyên dương trong phạm vi integer PostgreSQL, được kiểm tra hợp lệ (thiếu/sai → 500 chung). Migration 004 lưu baseline 5 từ T08, có thể đổi trong DB; không có fallback/hằng số giới hạn trong service/UI. Điều kiện chỗ trống loại chỗ đã cam kết cho lịch đỗ còn hiệu lực như AllocationPort.
+
+GET trips trả mọi chuyến active và tối đa 100 chuyến completed mới nhất, sắp thời điểm giảm dần; UI có điều khiển trả riêng cho từng chuyến active, không giả định mỗi người chỉ thuê một xe. RequestError giữ đồng thời code, status và details; filter chỉ chuyển tiếp details cho 4xx, không cho 5xx. Module mới sử dụng cùng API client/deadline với dashboard, mobility và simulation.
 
 ## T18 — giữ cổng sạc nguyên tử
 

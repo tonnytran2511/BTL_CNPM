@@ -1,5 +1,7 @@
 # T18 — bảo vệ phân bổ parking và charging
 
+Cập nhật 23/10/2026: T18 đã ghép main a80ca54 có T08/T35; bản này chỉ local. Build và 84 API + 40 frontend tests pass; chi tiết [execution T18](test-runs/2026-10-23-t18-main-integration.md). Các ghi chú nền c73dabe phía dưới là lịch sử ngày 20/10.
+
 Nền tích hợp: main c73dabe trong folder BTL_CNPM-main (2). Rental search/reservation, operations và simulation đã có; chưa có API/service chuyển trạng thái xe cho sạc trong RentalService.
 
 Trạng thái 20/10/2026: phần độc lập đã có code và kiểm thử local; chưa peer review, merge hoặc nghiệm thu luồng thuê xe/điều chuyển xuyên module. Căn cứ FR-05/06, NFR-01 và BR-02–06/11.

@@ -1,5 +1,17 @@
 # Smart E-Mobility Hub — định hướng thiết kế
 
+## T14 — hoàn tất tích hợp T35 ngày 23/10/2026
+
+T35 của Quỳnh Anh đã merge qua PR #13 vào main `5d0d4d2`. Ba điểm review đã sửa: khóa cổng sạc trước kiểm tra incident, giữ form khi mutation thất bại, tách logic/model khỏi UI. T14 bổ sung regression HTTP/PostgreSQL cho CRUD, quyền operator, dashboard động, inactive Hub, sức chứa có hold/booking, rollback và incident/delete đồng thời. Giao diện và file TXT đã được kiểm tra trên DB tạm; bằng chứng tại `demo/T14-t35-completion.md`.
+
+Phần tích hợp kỹ thuật T14 không còn phụ thuộc T35. Nghiệm thu/demo và giải thích của từng thành viên vẫn cần người phụ trách xác nhận; không tự coi test của Codex là peer review của sinh viên. T16 ở PR #14, scheduler/phiên sạc, hoàn tất điều chuyển và simulation mở rộng vẫn ngoài phạm vi bản này.
+
+## T14 — lịch sử đối chiếu ngày 20/10/2026
+
+Main `435f7a0` sau PR #11 có rental T08, mobility T09–T11, operations T12 và simulation T13 cùng nền auth/dashboard. Demo Chrome trên DB tạm đã chạy thuê xe, đặt/check-in/out, queue sạc, simulation; T12 được kiểm tra qua API do chưa có UI. Bằng chứng và giới hạn tại `demo/T14-integrated-demo.md`, `docs/defects.md`. Các ghi chú lịch sử phía dưới mô tả thời điểm triển khai cũ, không thay thế trạng thái mới này.
+
+Theo xác nhận Minh Tường, T35 còn chờ Quỳnh Anh và không được triển khai thay trong T14. Chưa nghiệm thu đủ gate T14 hoặc công bố feature-complete; scheduler/phiên sạc, hoàn tất điều chuyển và simulation mở rộng vẫn là phạm vi tuần 2. Runner `npm run demo:t14` chỉ tạo fixture cô lập; seed không trở thành nguồn trạng thái vận hành/UI.
+
 Trạng thái: nền tảng đã triển khai; thiết kế nghiệp vụ của các module thành viên tiếp tục được review.
 Nguồn: `Assignment_SoftwareEngineering_HK261.pdf` và `Guideline and Rubric.pdf`.
 
@@ -29,6 +41,7 @@ Frontend → API → services/domain → data access → database.
 - Backend triển khai theo module trong cùng một ứng dụng để giảm chi phí tích hợp.
 - Auth kiểm tra danh tính và quyền tại backend; các service kiểm tra quyền sở hữu tài nguyên.
 - Dashboard đọc trạng thái tổng hợp từ API; polling là phương án ban đầu, chu kỳ cập nhật cấu hình được. HTTP client có deadline theo `VITE_API_TIMEOUT_MS` được kiểm tra khi build/dev, hủy request chậm để UI có thể phục hồi. Deadline không đảm bảo server đã hủy mutation; không tự replay thao tác gửi dữ liệu.
+- T15 (20/10): mỗi refresh xác minh lại danh tính/role qua `/auth/me` trước khi đọc tài nguyên. Đổi tài khoản/quyền hoặc dashboard bị từ chối 403 thì xóa cache phía UI và yêu cầu đăng nhập lại. Khi mạng trở lại và tab visible, thử refresh ngay; lỗi tạm vẫn giữ dữ liệu có timestamp cũ. Backend tiếp tục quyết định quyền ở từng request.
 - Simulator lấy snapshot chỉ đọc; chạy trên trạng thái riêng và lưu kết quả riêng.
 - Đề xuất simulation không tự thay đổi vận hành. Khi thực thi, tạo lệnh nghiệp vụ và kiểm tra lại điều kiện hiện tại.
 
@@ -105,6 +118,10 @@ SimulationModule dùng HubsService.snapshot() và settings; engine departures-v1
 ## Tích hợp 18/10/2026
 
 PR #1/#2/#6/#7 được ghép với nền T13. Dashboard, mobility, rental search/reservation và simulation dùng cùng API client có deadline; test runner thu thập toàn bộ API suite. T12 tách SQL khỏi service; đổi trạng thái xe khi bắt đầu điều chuyển qua RentalService trong cùng transaction. Phạm vi T12 chỉ gồm nhật ký sự cố và tạo/bắt đầu/hủy lệnh trước khi chạy; hoàn tất điều chuyển và tác động sự cố lên thuê/sạc còn là workflow chưa triển khai, xem architecture.md và api.md. Chưa coi demo UI/NFR hoặc toàn bộ module là hoàn thành chỉ vì merge PR.
+
+## Tích hợp T08 — 20/10/2026
+
+Nhận/trả dùng TripService và AllocationPort cùng PoolClient; khóa Hub trước xe/chỗ để phối hợp với vận hành. UI hỗ trợ mọi chuyến active của tài khoản; chưa có quy tắc giới hạn một chuyến/người. Gợi ý Hub khi trả thất bại lấy số lượng từ settings.returnHubSuggestionLimit (migration 004), kiểm tra hợp lệ, không giữ chỗ. API client giữ code và details với deadline chung; 5xx không lộ details. T16/T17, scheduler và hoàn tất điều chuyển vẫn ngoài phạm vi tích hợp T08.
 
 ## T18 — 20/10/2026, nền tích hợp c73dabe
 

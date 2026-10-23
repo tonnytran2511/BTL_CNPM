@@ -941,6 +941,81 @@ body:has(.simulation-guide-dialog[open]) {
   border-bottom: 1px solid #dbe3df;
   text-align: left;
 }
+.hub-admin {
+  display: grid;
+  gap: 22px;
+}
+.hub-admin-create,
+.hub-admin-card {
+  padding: clamp(18px, 3vw, 28px);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+.hub-admin-create,
+.hub-admin-card form,
+.hub-admin-card > div {
+  display: grid;
+  gap: 14px;
+}
+.hub-admin-create {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  align-items: end;
+}
+.hub-admin-create h2 {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+.hub-admin label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+.hub-admin input,
+.hub-admin select {
+  min-height: 42px;
+  padding: 8px 10px;
+  color: inherit;
+  background: #fff;
+  border: 1px solid #bdcbc3;
+  border-radius: 8px;
+  font: inherit;
+}
+.hub-admin-card {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 22px;
+}
+.hub-admin-card h2,
+.hub-admin-card h3 {
+  margin: 0;
+}
+.hub-admin-card p {
+  margin: 0;
+  color: var(--muted);
+}
+.hub-admin-card ul {
+  margin: 0;
+  padding-left: 20px;
+}
+.hub-admin-card li {
+  padding: 4px 0;
+}
+.hub-admin-card .danger {
+  color: #8d2929;
+  background: #fff;
+  border: 1px solid #dfb8b8;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.hub-admin-card .text-button {
+  margin-left: 10px;
+  color: var(--green);
+  background: transparent;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
 
 /* Keep the rental heading, filters and results in one distinct region. */
 .vehicle-search {
