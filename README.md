@@ -31,69 +31,6 @@ Chi tiết API và quy tắc tại [docs/charging-scheduler.md](docs/charging-sc
 
 Đã tích hợp đăng ký xe cá nhân, tra cứu/đặt/hủy lịch đỗ, check-in/check-out, gửi/xem yêu cầu sạc và AllocationPort; thuê xe có tìm/đặt/hủy/nhận/trả và lịch sử. T12 có API nhật ký sự cố và tạo/start/cancel lệnh trước khi chạy; chưa có UI quản trị hoặc hoàn tất điều chuyển. Hợp đồng tại `docs/api.md`.
 
-## Setup
-
-Cần Node.js >=22.13 và npm. Phiên bản kiểm chứng ghi tại `docs/testing.md`.
-
-Repository: https://github.com/tonnytran2511/BTL_CNPM
-
-```sh
-git clone https://github.com/tonnytran2511/BTL_CNPM.git
-cd BTL_CNPM
-```
-
-```sh
-npm ci
-npm run setup:env
-```
-
-Lệnh setup tạo `.env` bằng mật khẩu ngẫu nhiên, không ghi đè file đã có. Chỉnh cấu hình tại đó; không commit/chia sẻ file `.env`. Xem `SEED_OPERATOR_EMAIL/PASSWORD` và `SEED_STUDENT_EMAIL/PASSWORD` để đăng nhập demo. Các biến `*_NAME` quyết định tên demo.
-
-Chọn **một** cách chạy PostgreSQL:
-
-```sh
-# Docker Desktop phải đang chạy:
-docker compose up -d
-```
-
-Hoặc PostgreSQL local qua package dev (không cần Docker):
-
-```sh
-npm run db:local
-```
-
-Giữ terminal database mở. Cả hai dùng `POSTGRES_*` trong `.env`; không chạy đồng thời trên cùng port. Local cluster lưu ở `.local/postgres`; Ctrl+C dừng database. Với database có sẵn, chỉnh `DATABASE_URL` rồi bỏ qua bước khởi động DB.
-
-Trong terminal khác:
-
-```sh
-npm run db:migrate
-npm run db:seed
-npm run dev
-```
-
-Mở URL `WEB_ORIGIN` trong `.env` (mặc định `http://localhost:5173`). Vite proxy `/api` đến `API_PORT`; không có database credentials trong bundle frontend. Nếu đổi origin/port, khởi động lại dev server. `VITE_API_TIMEOUT_MS` là thời gian chờ tối đa mỗi request (ms, ví dụ trong `.env.example`); khi cập nhật từ bản cũ, bổ sung biến này vào `.env` trước khi build/dev. Giá trị được kiểm tra khi Vite khởi động và được đưa vào bundle; thay đổi cần restart/rebuild. Chỉ đưa cấu hình công khai vào biến `VITE_*`.
-
-Seed là dữ liệu ví dụ do nhóm kiểm soát qua `SEED_DATA_FILE`; có thể thay JSON trước lần seed đầu. Chạy lại seed giữ nguyên user, Hub và trạng thái vận hành đã tồn tại; thay mật khẩu trong `.env` sau seed không tự đổi mật khẩu user cũ. Các thay đổi dữ liệu đang vận hành phải đi qua migration/service hoặc công cụ quản trị phù hợp.
-
-## Kiểm tra
-
-```sh
-npm run demo:t14
-```
-
-Sau `npm ci` và `npm run setup:env`, lệnh này build ứng dụng, tạo PostgreSQL tạm, migrate/seed từ `database/seed.example.json`, mở API/Vite trên cổng trống và in URL cùng hai tài khoản ngẫu nhiên riêng cho phiên demo. Không dùng `DATABASE_URL` vận hành, không đổi `.env` hoặc seed DB đang dùng. Giữ terminal mở; Ctrl+C dừng API/Vite/PostgreSQL và xóa dữ liệu tạm. Có thể chỉ định `DEMO_SEED_DATA_FILE` cho một seed fixture khác. Không chia sẻ thông tin đăng nhập tạm.
-
-Kịch bản, kết quả và giới hạn: [demo tích hợp T14](demo/T14-integrated-demo.md). T35 đã tích hợp qua PR #13; xem [hoàn tất kỹ thuật T14 ngày 23/10](demo/T14-t35-completion.md). Nghiệm thu/demo của từng thành viên vẫn cần được xác nhận riêng.
-
-```sh
-npm run build
-npm test
-npm run format:check
-```
-
-`npm test` chạy API integration trên PostgreSQL tạm/HTTP thật và frontend tests với Vitest/jsdom. Có thể chạy riêng `npm run test:api` hoặc `npm run test:web`. Database test dùng port trống, migration/seed riêng rồi dừng/xóa **chỉ cluster test**; không ghi vào database vận hành.
-
 ## Cấu trúc
 
 ```text
@@ -109,8 +46,6 @@ database/seed.example.json dữ liệu giả lập đầu vào
 scripts/               setup, database, migration, seed
 tests/                 integration test trên PostgreSQL thật
 ```
-
-Đọc `AGENTS.md`, `docs/guides/DESIGN.md`, `docs/api.md` và `docs/guides/CONTRIBUTING.md` trước khi bổ sung module. Không dùng frontend để quyết định quyền hoặc phân bổ tài nguyên.
 
 Đặc tả 15 use case: `docs/use-cases.md`; UML source: `docs/diagrams/`; kế hoạch 36 testcase tích hợp và traceability: `docs/integration-test-plan.md`. Kết quả chạy thực tế được ghi riêng tại `docs/testing.md`.
 
