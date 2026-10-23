@@ -15,7 +15,9 @@ export function useAppPage(role?: Role) {
       ? "overview"
       : hash === "#/simulation" || hash === "#/simulation/guide"
         ? "simulation"
-        : "overview";
+        : hash === "#/hubs/manage"
+          ? "hub-management"
+          : "overview";
   useEffect(() => {
     document.getElementById("main")?.focus();
     window.scrollTo(0, 0);

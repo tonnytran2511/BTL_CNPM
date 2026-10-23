@@ -38,3 +38,7 @@ Mọi lệnh giữ/nhận/trả/điều chuyển cần transaction và kiểm tr
 - Giả định nhu cầu/thời gian của simulation; chỉ số và tiêu chí đề xuất.
 
 Với mỗi quyết định, ghi lựa chọn, lý do, ảnh hưởng API/schema và test cần có. Không tự coi phần đang mở là đã được giảng viên hoặc cả nhóm phê duyệt.
+
+## Service giữ cổng T18 cho T19
+
+Import MobilityModule và inject ChargingAllocationService. Gọi allocatePrivateRequest(actor, requestId, pointId, client) với actor operator đã xác thực và PoolClient đang ở trong Database.transaction. Lỗi phải rollback, không commit phần còn lại. Thứ tự khóa Hub → xe cá nhân → request → point. Service trả {id, requestId, chargingPointId, status}; cấp mới có status scheduled, chưa chạy sạc. Đây là API nội bộ backend, không phải endpoint HTTP. Xe thuê chờ thống nhất thao tác charging với RentalService của Duy Tân; không cập nhật trực tiếp trạng thái xe thuê từ mobility. Xem docs/allocation-safety.md.

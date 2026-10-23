@@ -46,10 +46,25 @@ Các endpoint dưới đây là đề xuất, **chưa tồn tại**; chủ modul
 | ---------- | ------------------------------------------------------------------------------------------ |
 | TV2        | Nhận/trả và danh sách chuyến đã triển khai bên dưới; hết hạn tự động còn thuộc T16         |
 | TV3        | Đã triển khai local các endpoint `/mobility` bên dưới; scheduler/phiên sạc còn chờ tuần 2. |
-| TV4        | POST/PATCH /hubs (incident/redistribution đã triển khai bên trên)                          |
+| TV4        | Hub CRUD/cấu hình tài nguyên; incident/redistribution đã triển khai bên trên               |
 | TV5        | POST /simulations; GET /simulations/:id; GET /simulations                                  |
 
-TV4 đã triển khai các endpoint incident và redistribution nêu ở trên. `POST /redistributions` chỉ tạo lệnh `pending`; `start` kiểm tra lại Hub, xe available tại nguồn và incident đang mở trong transaction rồi chuyển xe sang `redistributing`. `cancel` chỉ áp dụng trước khi bắt đầu. Hoàn tất điều chuyển cần allocation service của TV3 để chiếm chỗ ở Hub đích; endpoint hoàn tất chưa được bật cho đến khi service đó được tích hợp.
+TV4 đã triển khai các endpoint quản trị Hub/tài nguyên ở dưới cùng với incident và redistribution nêu ở trên. `POST /redistributions` chỉ tạo lệnh `pending`; `start` kiểm tra lại Hub, xe available tại nguồn và incident đang mở trong transaction rồi chuyển xe sang `redistributing`. `cancel` chỉ áp dụng trước khi bắt đầu. Hoàn tất điều chuyển cần allocation service của TV3 để chiếm chỗ ở Hub đích; endpoint hoàn tất chưa được bật cho đến khi service đó được tích hợp.
+
+## T35 — Quản trị Hub và tài nguyên
+
+Các endpoint dưới đây dành cho operator. Tạo Hub chuẩn hóa code thành chữ hoa. Sửa thông tin không sửa tài nguyên đang vận hành; xóa chỉ thành công khi không còn tham chiếu dữ liệu và không có incident Hub đang mở.
+
+| Method / path                             | Input                                               | Response / quy tắc                                                                       |
+| ----------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| POST /hubs                                | `{code,name,location}`                              | 201; code duy nhất, 409 nếu trùng                                                        |
+| PATCH /hubs/:id                           | `{name?,location?,status?}`                         | 200; chỉ sửa trường gửi lên; 404 nếu không có Hub                                        |
+| DELETE /hubs/:id                          | —                                                   | 200 `{success:true}`; 404 nếu không có; 409 nếu còn dữ liệu liên quan/sự cố mở           |
+| PUT /hubs/:id/parking-capacity            | `{capacity}` (0–setting `maxParkingCapacityPerHub`) | 200 `{hubId,capacity}`; tạo/xóa hàng `parking_spaces` trong transaction                  |
+| POST /hubs/:id/charging-points            | `{code}`                                            | 201 cổng sạc trạng thái mặc định `available`; code duy nhất tại Hub                      |
+| DELETE /hubs/:id/charging-points/:pointId | —                                                   | 200 `{success:true}`; 404 nếu không có/khác Hub; 409 nếu occupied/có session/incident mở |
+
+`maxParkingCapacityPerHub` được lưu trong `settings` (migration 005, mặc định 5000) và đọc lại khi cấu hình. Giảm sức chứa không thể thấp hơn số chỗ occupied hoặc held còn hạn. Chỗ bị xóa phải available và không có booking tham chiếu (kể cả lịch sử); nếu không đủ chỗ an toàn thì toàn bộ thao tác rollback. Xóa cổng khóa Hub rồi cổng trước khi đọc incident để không xóa tài nguyên vừa có sự cố đồng thời. Tạo/xóa cổng sạc không thay đổi trạng thái vận hành của các cổng còn lại. Request DTO từ chối field ngoài danh sách.
 
 Không thêm endpoint success giả hoặc dữ liệu mẫu trong component để thay phần chưa triển khai.
 
@@ -135,3 +150,7 @@ Lặp pickup của reservation fulfilled trả lại trip cũ. Lặp return củ
 Hub đích đầy/inactive: rollback và trả 409 với `details: {suggestedHubs: HubSuggestion[]}`. Gợi ý chỉ là số liệu tại lúc đọc, không giữ chỗ; lấy tối đa `settings.returnHubSuggestionLimit`, số nguyên dương trong phạm vi integer PostgreSQL, được kiểm tra hợp lệ (thiếu/sai → 500 chung). Migration 004 lưu baseline 5 từ T08, có thể đổi trong DB; không có fallback/hằng số giới hạn trong service/UI. Điều kiện chỗ trống loại chỗ đã cam kết cho lịch đỗ còn hiệu lực như AllocationPort.
 
 GET trips trả mọi chuyến active và tối đa 100 chuyến completed mới nhất, sắp thời điểm giảm dần; UI có điều khiển trả riêng cho từng chuyến active, không giả định mỗi người chỉ thuê một xe. RequestError giữ đồng thời code, status và details; filter chỉ chuyển tiếp details cho 4xx, không cho 5xx. Module mới sử dụng cùng API client/deadline với dashboard, mobility và simulation.
+
+## T18 — giữ cổng sạc nguyên tử
+
+Không thêm hoặc thay đổi endpoint HTTP trong T18. Backend export ChargingAllocationService.allocatePrivateRequest(actor, requestId, pointId, client) để T19 dùng. Quyền operator, xe cá nhân còn đỗ đúng Hub, pin còn cần sạc và cổng cùng Hub/available được kiểm tra trong transaction; point occupied bao gồm đã được giữ cho session scheduled. Cổng failed không được cấp mới. Rental search/reservation đã có trong main, nhưng phân bổ sạc xe thuê chờ contract chuyển trạng thái xe dùng cùng transaction. Scheduler, API vòng đời phiên và giao diện quản lý phiên thuộc T19. Chi tiết docs/allocation-safety.md.

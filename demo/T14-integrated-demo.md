@@ -1,5 +1,7 @@
 # T14 — demo tích hợp lần 1 và bàn giao
 
+> Cập nhật 23/10/2026: T35 đã merge qua PR #13 và được kiểm chứng bổ sung tại [hoàn tất T14/T35](T14-t35-completion.md). Nội dung dưới đây giữ nguyên bằng chứng và giới hạn của phiên 20/10; không mô tả trạng thái hiện tại.
+
 Thực hiện bù mốc D7 ngày **20/10/2026**, khoảng 15:35–15:40 (Asia/Ho_Chi_Minh). Phụ trách: Minh Tường; kiểm tra do Codex thực hiện theo yêu cầu. Bản ứng dụng: main `435f7a0` sau PR #11, gồm auth/dashboard, mobility, rental T08, operations T12 và simulation T13/UI PR #9.
 
 **Trạng thái: đã chuẩn bị bản tích hợp, chạy demo phạm vi hiện có và cập nhật tài liệu; T14 chưa được nghiệm thu đầy đủ vì T35 còn chờ.** Minh Tường đã chọn hoàn thiện T14 và ghi rõ phụ thuộc T35; không triển khai thay T35 trong đợt này. Không dùng kết quả này để xác nhận T23/T25 hoặc các module tuần 2 đã xong.
