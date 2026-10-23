@@ -1,5 +1,7 @@
 # Nhật ký hỗ trợ AI
 
+23/10/2026: Theo yêu cầu Minh Tường hoàn tất sau T35, Codex review bản PR #13 đã merge, thêm regression HTTP/PostgreSQL (đặc biệt incident/delete đồng thời), chạy build/test và demo UI trên DB tạm; xác minh TXT tải thực tế, lưu ảnh/báo cáo và cập nhật tài liệu T14. Không triển khai thay T16/T19–T22/T37, không tự xác nhận peer review hoặc khả năng giải thích của thành viên.
+
 20/10/2026: Theo yêu cầu Minh Tường làm T14, Codex tích hợp PR #11, chạy demo Chrome trên Nest/Vite/PostgreSQL riêng cho thuê xe, đặt/check-in/out, queue sạc và simulation; kiểm tra API T12 và hash 13 bảng trước/sau simulation. Bổ sung runner demo database tạm, báo cáo T14, bằng chứng JSON, defect/gap log và cập nhật use case/thiết kế. Minh Tường chọn ghi T35 là phụ thuộc còn chờ, không triển khai thay owner; chưa nghiệm thu đủ T14. Không xác nhận video, peer review hoặc TXT download khi chưa có bằng chứng.
 
 20/10/2026: Theo yêu cầu Minh Tường thực hiện task tuần 2 từ bảng phân công, Codex hỗ trợ T15: rà polling/auth/error, xác minh danh tính/role trước refresh, xử lý dashboard 403 và sự kiện online, che message nội bộ 5xx; bổ sung regression tests frontend và kiểm tra API/PostgreSQL xuyên module đặt/hủy xe. Codex hỗ trợ soạn execution log và phần báo cáo tuần 2 T24, ghi rõ các gate T23/T25 chưa đủ điều kiện. Kiểm thử tự động không thay thế peer review, demo và khả năng giải thích của Minh Tường; không tự cập nhật tiến độ bảng Google Sheets.
@@ -42,3 +44,7 @@ Nhóm cần tự review, chỉnh sửa và chạy lại; ghi rõ các phần đ�
 20/10/2026: Codex tiếp tục kiểm tra T15 trong IAB với Nest API/PostgreSQL tạm riêng: đặt/hủy, polling tự nhận thay đổi DB và đổi role operator về student làm UI reset. Đã dọn fixture; không dùng dữ liệu vận hành. Kiểm tra này không thay cho peer review/demo của thành viên.
 
 20/10/2026: Theo yêu cầu tiếp tục của Minh Tường, Codex rà và chuẩn bị tích hợp PR #8/T08 lên nền T15: giải quyết conflict giữ nguyên simulation/dashboard/operations, tách điều phối và lựa chọn Hub khỏi UI, bảo vệ generation của mutation, hiển thị mọi chuyến active, cấu hình số Hub gợi ý và khóa Hub trước xe. Codex bổ sung test browser/API/PostgreSQL, cập nhật contract/sequence và ghi giới hạn. Giữ tác giả commit gốc T08; phần sửa tích hợp cần Minh Tường/Duy Tân review và giải thích.
+
+20/10/2026: Theo yêu cầu Mai Anh, Codex chuyển phần T18 sang worktree riêng trên nền main c73dabe trong folder BTL_CNPM-main (2), giữ các module đã tích hợp. Bổ sung service/repository/model giữ cổng xe cá nhân nguyên tử, test PostgreSQL đồng thời/rollback và tài liệu. npm test trên nền tích hợp pass 54 API + 18 frontend tests. Không viết thay rental/incident; các contract chưa có được ghi rõ. T18 được lưu commit local để T19 kế thừa; chưa push, peer review/merge phần mới.
+
+23/10/2026: Codex hỗ trợ Mai Anh cập nhật nhánh T18 với main a80ca54 trên folder (3)), giải quyết 5 xung đột giữ cả test/tài liệu hai phía; thêm 5 vòng phân bổ sạc/xóa cổng đồng thời. Build, 84 API + 40 frontend tests và format/diff checks pass. Chưa push, chưa peer review/merge bản cập nhật.

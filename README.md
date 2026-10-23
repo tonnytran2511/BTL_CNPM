@@ -69,7 +69,7 @@ npm run demo:t14
 
 Sau `npm ci` và `npm run setup:env`, lệnh này build ứng dụng, tạo PostgreSQL tạm, migrate/seed từ `database/seed.example.json`, mở API/Vite trên cổng trống và in URL cùng hai tài khoản ngẫu nhiên riêng cho phiên demo. Không dùng `DATABASE_URL` vận hành, không đổi `.env` hoặc seed DB đang dùng. Giữ terminal mở; Ctrl+C dừng API/Vite/PostgreSQL và xóa dữ liệu tạm. Có thể chỉ định `DEMO_SEED_DATA_FILE` cho một seed fixture khác. Không chia sẻ thông tin đăng nhập tạm.
 
-Kịch bản, kết quả và giới hạn: [demo tích hợp T14](demo/T14-integrated-demo.md). T35 còn chờ; không coi việc chạy demo các module hiện có là nghiệm thu đầy đủ T14.
+Kịch bản, kết quả và giới hạn: [demo tích hợp T14](demo/T14-integrated-demo.md). T35 đã tích hợp qua PR #13; xem [hoàn tất kỹ thuật T14 ngày 23/10](demo/T14-t35-completion.md). Nghiệm thu/demo của từng thành viên vẫn cần được xác nhận riêng.
 
 ```sh
 npm run build

@@ -7,7 +7,7 @@ rectangle "Smart E-Mobility Hub — luồng vận hành" {
   usecase "UC-09\nYêu cầu sạc xe thuê" as UC09
   usecase "UC-10\nPhân bổ / quản lý phiên sạc" as UC10 <<planned>>
   usecase "UC-11\nGiám sát mạng lưới" as UC11
-  usecase "UC-12\nQuản lý Hub / tài nguyên" as UC12 <<planned>>
+  usecase "UC-12\nQuản lý Hub / tài nguyên" as UC12
   usecase "UC-13\nXử lý sự cố" as UC13 <<partial>>
   usecase "UC-14\nĐiều chuyển xe" as UC14 <<partial>>
   usecase "UC-15\nWhat-if và đề xuất" as UC15 <<partial>>
@@ -27,7 +27,8 @@ note bottom of UC15
   cần kiểm tra lại trạng thái thực.
 end note
 note bottom of UC12
-  T14: T35 chưa có code/PR, còn chờ owner.
+  T35: CRUD Hub/capacity/cổng sạc có API + UI.
+  Audit log chung và policy cam kết khi inactive còn mở.
 end note
 note bottom of UC13
   T12 chỉ ghi và resolve incident qua API.
@@ -38,7 +39,7 @@ note bottom of UC14
   Chưa có hoàn tất điều chuyển hoặc UI.
 end note
 legend bottom
-  T14 — 20/10/2026
+  T14 — cập nhật 23/10/2026
   planned: chưa triển khai
   partial: chỉ có phạm vi ghi tại use-cases.md
 endlegend

@@ -13,10 +13,18 @@ import { VehicleSearch } from "./components/VehicleSearch";
 import { formatNumber, formatTime } from "./utils/format";
 import { useMobility } from "./hooks/useMobility";
 import { MobilityPanel } from "./components/MobilityPanel";
+import { useHubManagement } from "./hooks/useHubManagement";
+import { HubManagementPage } from "./pages/HubManagementPage";
 export function App() {
   const model = useFoundation();
   const simulation = useSimulation(model.user);
   const page = useAppPage(model.user?.role);
+  const hubManagement = useHubManagement(
+    model.user,
+    model.user?.role === "operator" && page === "hub-management",
+    model.sessionExpired,
+    model.accessRevoked,
+  );
   const hub = useHubDetail(
     model.user?.id,
     model.updatedAt,
@@ -101,11 +109,19 @@ export function App() {
             >
               Mô phỏng
             </a>
+            <a
+              href="#/hubs/manage"
+              aria-current={page === "hub-management" ? "page" : undefined}
+            >
+              Quản lý Hub
+            </a>
           </>
         )}
       </nav>
       <main id="main" tabIndex={-1}>
-        {page === "simulation" ? (
+        {page === "hub-management" ? (
+          <HubManagementPage model={hubManagement} />
+        ) : page === "simulation" ? (
           <SimulationPage
             model={simulation}
             hubs={model.hubs}
