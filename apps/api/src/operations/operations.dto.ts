@@ -2,6 +2,10 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
   IsIn,
   IsString,
   IsUUID,
@@ -16,6 +20,8 @@ import type {
 } from "@emobility/contracts";
 
 export class IncidentDto implements CreateIncidentRequest {
+  @IsOptional() @IsUUID() sessionId?: string;
+  @IsOptional() @IsInt() @Min(0) @Max(100) achievedBatteryPercent?: number;
   @IsIn(["vehicle", "charging_point", "hub"])
   resourceType!: IncidentResourceType;
   @IsUUID() resourceId!: string;

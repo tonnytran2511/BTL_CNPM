@@ -150,4 +150,14 @@ export class ChargingWorkflowRepository {
       JOIN vehicles v ON v.id=r.vehicle_id JOIN hubs h ON h.id=r.hub_id WHERE r.status='queued' ORDER BY r.created_at,r.id`)
     ).rows;
   }
+  async pointHasOpenIncident(c: PoolClient, id: string) {
+    return Boolean(
+      (
+        await c.query(
+          "SELECT 1 FROM incidents WHERE resource_type='charging_point' AND resource_id=$1 AND status='open' LIMIT 1",
+          [id],
+        )
+      ).rowCount,
+    );
+  }
 }

@@ -131,3 +131,7 @@ Build và format/diff check pass; npm test **102/102 backend + 48/48 frontend pa
 ## T19 kiểm chứng ở checkout mới — 23/10/2026
 
 Giữ nguyên bản T19 và README Mai Anh đã chỉnh trên nền main e918f9d. Build/format pass. Lần chạy tổng backend có 101 pass và một suite lỗi EBUSY khi Windows dọn thư mục PostgreSQL tạm; không có assertion nghiệp vụ thất bại. Bổ sung maxRetries=10, retryDelay=100ms vào bước rm thư mục test T16 để xử lý khóa file tạm có giới hạn. Chạy lại riêng reservation-expiry.test.mjs: 12/12 pass; frontend: 48/48 pass. Các bộ backend đạt sau lần chạy lại, không mô tả thành một lần chạy tổng 102/102 mới. Không đổi nghiệp vụ hoặc schema; không thay chỉnh sửa README của Mai Anh.
+
+## T20 — 23/10/2026
+
+Build pass; npm test **103/103 API + 53/53 frontend pass**; format/diff checks pass. Có kiểm thử gián đoạn/requeue/repair, API incidents cũ, replay, rollback và fail/allocate/complete/delete đồng thời. Chi tiết [execution T20](test-runs/2026-10-23-t20-failure-recovery.md). Chỉ local, chưa push/merge; chưa demo trình duyệt toàn luồng.

@@ -1,3 +1,7 @@
+import { ChargingIncidentModule } from "../operations/charging-incident.module";
+import { ChargingFailureController } from "./charging-failure.controller";
+import { ChargingFailureRepository } from "./charging-failure.repository";
+import { ChargingFailureService } from "./charging-failure.service";
 import { RentalChargingModule } from "../rental/rental-charging.module";
 import { Module } from "@nestjs/common";
 import { ALLOCATION_PORT } from "../integration/allocation.port";
@@ -10,9 +14,15 @@ import { ChargingWorkflowRepository } from "./charging-workflow.repository";
 import { ChargingWorkflowService } from "./charging-workflow.service";
 import { ChargingWorkflowController } from "./charging-workflow.controller";
 @Module({
-  imports: [RentalChargingModule],
-  controllers: [MobilityController, ChargingWorkflowController],
+  imports: [RentalChargingModule, ChargingIncidentModule],
+  controllers: [
+    MobilityController,
+    ChargingWorkflowController,
+    ChargingFailureController,
+  ],
   providers: [
+    ChargingFailureRepository,
+    ChargingFailureService,
     MobilityRepository,
     MobilityService,
     ChargingAllocationRepository,
@@ -21,6 +31,11 @@ import { ChargingWorkflowController } from "./charging-workflow.controller";
     ChargingWorkflowService,
     { provide: ALLOCATION_PORT, useExisting: MobilityService },
   ],
-  exports: [ALLOCATION_PORT, MobilityService, ChargingAllocationService],
+  exports: [
+    ALLOCATION_PORT,
+    MobilityService,
+    ChargingAllocationService,
+    ChargingFailureService,
+  ],
 })
 export class MobilityModule {}

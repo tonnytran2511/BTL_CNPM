@@ -105,4 +105,14 @@ export class ChargingAllocationRepository {
       )
     ).rows[0];
   }
+  async pointHasOpenIncident(c: PoolClient, id: string) {
+    return Boolean(
+      (
+        await c.query(
+          "SELECT 1 FROM incidents WHERE resource_type='charging_point' AND resource_id=$1 AND status='open' LIMIT 1",
+          [id],
+        )
+      ).rowCount,
+    );
+  }
 }

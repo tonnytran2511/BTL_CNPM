@@ -160,6 +160,8 @@ export class ChargingWorkflowService {
       )
         throw new ConflictException("Phiên sạc không ở trạng thái phù hợp.");
       if (action === "start") {
+        if (await this.repo.pointHasOpenIncident(c, point.id))
+          throw new ConflictException("Cổng có sự cố chưa xử lý.");
         const hub = await this.mobility.activeHub(c, located.hub_id);
         if (
           hub.status !== "active" ||

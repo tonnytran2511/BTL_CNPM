@@ -1,5 +1,24 @@
 # Smart E-Mobility Hub
 
+## T20 — xử lý sự cố cổng sạc
+
+Nhánh: `t20/charging-failure-recovery`. Phụ trách: Mai Anh. Kế thừa T19; chỉ local, chưa push/review/merge.
+
+| Công việc T20   | Chức năng                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Báo hỏng        | Operator chọn cổng, nhập mô tả; cổng failed, chặn cấp/bắt đầu phiên mới.                                                        |
+| Gián đoạn phiên | scheduled/charging → interrupted; phiên đang chạy phải nhập đúng pin quan sát và ID phiên.                                      |
+| Giữ nhu cầu     | Chưa đạt pin mục tiêu thì đưa request về queued, giữ ID/thời gian chờ; đủ pin thì fulfilled. Operator có thể cấp lại cổng khác. |
+| Khôi phục       | Sau khi sửa và kiểm tra, operator xác nhận sửa xong; đóng incident cổng, đưa cổng về available, không chạy lại phiên cũ.        |
+| Tích hợp        | Cả API sự cố cũ và UI mới dùng chung transaction; sự cố, pin, xe thuê, phiên và request rollback cùng nhau khi lỗi.             |
+| Kiểm chứng      | Kiểm thử gửi lặp, pin/phiên cũ, phân bổ/hoàn tất/xóa cổng đồng thời, rollback và quyền operator.                                |
+
+**Dùng thử:** đăng nhập operator → **Sự cố cổng sạc** → chọn cổng → mô tả và pin thực tế nếu đang sạc → **Báo hỏng cổng và xử lý phiên**. Sau khi sửa, chọn cổng hỏng và bấm **Xác nhận đã sửa xong**.
+
+Không tự tăng pin, tự sửa cổng hoặc tự phân bổ lại theo chu kỳ. Xử lý xe/Hub hỏng và trip đang chạy ngoài phạm vi T20. Hướng dẫn/API chi tiết tại [docs/charging-failure-recovery.md](docs/charging-failure-recovery.md).
+
+Phần T19 phía dưới là chức năng nền được kế thừa.
+
 ## T19 — điều phối hàng chờ và phiên sạc
 
 Nhánh: `t19/charging-scheduler`. Cập nhật ngày 23/10/2026 trên main `e918f9d`.
@@ -17,7 +36,7 @@ Phụ trách: Mai Anh.
 Đăng nhập operator → “Điều phối sạc” → gửi yêu cầu xe thuê hoặc chọn Hub để phân bổ → bắt đầu phiên → nhập pin thực tế khi hoàn tất/hủy.
 Xe cá nhân: đăng ký → đặt chỗ → check-in đúng Hub → gửi yêu cầu sạc. Yêu cầu còn queued chưa giữ xe thuê; xe được đặt/di chuyển trước đó sẽ không được phân bổ khi không còn đủ điều kiện.
 
-Hạn chế: chưa tự tăng pin hoặc tự chạy phân bổ theo chu kỳ; người vận hành chủ động xác nhận. Xử lý cổng hỏng, interrupted và đưa nhu cầu trở lại hàng chờ thuộc **T20**, chưa triển khai trong nhánh này. available vẫn phải đủ pin và ở Hub hoạt động mới thuê được.
+Hạn chế: chưa tự tăng pin hoặc tự chạy phân bổ theo chu kỳ; người vận hành chủ động xác nhận. Nhánh T20 này đã bổ sung xử lý cổng hỏng, interrupted và đưa nhu cầu trở lại hàng chờ như mục phía trên. available vẫn phải đủ pin và ở Hub hoạt động mới thuê được.
 
 ## Những phần đang chạy
 
@@ -48,3 +67,7 @@ tests/                 integration test trên PostgreSQL thật
 Đặc tả 15 use case: `docs/use-cases.md`; UML source: `docs/diagrams/`; kế hoạch 36 testcase tích hợp và traceability: `docs/integration-test-plan.md`. Kết quả chạy thực tế được ghi riêng tại `docs/testing.md`.
 
 Chạy production cần hosting, HTTPS/cookie Secure, cấu hình DB và chiến lược vận hành riêng; compose/local hiện phục vụ phát triển. Hướng dẫn này không khẳng định hệ thống đã được triển khai production.
+
+## Kiểm chứng T20
+
+Build và kiểm tra định dạng pass; **103 kiểm thử backend + 53 frontend pass**. Kết quả và giới hạn tại [execution T20](docs/test-runs/2026-10-23-t20-failure-recovery.md). Chưa peer review/merge hoặc triển khai production.

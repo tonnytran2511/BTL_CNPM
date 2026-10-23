@@ -356,3 +356,7 @@ stateDiagram-v2
 ```
 
 queued chưa giữ xe; reservation và redistribution kiểm tra trạng thái trên cùng hàng xe đã khóa. Pin dưới ngưỡng thuê hoặc Hub inactive vẫn không xuất hiện trong tìm xe dù status available. Sự cố/interrupted chưa thuộc luồng T19 này. Xem charging-scheduler.md về API, transaction và kiểm thử.
+
+## T20 — sự cố cổng sạc
+
+ChargingFailurePanel → useChargingFailures → chargingFailureApi → ChargingFailureController → ChargingFailureService. Service dùng MobilityRepository.transaction, ChargingFailureRepository, RentalChargingService và ChargingIncidentService với cùng PoolClient. OperationsService chuyển incident charging_point sang workflow T20; các incident khác giữ nguyên. ChargingIncidentModule là module lá, không tạo vòng OperationsModule/RentalModule/MobilityModule. Sơ đồ vòng đời và chính sách tại charging-failure-recovery.md.

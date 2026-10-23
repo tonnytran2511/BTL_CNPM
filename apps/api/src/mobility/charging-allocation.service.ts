@@ -57,7 +57,10 @@ export class ChargingAllocationService {
     if (!point) throw new NotFoundException("Không tìm thấy cổng sạc.");
     if (point.hub_id !== request.hub_id)
       throw new ConflictException("Cổng và yêu cầu phải thuộc cùng Hub.");
-    if (point.status === "failed")
+    if (
+      point.status === "failed" ||
+      (await this.repo.pointHasOpenIncident(client, pointId))
+    )
       throw new ConflictException("Cổng sạc đang hỏng.");
     if (!vehicle || vehicle.owner_id !== request.user_id)
       throw new ConflictException("Xe không còn thuộc người gửi yêu cầu.");
@@ -116,7 +119,12 @@ export class ChargingAllocationService {
       request.hub_id !== located.hub_id
     )
       throw new ConflictException("Yêu cầu đã thay đổi.");
-    if (!point || point.hub_id !== request.hub_id || point.status === "failed")
+    if (
+      !point ||
+      point.hub_id !== request.hub_id ||
+      point.status === "failed" ||
+      (await this.repo.pointHasOpenIncident(c, pointId))
+    )
       throw new ConflictException("Cổng không phù hợp.");
     const existing = await this.repo.activeSession(c, requestId);
     if (

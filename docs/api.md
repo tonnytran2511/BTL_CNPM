@@ -158,3 +158,7 @@ Không thêm hoặc thay đổi endpoint HTTP trong T18. Backend export Charging
 ## T19 — API quản lý sạc
 
 Xem [hợp đồng điều phối sạc](charging-scheduler.md): overview, schedule và start/complete/cancel. Chỉ operator; POST yêu cầu Idempotency-Key. Phạm vi xe cá nhân và xe thuê; operator có thể tạo/hủy yêu cầu xe thuê và quản lý phiên. RentalChargingService giữ/giải phóng trạng thái xe trong cùng transaction.
+
+## T20 — sự cố cổng sạc
+
+GET /mobility/charging/points và POST /mobility/charging/points/:id/fail|recover chỉ dành operator. Các POST mới cần Idempotency-Key; phiên charging cần sessionId và pin quan sát. POST incidents/resolve cho charging_point dùng cùng workflow T20, giữ contract trả Incident. Phần ghi chú incident chỉ là nhật ký ở các mục trước là lịch sử trước T20. Hợp đồng và mã lỗi chi tiết: [charging-failure-recovery.md](charging-failure-recovery.md).

@@ -1,5 +1,6 @@
 import {
   Body,
+  Headers,
   Controller,
   Inject,
   Param,
@@ -19,13 +20,21 @@ export class OperationsController {
   ) {}
 
   @Post("incidents")
-  createIncident(@Body() body: IncidentDto, @Req() req: AuthRequest) {
-    return this.operations.createIncident(body, req.user.id);
+  createIncident(
+    @Body() body: IncidentDto,
+    @Req() req: AuthRequest,
+    @Headers("idempotency-key") key?: string,
+  ) {
+    return this.operations.createIncident(body, req.user.id, key);
   }
 
   @Post("incidents/:id/resolve")
-  resolveIncident(@Param("id", ParseUUIDPipe) id: string) {
-    return this.operations.resolveIncident(id);
+  resolveIncident(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Req() req: AuthRequest,
+    @Headers("idempotency-key") key?: string,
+  ) {
+    return this.operations.resolveIncident(id, req.user.id, key);
   }
 
   @Post("redistributions")
