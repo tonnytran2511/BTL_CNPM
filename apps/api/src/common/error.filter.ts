@@ -13,19 +13,31 @@ export class ErrorFilter implements ExceptionFilter {
     const status = error instanceof HttpException ? error.getStatus() : 500;
     const body = error instanceof HttpException ? error.getResponse() : null;
     let message = "Không thể xử lý yêu cầu. Vui lòng thử lại.";
-    if (typeof body === "string") message = body;
-    else if (body && typeof body === "object" && "message" in body) {
-      const value = body.message;
-      message = Array.isArray(value) ? value.join("; ") : String(value);
+    if (status < 500) {
+      if (typeof body === "string") message = body;
+      else if (body && typeof body === "object" && "message" in body) {
+        const value = body.message;
+        message = Array.isArray(value) ? value.join("; ") : String(value);
+      }
     }
     if (status >= 500)
       this.logger.error(
         "Request failed; inspect database availability and application configuration.",
       );
+    // `details` là dữ liệu có cấu trúc do service chủ động đính kèm (ví dụ gợi ý Hub khi trả xe, BR-03).
+    const details =
+      status < 500 && body && typeof body === "object" && "details" in body
+        ? body.details
+        : undefined;
     host
       .switchToHttp()
       .getResponse<Response>()
       .status(status)
-      .json({ statusCode: status, code: `HTTP_${status}`, message });
+      .json({
+        statusCode: status,
+        code: `HTTP_${status}`,
+        message,
+        ...(details === undefined ? {} : { details }),
+      });
   }
 }

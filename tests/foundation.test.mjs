@@ -10,6 +10,7 @@ import { once } from "node:events";
 import EmbeddedPostgres from "embedded-postgres";
 import pg from "pg";
 import { root } from "../scripts/env.mjs";
+import { checkDashboard } from "./dashboard-check.mjs";
 async function freePort() {
   const server = createServer();
   server.listen(0, "127.0.0.1");
@@ -150,6 +151,12 @@ test(
         },
       );
       await t.test(
+        "T14/T35 Hub management integration and incident race",
+        async () => {
+          await command("tests/hub-management-check.mjs", env);
+        },
+      );
+      await t.test(
         "shared transaction commits, rolls back and enforces read-only snapshots",
         async () => {
           await command("tests/transaction-check.mjs", env);
@@ -217,6 +224,7 @@ test(
       });
       assert.equal(operator.status, 201);
       assert.equal(student.status, 201);
+      await checkDashboard({ t, request, operator, student });
       await t.test(
         "sessions do not expose credentials; authorization is server-side",
         async () => {

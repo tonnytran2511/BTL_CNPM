@@ -1,3 +1,5 @@
+import { HubManagementRepository } from "../apps/api/dist/hub-management/hub-management.repository.js";
+import { HubManagementService } from "../apps/api/dist/hub-management/hub-management.service.js";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import "reflect-metadata";
@@ -447,6 +449,57 @@ try {
   }
   console.log(
     "T18 charging: allocation/check-out race leaves a consistent physical state.",
+  );
+  // T35 now supports deleting a free charging point. Both operations must serialize
+  // on the same Hub and preserve request/point/session consistency in either order.
+  const management = new HubManagementService(new HubManagementRepository(db));
+  for (let round = 0; round < 5; round++) {
+    const fixture = await hub({ cars: 1, points: 1 });
+    const queued = await request(fixture);
+    const jobs =
+      round % 2
+        ? [
+            () => management.removeChargingPoint(fixture.id, fixture.points[0]),
+            () => allocate(queued.id, fixture.points[0]),
+          ]
+        : [
+            () => allocate(queued.id, fixture.points[0]),
+            () => management.removeChargingPoint(fixture.id, fixture.points[0]),
+          ];
+    const result = await Promise.allSettled(jobs.map((job) => job()));
+    assert.equal(result.filter((r) => r.status === "fulfilled").length, 1);
+    const rejected = result.find((r) => r.status === "rejected");
+    assert.ok(
+      [404, 409].includes(rejected.reason.getStatus?.()),
+      String(rejected.reason),
+    );
+    const state = (
+      await db.query(
+        `SELECT r.status,
+      (SELECT count(*)::integer FROM charging_points p WHERE p.id=$2) AS points,
+      (SELECT count(*)::integer FROM charging_sessions s WHERE s.request_id=r.id) AS sessions,
+      (SELECT p.status FROM charging_points p WHERE p.id=$2) AS point_status
+      FROM charging_requests r WHERE r.id=$1`,
+        [queued.id, fixture.points[0]],
+      )
+    ).rows[0];
+    if (state.status === "allocated")
+      assert.deepEqual(state, {
+        status: "allocated",
+        points: 1,
+        sessions: 1,
+        point_status: "occupied",
+      });
+    else
+      assert.deepEqual(state, {
+        status: "queued",
+        points: 0,
+        sessions: 0,
+        point_status: null,
+      });
+  }
+  console.log(
+    "T18/T35: 5 allocation/delete-point races keep the request, point and session consistent.",
   );
 } finally {
   await db.query(

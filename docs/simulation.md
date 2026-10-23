@@ -1,6 +1,6 @@
 # T13 — mô phỏng tăng nhu cầu
 
-Trạng thái: implementation trên nhánh Minh Khuê; chờ peer review/tích hợp. Giả định là baseline đề xuất, chưa phải mô hình nhu cầu thực tế đã được xác thực.
+Trạng thái: T13 và UI PR #9 đã tích hợp vào main; T14 ngày 20/10 kiểm tra Chrome/API/PostgreSQL cùng luồng thuê/đỗ/sạc. Giả định là baseline đề xuất, chưa phải mô hình nhu cầu thực tế đã được xác thực.
 
 ## Luồng và ranh giới
 

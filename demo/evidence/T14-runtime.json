@@ -1,0 +1,144 @@
+{
+  "verifiedAt": "2026-10-20T08:38:04.406Z",
+  "sourceCommit": "435f7a098e78510e24fec566c1579f7c1db986b0",
+  "environment": "isolated T14 PostgreSQL + Nest + Vite; synthetic accounts; not operational DB",
+  "operations": {
+    "incident": {
+      "id": "a7657c4e-99a4-4a91-a76f-d52983d0c9a7",
+      "status": "resolved",
+      "reportedByMatchesSession": true
+    },
+    "redistribution": {
+      "id": "613cca0b-e3da-4bce-9efb-3127c0877460",
+      "status": "cancelled"
+    },
+    "resourceTotalsUnchanged": true,
+    "limitation": "API only; T12 has no operator UI or completion endpoint"
+  },
+  "simulationBeforeHashes": {
+    "hubs": "7d6f49b8620308f7bfed250b49d34f3843c85cd5e8772e6a7c72981fb31e7ede",
+    "vehicles": "d930ca310f33de1b900d64fa546e4c41b3ec08dc8cf23fd5cb1926f6e3da3a94",
+    "private_vehicles": "e9e18b8a8adc3cab1a486925fb609ab0484896206a27bb31418f0be2d037df19",
+    "parking_spaces": "6cd10b60e0eec6ed0f2ad111e27b88cbaabfa41d29a43acd04c5131784432f1f",
+    "charging_points": "5e570b574d9f7a9137ea606c9c5afc8d01e1f22124d5d04295dba610f7c8f27c",
+    "parking_bookings": "12026cb27354412d2cf163e7c787a047da354ec8c252dc8743bbc37df84218c1",
+    "charging_requests": "2bbf130e94cbd7ab60f5314fc0cc73dafb8043b58350aa17bd64c9a8f517a66d",
+    "vehicle_reservations": "bbe9dbd6e7422b02980a709d79c5b820c2b41ba16eb1e3fb87bc140e0ac81332",
+    "trips": "c70179b6919823d072437cc3ba5bda567785d2f7dcaf2fe838e2b45b5febf25f",
+    "incidents": "3a16bf1a7572605b73d0413c772c901b029f06f9072bb7606d757bd7faeb7533",
+    "redistributions": "4c8886e5fd6950901f969fdb21c46f2bdc8c7ab77d2ee2bb2f92ace78b43e047",
+    "redistribution_vehicles": "b24f172097e30a7e4755e9ee84dc2657102967c768ff94f1154c43a6a31d9a9b",
+    "mobility_idempotency": "4c193727699ce5c57929b56fe01817532d691f13edacaf69ed9abf1eb9334bf7"
+  },
+  "initialTotals": {
+    "hubs": 2,
+    "vehicles": 5,
+    "availableVehicles": 2,
+    "availableParking": 14,
+    "availableCharging": 2,
+    "failedCharging": 1
+  },
+  "simulation": {
+    "capturedAt": "2026-10-20T08:38:24.238Z",
+    "source": "Chrome UI observed by Codex",
+    "modelVersion": "departures-v1",
+    "hubName": "Hub ga Metro",
+    "parameters": {
+      "horizonMinutes": 60,
+      "stepMinutes": 5,
+      "seed": 42,
+      "baselineArrivalsPerStep": 0.2,
+      "scenarioArrivalsPerStep": 2
+    },
+    "initialEligibleVehicles": 2,
+    "baseline": {
+      "demand": 6,
+      "served": 2,
+      "unserved": 4,
+      "remainingVehicles": 0
+    },
+    "scenario": {
+      "demand": 27,
+      "served": 2,
+      "unserved": 25,
+      "remainingVehicles": 0
+    },
+    "operationalTablesUnchanged": true,
+    "tablesCompared": [
+      "hubs",
+      "vehicles",
+      "private_vehicles",
+      "parking_spaces",
+      "charging_points",
+      "parking_bookings",
+      "charging_requests",
+      "vehicle_reservations",
+      "trips",
+      "incidents",
+      "redistributions",
+      "redistribution_vehicles",
+      "mobility_idempotency"
+    ],
+    "afterHashes": {
+      "hubs": "7d6f49b8620308f7bfed250b49d34f3843c85cd5e8772e6a7c72981fb31e7ede",
+      "vehicles": "d930ca310f33de1b900d64fa546e4c41b3ec08dc8cf23fd5cb1926f6e3da3a94",
+      "private_vehicles": "e9e18b8a8adc3cab1a486925fb609ab0484896206a27bb31418f0be2d037df19",
+      "parking_spaces": "6cd10b60e0eec6ed0f2ad111e27b88cbaabfa41d29a43acd04c5131784432f1f",
+      "charging_points": "5e570b574d9f7a9137ea606c9c5afc8d01e1f22124d5d04295dba610f7c8f27c",
+      "parking_bookings": "12026cb27354412d2cf163e7c787a047da354ec8c252dc8743bbc37df84218c1",
+      "charging_requests": "2bbf130e94cbd7ab60f5314fc0cc73dafb8043b58350aa17bd64c9a8f517a66d",
+      "vehicle_reservations": "bbe9dbd6e7422b02980a709d79c5b820c2b41ba16eb1e3fb87bc140e0ac81332",
+      "trips": "c70179b6919823d072437cc3ba5bda567785d2f7dcaf2fe838e2b45b5febf25f",
+      "incidents": "3a16bf1a7572605b73d0413c772c901b029f06f9072bb7606d757bd7faeb7533",
+      "redistributions": "4c8886e5fd6950901f969fdb21c46f2bdc8c7ab77d2ee2bb2f92ace78b43e047",
+      "redistribution_vehicles": "b24f172097e30a7e4755e9ee84dc2657102967c768ff94f1154c43a6a31d9a9b",
+      "mobility_idempotency": "4c193727699ce5c57929b56fe01817532d691f13edacaf69ed9abf1eb9334bf7"
+    }
+  },
+  "mobilityAtSimulation": [
+    {
+      "code": "DEMO-T14-PRIVATE",
+      "parking_status": "checked_in",
+      "charging_status": "queued",
+      "space_code": "P10"
+    }
+  ],
+  "completedAt": "2026-10-20T08:40:06.222Z",
+  "checkout": {
+    "rows": [
+      {
+        "code": "DEMO-T14-PRIVATE",
+        "status": "completed",
+        "charging_status": "cancelled",
+        "space_status": "available",
+        "private_vehicle_id": null
+      }
+    ],
+    "passed": true
+  },
+  "rental": {
+    "rows": [
+      {
+        "code": "DORM-B01",
+        "status": "completed",
+        "target_hub": "METRO",
+        "vehicle_at_target": true,
+        "occupies_target_space": true
+      }
+    ],
+    "passed": true
+  },
+  "browser": {
+    "engine": "Chrome via CUA",
+    "reloadPersistedVehicleBookingAndQueue": true,
+    "earlyCheckInRejected": true,
+    "simulationClearPreservedHorizonMinutes": 60,
+    "txtDownload": "unverified: browser automation download event timed out; no JavaScript error observed",
+    "consoleErrorsOrWarnings": [],
+    "localScreenshots": [
+      "t14-parking-charging.jpg",
+      "t14-simulation.jpg",
+      "t14-checkout.jpg"
+    ]
+  }
+}

@@ -3,6 +3,7 @@ export type * from "./simulation";
 export type * from "./planned";
 export type * from "./mobility";
 export type * from "./rental";
+export type * from "./hub-management";
 export interface User {
   id: string;
   email: string;
@@ -70,6 +71,7 @@ export interface NetworkOverview {
   updatedAt: string;
 }
 export interface ApiError {
+  details?: unknown;
   statusCode: number;
   message: string;
   code: string;

@@ -10,7 +10,7 @@ Nền tảng bài tập lớn CNPM HK261, nhóm 5 người. Frontend React/TypeS
 - Snapshot nhất quán chỉ đọc để TV5 xây simulation.
 - Seed giả lập từ JSON; migration, kiểm thử PostgreSQL riêng và kiểu API dùng chung.
 
-Phần Mai Anh tuần 1 đã có code local: đăng ký xe cá nhân, tra cứu/đặt/hủy lịch đỗ, check-in/check-out, gửi/xem yêu cầu sạc và provider AllocationPort cho thuê xe/điều chuyển. Hợp đồng API tại `docs/api.md`; còn chờ review/tích hợp của nhóm.
+Đã tích hợp đăng ký xe cá nhân, tra cứu/đặt/hủy lịch đỗ, check-in/check-out, gửi/xem yêu cầu sạc và AllocationPort; thuê xe có tìm/đặt/hủy/nhận/trả và lịch sử. T12 có API nhật ký sự cố và tạo/start/cancel lệnh trước khi chạy; chưa có UI quản trị hoặc hoàn tất điều chuyển. Hợp đồng tại `docs/api.md`.
 
 Vòng đời thuê xe, quản trị tài nguyên và sự cố/điều chuyển chưa hoàn chỉnh. T13 đã có engine mô phỏng tăng nhu cầu và operator UI; mô hình giới hạn ở lượt rời Hub, xem docs/simulation.md. Scheduler và chạy phiên sạc thuộc tuần 2.
 
@@ -60,6 +60,16 @@ Mở URL `WEB_ORIGIN` trong `.env` (mặc định `http://localhost:5173`). Vite
 Seed là dữ liệu ví dụ do nhóm kiểm soát qua `SEED_DATA_FILE`; có thể thay JSON trước lần seed đầu. Chạy lại seed giữ nguyên user, Hub và trạng thái vận hành đã tồn tại; thay mật khẩu trong `.env` sau seed không tự đổi mật khẩu user cũ. Các thay đổi dữ liệu đang vận hành phải đi qua migration/service hoặc công cụ quản trị phù hợp.
 
 ## Kiểm tra
+
+### Demo T14 bằng database riêng
+
+```sh
+npm run demo:t14
+```
+
+Sau `npm ci` và `npm run setup:env`, lệnh này build ứng dụng, tạo PostgreSQL tạm, migrate/seed từ `database/seed.example.json`, mở API/Vite trên cổng trống và in URL cùng hai tài khoản ngẫu nhiên riêng cho phiên demo. Không dùng `DATABASE_URL` vận hành, không đổi `.env` hoặc seed DB đang dùng. Giữ terminal mở; Ctrl+C dừng API/Vite/PostgreSQL và xóa dữ liệu tạm. Có thể chỉ định `DEMO_SEED_DATA_FILE` cho một seed fixture khác. Không chia sẻ thông tin đăng nhập tạm.
+
+Kịch bản, kết quả và giới hạn: [demo tích hợp T14](demo/T14-integrated-demo.md). T35 đã tích hợp qua PR #13; xem [hoàn tất kỹ thuật T14 ngày 23/10](demo/T14-t35-completion.md). Nghiệm thu/demo của từng thành viên vẫn cần được xác nhận riêng.
 
 ```sh
 npm run build

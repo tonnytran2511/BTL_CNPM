@@ -1,5 +1,21 @@
 # Kiểm chứng nền tảng — 14/10/2026
 
+## T14/T35 — kiểm chứng sau PR #13, 23/10/2026
+
+Base main `5d0d4d2` (T35 head `ee18a06`). Build API/web và bộ test hiện có pass 82 API / 40 frontend. Bổ sung một subtest vào foundation để chạy `tests/hub-management-check.mjs` trên HTTP + PostgreSQL tạm: đủ 6 mutation routes kiểm tra 401/403, CRUD/code trùng/DTO, cấu hình giới hạn, Hub inactive, dashboard động, hold và booking tương lai chặn giảm capacity với rollback, cổng occupied, và incident/delete đồng thời. Regression đồng thời đợi lock thực qua `pg_stat_activity`, không suy luận pass từ mock hoặc sleep cố định.
+
+Kết quả cuối và bằng chứng browser/TXT tại [execution 23/10](test-runs/2026-10-23-t14-t35.md), [bàn giao T14/T35](../demo/T14-t35-completion.md). Các mục 20/10 phía dưới là lịch sử, bao gồm phụ thuộc T35 và thiếu bằng chứng TXT đã được giải quyết trong lần này. Không xác nhận thay sinh viên về peer review/demo hoặc NFR chưa đo.
+
+## T14 — demo tích hợp 20/10/2026
+
+Trên nền main `435f7a0` sau PR #11, `npm test` pass **77 tests API và 28 tests frontend**; build API/web, format và kiểm tra whitespace pass. Đã demo Chrome → API → PostgreSQL cùng instance: rental, lịch đỗ/check-in/out, queue sạc, reload và simulation. T12 create/resolve incident và create/cancel redistribution được kiểm tra bằng HTTP API. Hash 13 bảng nghiệp vụ trước/sau simulation khớp. Chi tiết và giới hạn tại [bàn giao T14](../demo/T14-integrated-demo.md), [runtime evidence](../demo/evidence/T14-runtime.json).
+
+Runner `npm run demo:t14` khởi tạo DB/credentials riêng, kiểm tra health và phục vụ UI qua proxy. Đã smoke đăng nhập và xác nhận SIGINT dừng API/DB, xóa thư mục tạm. Không thay thế kiểm thử triển khai production. T35 chưa có code/PR; TXT download chưa xác minh; chưa có peer review sinh viên, nên không kết luận full gate T14 đã pass.
+
+## T15 — 20/10/2026
+
+Trên nền main sau PR #9 (`c73dabe`), build frontend/backend pass; `npm test` pass **57 tests API và 23 tests frontend**. Bổ sung xác minh quyền/danh tính trước refresh, xóa cache khi bị từ chối quyền, phục hồi khi online, kiểm tra envelope và che message nội bộ 5xx. Kiểm thử PostgreSQL/HTTP thật xác nhận đặt/hủy xe qua T07 phản ánh đúng lên overview, list và detail Hub. Chi tiết phạm vi và giới hạn tại [execution log T15](test-runs/2026-10-20-t15-dashboard.md); bàn giao tuần 2 tại [báo cáo Minh Tường](reports/2026-10-20-minh-tuong-week2.md). Bổ sung browser–API–PostgreSQL riêng: đặt/hủy, polling tự cập nhật và reset khi đổi quyền pass; không có error/warn console. Chưa phải xác nhận peer review của sinh viên hoặc full T23/T25.
+
 ## Cập nhật Mai Anh — 15/10/2026
 
 Code T09–T11 được bổ sung trực tiếp vào folder dự án gốc; chưa commit/push hoặc có peer review.
@@ -69,6 +85,12 @@ Build frontend/backend pass; API 53/53 tests và frontend 18/18 tests pass. `tes
 
 T12 chưa có UI, hoàn tất điều chuyển, Idempotency-Key hoặc ảnh hưởng incident lên trạng thái vận hành/phiên đang chạy; đây không phải bằng chứng những luồng đó đã triển khai. Chưa chạy lại demo trình duyệt, đo tải hoặc deploy.
 
+## Ứng viên tích hợp PR #8/T08 sau T15 — 20/10/2026
+
+Build frontend/backend pass; full API **77/77 tests** và frontend **28/28 tests** pass; format/diff checks pass. Thêm migration 004 cho giới hạn Hub gợi ý, bảo vệ generation theo user, UI mọi chuyến active, kiểm tra Hub-first lock contention và hết hạn trong lúc chờ khóa. Browser với API/PostgreSQL riêng kiểm tra một tài khoản nhận hai xe, chọn đích chéo, trả lần lượt, lịch sử/dashboard và DB khớp; không có error/warn console trong luồng đó. Giữ regression dashboard/auth, mobility, operations và simulation.
+
+Chi tiết tại [execution T08](test-runs/2026-10-20-t08-integration.md). Đây là ứng viên chờ review/tích hợp vào main, không phải xác nhận toàn bộ T16/T17 hoặc T23/T25 hoàn thành. PR #10/T15 đã merge trước đó.
+
 ## T18 trên nền main tích hợp — 20/10/2026
 
 Worktree T18 trong folder BTL_CNPM-main (2) bắt đầu từ main c73dabe. npm test pass: **54 API tests** (Node bao gồm các parent/subtests) và **18 frontend tests** (4 Vitest files). Các suite chạy cả foundation/mobility, T18 allocation, rental search/reservation, operations và simulation; PostgreSQL/HTTP test thực dùng database tạm riêng, không database vận hành.
@@ -76,3 +98,7 @@ Worktree T18 trong folder BTL_CNPM-main (2) bắt đầu từ main c73dabe. npm 
 T18 kiểm tra tranh chỗ/cổng, trùng lịch theo xe và theo chỗ, gửi lại cùng key, hold còn/hết hạn, xe quá giờ, request không giữ hai point, point failed/sai Hub, actor sai quyền, xe rời Hub, rollback sau lỗi và allocation/check-out đồng thời. Xem tests/allocation-safety-check.mjs và docs/allocation-safety.md. Không coi các test này là bằng chứng module xe thuê đã có tích hợp charging, T08 đã merge hoặc đã nghiệm thu toàn bộ tuần 2.
 
 Bản T18 cũ trên nền tuần 1 pass 17 tests; đó không phải số test của nền tích hợp. T19/T20 chưa triển khai. Phần mới chưa có peer review/merge hoặc kiểm chứng production.
+
+## T18 cập nhật main — 23/10/2026
+
+Ghép main a80ca54, giữ cả test/tài liệu T18 và T08/T35. Build pass; npm test **84 API + 40 frontend** pass; format/diff check pass. Thêm 5 vòng phân bổ/xóa cổng đồng thời. Chi tiết tại [execution T18](test-runs/2026-10-23-t18-main-integration.md). Chỉ local, chưa push/merge theo yêu cầu Mai Anh.
