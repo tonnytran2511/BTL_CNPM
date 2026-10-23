@@ -19,8 +19,6 @@ Xe cá nhân: đăng ký → đặt chỗ → check-in đúng Hub → gửi yêu
 
 Hạn chế: chưa tự tăng pin hoặc tự chạy phân bổ theo chu kỳ; người vận hành chủ động xác nhận. Xử lý cổng hỏng, interrupted và đưa nhu cầu trở lại hàng chờ thuộc **T20**, chưa triển khai trong nhánh này. available vẫn phải đủ pin và ở Hub hoạt động mới thuê được.
 
-Chi tiết API và quy tắc tại [docs/charging-scheduler.md](docs/charging-scheduler.md); kết quả kiểm thử tại [docs/testing.md](docs/testing.md). Codex hỗ trợ code/test/tài liệu; Mai Anh cần đọc, giải thích và phối hợp review phần tích hợp.
-
 ## Những phần đang chạy
 
 - Đăng nhập/đăng xuất; session lưu database; quyền sinh viên/operator kiểm tra tại backend.
