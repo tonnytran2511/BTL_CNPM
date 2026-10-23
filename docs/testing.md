@@ -92,3 +92,8 @@ Bản T18 cũ trên nền tuần 1 pass 17 tests; đó không phải số test c
 - Web localhost:5119 và proxy /api/health trả HTTP 200 sau build. Chưa xác minh trực quan thủ công toàn màn hình mới.
 
 T19 không còn chờ hợp đồng sạc xe thuê từ Duy Tân; đã có RentalChargingService nhận cùng PoolClient. T20 sự cố/interrupted vẫn chưa triển khai.
+
+## 20/10/2026 — đồng bộ hai khung yêu cầu sạc
+
+Khắc phục yêu cầu xe thuê tạo ở Điều phối sạc chưa hiện ngay tại danh sách Yêu cầu sạc phía trên; chiều ngược lại và đổi trạng thái phiên cũng tải lại cả hai khung theo lần cập nhật dữ liệu chung. Không reset bước nhập và không để response cũ ghi đè danh sách mới.
+Thêm 4 kiểm thử hồi quy hook cho đồng bộ hai chiều, đổi trạng thái và response chậm. `npm.cmd run test:web`: 26/26 pass; frontend build và kiểm tra định dạng được xác minh riêng. Backend/API không đổi.

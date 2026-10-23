@@ -33,7 +33,8 @@
 .mobility-history > h3:first-child {
   margin-top: 0;
 }
-.mobility-history .mobility-list + h3 {
+.mobility-history .mobility-list + h3,
+.mobility-history .mobility-scroll-list + h3 {
   border-top: 1px solid #cedce5;
   padding-top: 24px;
 }
@@ -939,4 +940,45 @@ body:has(.simulation-guide-dialog[open]) {
   padding: 0.7rem;
   border-bottom: 1px solid #dbe3df;
   text-align: left;
+}
+
+/* Keep the rental heading, filters and results in one distinct region. */
+.vehicle-search {
+  min-width: 0;
+  padding: clamp(18px, 3vw, 32px);
+  border: 1px solid #d8cbb4;
+  border-radius: 20px;
+  background: #f8f4eb;
+}
+
+.mobility-scroll-list {
+  margin: 14px 0 24px;
+  min-width: 0;
+}
+.mobility-scroll-controls {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.mobility-scroll-viewport {
+  max-height: min(420px, 60vh);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  overscroll-behavior-y: contain;
+  padding: 2px;
+}
+.mobility-scroll-viewport:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+  border-radius: 16px;
+}
+.mobility-list.mobility-list-vertical {
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+}
+.mobility-list-vertical article {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }

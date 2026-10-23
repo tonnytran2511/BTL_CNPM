@@ -23,8 +23,12 @@ export function App() {
     model.updatedAt,
     model.sessionExpired,
   );
-  const mobility = useMobility(model.user, model.refresh);
-  const chargingManager = useChargingManager(model.user, model.refresh);
+  const mobility = useMobility(model.user, model.refresh, model.updatedAt);
+  const chargingManager = useChargingManager(
+    model.user,
+    model.refresh,
+    model.updatedAt,
+  );
   const { vehicles, reservations, reserve, cancel } = useRental(
     model.user?.id,
     model.updatedAt,

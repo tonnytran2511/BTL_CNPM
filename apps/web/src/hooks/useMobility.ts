@@ -16,7 +16,11 @@ function text(form: FormData, key: string) {
 function instant(form: FormData, key: string) {
   return new Date(text(form, key)).toISOString();
 }
-export function useMobility(user: User | null, onChanged: () => Promise<void>) {
+export function useMobility(
+  user: User | null,
+  onChanged: () => Promise<void>,
+  refreshKey?: string | null,
+) {
   const [vehicles, setVehicles] = useState<PrivateVehicle[]>([]);
   const [bookings, setBookings] = useState<ParkingBooking[]>([]);
   const [queue, setQueue] = useState<ChargingQueueEntry[]>([]);
@@ -27,22 +31,29 @@ export function useMobility(user: User | null, onChanged: () => Promise<void>) {
   const [step, setStep] = useState<MobilityStep>("vehicle");
   const inFlight = useRef(false);
   const generation = useRef(0);
+  const loadVersion = useRef(0);
   const pending = useRef<{ payload: string; key: string } | null>(null);
   const load = useCallback(
     async (signal?: AbortSignal) => {
       if (!user) return;
       const current = generation.current;
+      const version = ++loadVersion.current;
       const [v, b, q] = await Promise.all([
         mobilityApi.vehicles(signal),
         mobilityApi.bookings(signal),
         mobilityApi.queue(signal),
       ]);
-      if (signal?.aborted || current !== generation.current) return;
+      if (
+        signal?.aborted ||
+        current !== generation.current ||
+        version !== loadVersion.current
+      )
+        return;
       setVehicles(v);
       setBookings(b);
       setQueue(q);
     },
-    [user?.id],
+    [user?.id, user?.role],
   );
   useEffect(() => {
     generation.current++;
@@ -70,6 +81,19 @@ export function useMobility(user: User | null, onChanged: () => Promise<void>) {
       generation.current++;
     };
   }, [user?.id, load]);
+  // Shared dashboard refresh also follows mutations made in the charging manager.
+  // Reload data without resetting the selected step, form state or pending mutation key.
+  useEffect(() => {
+    if (!user || !refreshKey) return;
+    const controller = new AbortController();
+    void load(controller.signal).catch((e) => {
+      if (!controller.signal.aborted)
+        setError(
+          e instanceof Error ? e.message : "Không thể cập nhật yêu cầu sạc.",
+        );
+    });
+    return () => controller.abort();
+  }, [refreshKey, load]);
   const run = async (
     operation: string,
     body: unknown,

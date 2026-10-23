@@ -6,6 +6,7 @@ import { RequestError } from "../api/client";
 export function useChargingManager(
   user: User | null,
   onChanged: () => Promise<void>,
+  refreshKey?: string | null,
 ) {
   const [data, setData] = useState<ChargingOverview>({
     queue: [],
@@ -18,6 +19,7 @@ export function useChargingManager(
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(false);
   const epoch = useRef(0);
+  const loadVersion = useRef(0);
   const running = useRef(false);
   const pending = useRef<{ payload: string; key: string } | null>(null);
   useEffect(() => {
@@ -36,11 +38,13 @@ export function useChargingManager(
     setLoading(false);
     if (user?.role !== "operator") return;
     const controller = new AbortController();
+    const version = ++loadVersion.current;
     setLoading(true);
     void chargingApi
       .overview(controller.signal)
       .then((value) => {
-        if (!controller.signal.aborted) setData(value);
+        if (!controller.signal.aborted && version === loadVersion.current)
+          setData(value);
       })
       .catch((e) => {
         if (!controller.signal.aborted) setError(e.message);
@@ -53,6 +57,35 @@ export function useChargingManager(
       epoch.current++;
     };
   }, [user?.id, user?.role]);
+  useEffect(() => {
+    if (user?.role !== "operator" || !refreshKey) return;
+    const controller = new AbortController();
+    const current = epoch.current;
+    const version = ++loadVersion.current;
+    void chargingApi
+      .overview(controller.signal)
+      .then((value) => {
+        if (
+          !controller.signal.aborted &&
+          current === epoch.current &&
+          version === loadVersion.current
+        )
+          setData(value);
+      })
+      .catch((e) => {
+        if (
+          !controller.signal.aborted &&
+          current === epoch.current &&
+          version === loadVersion.current
+        )
+          setError(
+            e instanceof Error
+              ? e.message
+              : "Không thể cập nhật danh sách sạc.",
+          );
+      });
+    return () => controller.abort();
+  }, [refreshKey, user?.id, user?.role]);
   const run = async (
     payload: unknown,
     work: (key: string) => Promise<unknown>,
@@ -72,9 +105,10 @@ export function useChargingManager(
       if (current !== epoch.current) return;
       pending.current = null;
       setMessage(success);
+      const version = ++loadVersion.current;
       const result = await chargingApi.overview();
       if (current !== epoch.current) return;
-      setData(result);
+      if (version === loadVersion.current) setData(result);
       await onChanged();
     } catch (e) {
       if (current !== epoch.current) return;
