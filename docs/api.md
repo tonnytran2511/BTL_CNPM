@@ -149,3 +149,7 @@ Lặp pickup của reservation fulfilled trả lại trip cũ. Lặp return củ
 Hub đích đầy/inactive: rollback và trả 409 với `details: {suggestedHubs: HubSuggestion[]}`. Gợi ý chỉ là số liệu tại lúc đọc, không giữ chỗ; lấy tối đa `settings.returnHubSuggestionLimit`, số nguyên dương trong phạm vi integer PostgreSQL, được kiểm tra hợp lệ (thiếu/sai → 500 chung). Migration 004 lưu baseline 5 từ T08, có thể đổi trong DB; không có fallback/hằng số giới hạn trong service/UI. Điều kiện chỗ trống loại chỗ đã cam kết cho lịch đỗ còn hiệu lực như AllocationPort.
 
 GET trips trả mọi chuyến active và tối đa 100 chuyến completed mới nhất, sắp thời điểm giảm dần; UI có điều khiển trả riêng cho từng chuyến active, không giả định mỗi người chỉ thuê một xe. RequestError giữ đồng thời code, status và details; filter chỉ chuyển tiếp details cho 4xx, không cho 5xx. Module mới sử dụng cùng API client/deadline với dashboard, mobility và simulation.
+
+## T18 — giữ cổng sạc nguyên tử
+
+Không thêm hoặc thay đổi endpoint HTTP trong T18. Backend export ChargingAllocationService.allocatePrivateRequest(actor, requestId, pointId, client) để T19 dùng. Quyền operator, xe cá nhân còn đỗ đúng Hub, pin còn cần sạc và cổng cùng Hub/available được kiểm tra trong transaction; point occupied bao gồm đã được giữ cho session scheduled. Cổng failed không được cấp mới. Rental search/reservation đã có trong main, nhưng phân bổ sạc xe thuê chờ contract chuyển trạng thái xe dùng cùng transaction. Scheduler, API vòng đời phiên và giao diện quản lý phiên thuộc T19. Chi tiết docs/allocation-safety.md.

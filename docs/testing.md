@@ -90,3 +90,15 @@ T12 chưa có UI, hoàn tất điều chuyển, Idempotency-Key hoặc ảnh hư
 Build frontend/backend pass; full API **77/77 tests** và frontend **28/28 tests** pass; format/diff checks pass. Thêm migration 004 cho giới hạn Hub gợi ý, bảo vệ generation theo user, UI mọi chuyến active, kiểm tra Hub-first lock contention và hết hạn trong lúc chờ khóa. Browser với API/PostgreSQL riêng kiểm tra một tài khoản nhận hai xe, chọn đích chéo, trả lần lượt, lịch sử/dashboard và DB khớp; không có error/warn console trong luồng đó. Giữ regression dashboard/auth, mobility, operations và simulation.
 
 Chi tiết tại [execution T08](test-runs/2026-10-20-t08-integration.md). Đây là ứng viên chờ review/tích hợp vào main, không phải xác nhận toàn bộ T16/T17 hoặc T23/T25 hoàn thành. PR #10/T15 đã merge trước đó.
+
+## T18 trên nền main tích hợp — 20/10/2026
+
+Worktree T18 trong folder BTL_CNPM-main (2) bắt đầu từ main c73dabe. npm test pass: **54 API tests** (Node bao gồm các parent/subtests) và **18 frontend tests** (4 Vitest files). Các suite chạy cả foundation/mobility, T18 allocation, rental search/reservation, operations và simulation; PostgreSQL/HTTP test thực dùng database tạm riêng, không database vận hành.
+
+T18 kiểm tra tranh chỗ/cổng, trùng lịch theo xe và theo chỗ, gửi lại cùng key, hold còn/hết hạn, xe quá giờ, request không giữ hai point, point failed/sai Hub, actor sai quyền, xe rời Hub, rollback sau lỗi và allocation/check-out đồng thời. Xem tests/allocation-safety-check.mjs và docs/allocation-safety.md. Không coi các test này là bằng chứng module xe thuê đã có tích hợp charging, T08 đã merge hoặc đã nghiệm thu toàn bộ tuần 2.
+
+Bản T18 cũ trên nền tuần 1 pass 17 tests; đó không phải số test của nền tích hợp. T19/T20 chưa triển khai. Phần mới chưa có peer review/merge hoặc kiểm chứng production.
+
+## T18 cập nhật main — 23/10/2026
+
+Ghép main a80ca54, giữ cả test/tài liệu T18 và T08/T35. Build pass; npm test **84 API + 40 frontend** pass; format/diff check pass. Thêm 5 vòng phân bổ/xóa cổng đồng thời. Chi tiết tại [execution T18](test-runs/2026-10-23-t18-main-integration.md). Chỉ local, chưa push/merge theo yêu cầu Mai Anh.

@@ -122,3 +122,7 @@ PR #1/#2/#6/#7 được ghép với nền T13. Dashboard, mobility, rental searc
 ## Tích hợp T08 — 20/10/2026
 
 Nhận/trả dùng TripService và AllocationPort cùng PoolClient; khóa Hub trước xe/chỗ để phối hợp với vận hành. UI hỗ trợ mọi chuyến active của tài khoản; chưa có quy tắc giới hạn một chuyến/người. Gợi ý Hub khi trả thất bại lấy số lượng từ settings.returnHubSuggestionLimit (migration 004), kiểm tra hợp lệ, không giữ chỗ. API client giữ code và details với deadline chung; 5xx không lộ details. T16/T17, scheduler và hoàn tất điều chuyển vẫn ngoài phạm vi tích hợp T08.
+
+## T18 — 20/10/2026, nền tích hợp c73dabe
+
+MobilityModule export ChargingAllocationService để giữ cổng cho xe cá nhân, dùng cùng transaction của caller. Khóa Hub → xe → request → point; kiểm tra lại quyền operator, chủ xe, vị trí, pin và cổng; đổi point occupied, request allocated và tạo session scheduled nguyên tử. Gửi lặp cùng request/point trả phiên active hiện có. Chưa có scheduler hoặc API start/complete/cancel (T19), chưa có xử lý gián đoạn (T20). RentalService hiện có search/reservation và ranh giới điều chuyển nhưng chưa có thao tác giữ/đổi trạng thái xe cho sạc; phối hợp Duy Tân tại điểm này, không tự sửa module rental. T18 chờ review/tích hợp; chi tiết docs/allocation-safety.md.

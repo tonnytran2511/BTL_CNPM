@@ -145,6 +145,12 @@ test(
         await command("tests/mobility-check.mjs", env);
       });
       await t.test(
+        "T18 concurrent parking and charging allocation safety",
+        async () => {
+          await command("tests/allocation-safety-check.mjs", env);
+        },
+      );
+      await t.test(
         "T14/T35 Hub management integration and incident race",
         async () => {
           await command("tests/hub-management-check.mjs", env);
