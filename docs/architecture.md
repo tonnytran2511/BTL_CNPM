@@ -306,6 +306,7 @@ flowchart LR
   UI[React UI] --> Hooks[Hooks / API client]
   Hooks --> Guard[Session / role guard + DTO]
   Guard --> Hubs[HubsService]
+  Guard --> HubManagement[HubManagementService]
   Guard --> Trip[TripService / ReservationService]
   Guard --> Mobility[MobilityService / AllocationPort]
   Guard --> Operations[OperationsService]
@@ -315,6 +316,7 @@ flowchart LR
   Simulation --> Hubs
   Simulation --> Engine[Engine thuần departures-v1]
   Hubs --> Repo[Repository từng module]
+  HubManagement --> Repo
   Trip --> Repo
   Mobility --> Repo
   Operations --> Repo
@@ -322,7 +324,7 @@ flowchart LR
   Repo --> DB[(PostgreSQL)]
 ```
 
-Trip và allocation dùng cùng PoolClient để xe/chỗ/trip commit nguyên tử. Operations chỉ gọi RentalService để giữ xe khi start; chưa hoàn tất điều chuyển. Simulation đọc snapshot nhất quán và settings, engine không truy cập DB; không áp dụng kết quả lên vận hành. T35 còn chờ, nên không có mũi tên CRUD Hub/UI quản trị trong phần đã triển khai.
+Trip và allocation dùng cùng PoolClient để xe/chỗ/trip commit nguyên tử. Operations chỉ gọi RentalService để giữ xe khi start; chưa hoàn tất điều chuyển. Simulation đọc snapshot nhất quán và settings, engine không truy cập DB; không áp dụng kết quả lên vận hành. T35 đã có UI → useHubManagement → API → HubManagementService → HubManagementRepository. CRUD/cấu hình layout không chuyển trạng thái vận hành của xe hay phiên sạc. Mutation khóa Hub; xóa cổng khóa tiếp cổng trước kiểm tra incident để đồng bộ với Operations. Capacity đọc giới hạn từ settings; giữ nguyên booking/lịch sử và rollback nếu không đủ chỗ xóa an toàn.
 
 ```mermaid
 erDiagram

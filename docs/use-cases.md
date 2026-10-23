@@ -1,6 +1,6 @@
 # Đặc tả use case v1 — 15/10/2026
 
-Cập nhật tích hợp T14 ngày 20/10/2026, base main `435f7a0` sau PR #11. Danh mục dưới đây phản ánh code hiện có. Các bước ghi “mục tiêu” thuộc thiết kế mở rộng, chưa phải kết quả triển khai; không thay thế peer review của thành viên. T35 còn chờ theo xác nhận Minh Tường.
+Cập nhật tích hợp T14 ngày 20/10/2026, base main `435f7a0` sau PR #11. Danh mục dưới đây phản ánh code hiện có. Các bước ghi “mục tiêu” thuộc thiết kế mở rộng, chưa phải kết quả triển khai; không thay thế peer review của thành viên. Cập nhật 23/10: T35 đã merge PR #13, có API/UI và regression tích hợp; các kết quả 20/10 được giữ ở báo cáo lịch sử.
 
 ## Ranh giới và actor
 
@@ -17,23 +17,23 @@ Nguồn UML use-case diagram: [sinh viên](diagrams/use-cases-student.puml), [v�
 
 ## Danh mục và trạng thái
 
-| UC    | Tên                          | Yêu cầu      | Owner                | Trạng thái                         |
-| ----- | ---------------------------- | ------------ | -------------------- | ---------------------------------- |
-| UC-01 | Đăng nhập / đăng xuất        | FR-13        | Leader               | Có code                            |
-| UC-02 | Xem danh sách / chi tiết Hub | FR-01        | Leader               | Có code                            |
-| UC-03 | Tìm xe thuê phù hợp          | FR-02        | TV2                  | Có code tìm xe T06                 |
-| UC-04 | Đặt / hủy đặt xe             | FR-03        | TV2                  | Có đặt/hủy T07; expiry chờ T16     |
-| UC-05 | Nhận xe                      | FR-04        | TV2 + TV3            | Có code T08, kiểm tra hạn giữ      |
-| UC-06 | Trả xe                       | FR-04        | TV2 + TV3            | Có code T08, allocation nguyên tử  |
-| UC-07 | Đăng ký xe cá nhân           | FR-05        | TV3                  | Có code đăng ký T09–T10            |
-| UC-08 | Đặt / sử dụng chỗ đỗ         | FR-05        | TV3                  | Có đặt/hủy/check-in/out T10–T11    |
-| UC-09 | Yêu cầu sạc                  | FR-06        | TV3                  | Có hàng chờ T11; chưa chạy phiên   |
-| UC-10 | Phân bổ / quản lý phiên sạc  | FR-06, FR-07 | TV3                  | Chờ T19–T20                        |
-| UC-11 | Giám sát mạng lưới           | FR-01        | Leader               | Có code dashboard cơ bản           |
-| UC-12 | Quản lý Hub / tài nguyên     | FR-08        | TV4                  | Chờ T35                            |
-| UC-13 | Xử lý sự cố                  | FR-09        | TV4 + chủ tài nguyên | T12: ghi/đóng; tác động chờ T21    |
-| UC-14 | Điều chuyển xe               | FR-10        | TV4 + TV2 + TV3      | T12: tạo/start/cancel pending      |
-| UC-15 | Chạy What-if và xem đề xuất  | FR-11, FR-12 | TV5                  | T13 departures-v1; mở rộng chờ T22 |
+| UC    | Tên                          | Yêu cầu      | Owner                | Trạng thái                          |
+| ----- | ---------------------------- | ------------ | -------------------- | ----------------------------------- |
+| UC-01 | Đăng nhập / đăng xuất        | FR-13        | Leader               | Có code                             |
+| UC-02 | Xem danh sách / chi tiết Hub | FR-01        | Leader               | Có code                             |
+| UC-03 | Tìm xe thuê phù hợp          | FR-02        | TV2                  | Có code tìm xe T06                  |
+| UC-04 | Đặt / hủy đặt xe             | FR-03        | TV2                  | Có đặt/hủy T07; expiry chờ T16      |
+| UC-05 | Nhận xe                      | FR-04        | TV2 + TV3            | Có code T08, kiểm tra hạn giữ       |
+| UC-06 | Trả xe                       | FR-04        | TV2 + TV3            | Có code T08, allocation nguyên tử   |
+| UC-07 | Đăng ký xe cá nhân           | FR-05        | TV3                  | Có code đăng ký T09–T10             |
+| UC-08 | Đặt / sử dụng chỗ đỗ         | FR-05        | TV3                  | Có đặt/hủy/check-in/out T10–T11     |
+| UC-09 | Yêu cầu sạc                  | FR-06        | TV3                  | Có hàng chờ T11; chưa chạy phiên    |
+| UC-10 | Phân bổ / quản lý phiên sạc  | FR-06, FR-07 | TV3                  | Chờ T19–T20                         |
+| UC-11 | Giám sát mạng lưới           | FR-01        | Leader               | Có code dashboard cơ bản            |
+| UC-12 | Quản lý Hub / tài nguyên     | FR-08        | TV4                  | Đã có API/UI T35, xem phạm vi UC-12 |
+| UC-13 | Xử lý sự cố                  | FR-09        | TV4 + chủ tài nguyên | T12: ghi/đóng; tác động chờ T21     |
+| UC-14 | Điều chuyển xe               | FR-10        | TV4 + TV2 + TV3      | T12: tạo/start/cancel pending       |
+| UC-15 | Chạy What-if và xem đề xuất  | FR-11, FR-12 | TV5                  | T13 departures-v1; mở rộng chờ T22  |
 
 ## UC-01 — Đăng nhập / đăng xuất
 
@@ -149,12 +149,12 @@ Nguồn UML use-case diagram: [sinh viên](diagrams/use-cases-student.puml), [v�
 
 ## UC-12 — Quản lý Hub / tài nguyên
 
-- Phạm vi tại T14: Chưa có Hub CRUD/UI cấu hình T35; chỉ API đọc Hub/dashboard đã tồn tại. Luồng dưới đây là mục tiêu.
+- Phạm vi 23/10: T35 có CRUD Hub, cấu hình sức chứa, thêm/xóa cổng sạc và UI operator. Backend khóa Hub, cổng sạc trước khi kiểm tra/xóa; bảo vệ hold, booking, session và incident mở. Chưa có audit log chung cho mọi thay đổi Hub.
 
 - Actor: operator. Trigger: thêm/sửa Hub, cấu hình tài nguyên, đổi active/inactive.
 - Tiền điều kiện: quyền hợp lệ; dữ liệu đầu vào được validate.
-- Luồng chính: (1) xem dữ liệu hiện tại; (2) gửi thay đổi; (3) kiểm tra invariant, tài nguyên/lịch bị ảnh hưởng; (4) cập nhật trong transaction; (5) ghi lịch sử thao tác; (6) dashboard cập nhật.
-- Ngoại lệ: giảm sức chứa dưới phần đang chiếm/giữ hoặc làm lịch đã cam kết bất khả thi → 409; không được xóa chỗ/cổng đang dùng; chuyển inactive cần policy xử lý booking/trip đang tồn tại trước khi commit.
+- Luồng chính: (1) xem dữ liệu hiện tại; (2) gửi thay đổi; (3) kiểm tra invariant, tài nguyên/lịch bị ảnh hưởng; (4) cập nhật trong transaction; (5) dashboard đọc lại API. Ghi audit log chung là mục tiêu mở rộng, chưa triển khai trong T35.
+- Ngoại lệ: giảm sức chứa dưới phần đang chiếm/giữ hoặc làm lịch đã cam kết bất khả thi → 409; không được xóa chỗ/cổng đang dùng; chuyển inactive hiện chỉ đổi trạng thái Hub, ẩn với student/chặn nhận tài nguyên mới, không tự hủy booking/trip. Chính sách xử lý các cam kết cũ vẫn cần owner review.
 - Hậu điều kiện: không tạo sức chứa âm hoặc tài nguyên mồ côi; code/mã định danh không trùng.
 - Liên kết: IT-28; FR-08. Chính sách inactive/giảm capacity phải TV4 phối hợp TV2/TV3 review.
 

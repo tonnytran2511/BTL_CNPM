@@ -55,16 +55,16 @@ TV4 đã triển khai các endpoint quản trị Hub/tài nguyên ở dưới c�
 
 Các endpoint dưới đây dành cho operator. Tạo Hub chuẩn hóa code thành chữ hoa. Sửa thông tin không sửa tài nguyên đang vận hành; xóa chỉ thành công khi không còn tham chiếu dữ liệu và không có incident Hub đang mở.
 
-| Method / path                             | Input                                               | Response / quy tắc                                                             |
-| ----------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------ |
-| POST /hubs                                | `{code,name,location}`                              | 201; code duy nhất, 409 nếu trùng                                              |
-| PATCH /hubs/:id                           | `{name?,location?,status?}`                         | 200; chỉ sửa trường gửi lên; 404 nếu không có Hub                              |
-| DELETE /hubs/:id                          | —                                                   | 200 `{success:true}`; 404 nếu không có; 409 nếu còn dữ liệu liên quan/sự cố mở |
-| PUT /hubs/:id/parking-capacity            | `{capacity}` (0–setting `maxParkingCapacityPerHub`) | 200 `{hubId,capacity}`; tạo/xóa hàng `parking_spaces` trong transaction        |
-| POST /hubs/:id/charging-points            | `{code}`                                            | 201 cổng sạc trạng thái mặc định `available`; code duy nhất tại Hub            |
-| DELETE /hubs/:id/charging-points/:pointId | —                                                   | 200 `{success:true}`; 409 nếu cổng đang occupied/có session hoặc không tồn tại |
+| Method / path                             | Input                                               | Response / quy tắc                                                                       |
+| ----------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| POST /hubs                                | `{code,name,location}`                              | 201; code duy nhất, 409 nếu trùng                                                        |
+| PATCH /hubs/:id                           | `{name?,location?,status?}`                         | 200; chỉ sửa trường gửi lên; 404 nếu không có Hub                                        |
+| DELETE /hubs/:id                          | —                                                   | 200 `{success:true}`; 404 nếu không có; 409 nếu còn dữ liệu liên quan/sự cố mở           |
+| PUT /hubs/:id/parking-capacity            | `{capacity}` (0–setting `maxParkingCapacityPerHub`) | 200 `{hubId,capacity}`; tạo/xóa hàng `parking_spaces` trong transaction                  |
+| POST /hubs/:id/charging-points            | `{code}`                                            | 201 cổng sạc trạng thái mặc định `available`; code duy nhất tại Hub                      |
+| DELETE /hubs/:id/charging-points/:pointId | —                                                   | 200 `{success:true}`; 404 nếu không có/khác Hub; 409 nếu occupied/có session/incident mở |
 
-`maxParkingCapacityPerHub` được lưu trong `settings` (migration 005, mặc định 5000) và đọc lại khi cấu hình. Giảm sức chứa không thể thấp hơn số chỗ occupied hoặc held còn hạn. Chỗ bị xóa phải available và không có booking tham chiếu (kể cả lịch sử); nếu không đủ chỗ an toàn thì toàn bộ thao tác rollback. Tạo/xóa cổng sạc không thay đổi trạng thái vận hành của các cổng còn lại. Request DTO từ chối field ngoài danh sách.
+`maxParkingCapacityPerHub` được lưu trong `settings` (migration 005, mặc định 5000) và đọc lại khi cấu hình. Giảm sức chứa không thể thấp hơn số chỗ occupied hoặc held còn hạn. Chỗ bị xóa phải available và không có booking tham chiếu (kể cả lịch sử); nếu không đủ chỗ an toàn thì toàn bộ thao tác rollback. Xóa cổng khóa Hub rồi cổng trước khi đọc incident để không xóa tài nguyên vừa có sự cố đồng thời. Tạo/xóa cổng sạc không thay đổi trạng thái vận hành của các cổng còn lại. Request DTO từ chối field ngoài danh sách.
 
 Không thêm endpoint success giả hoặc dữ liệu mẫu trong component để thay phần chưa triển khai.
 

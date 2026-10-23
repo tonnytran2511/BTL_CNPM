@@ -1,6 +1,12 @@
 # Smart E-Mobility Hub — định hướng thiết kế
 
-## T14 — đối chiếu bản tích hợp ngày 20/10/2026
+## T14 — hoàn tất tích hợp T35 ngày 23/10/2026
+
+T35 của Quỳnh Anh đã merge qua PR #13 vào main `5d0d4d2`. Ba điểm review đã sửa: khóa cổng sạc trước kiểm tra incident, giữ form khi mutation thất bại, tách logic/model khỏi UI. T14 bổ sung regression HTTP/PostgreSQL cho CRUD, quyền operator, dashboard động, inactive Hub, sức chứa có hold/booking, rollback và incident/delete đồng thời. Giao diện và file TXT đã được kiểm tra trên DB tạm; bằng chứng tại `demo/T14-t35-completion.md`.
+
+Phần tích hợp kỹ thuật T14 không còn phụ thuộc T35. Nghiệm thu/demo và giải thích của từng thành viên vẫn cần người phụ trách xác nhận; không tự coi test của Codex là peer review của sinh viên. T16 ở PR #14, scheduler/phiên sạc, hoàn tất điều chuyển và simulation mở rộng vẫn ngoài phạm vi bản này.
+
+## T14 — lịch sử đối chiếu ngày 20/10/2026
 
 Main `435f7a0` sau PR #11 có rental T08, mobility T09–T11, operations T12 và simulation T13 cùng nền auth/dashboard. Demo Chrome trên DB tạm đã chạy thuê xe, đặt/check-in/out, queue sạc, simulation; T12 được kiểm tra qua API do chưa có UI. Bằng chứng và giới hạn tại `demo/T14-integrated-demo.md`, `docs/defects.md`. Các ghi chú lịch sử phía dưới mô tả thời điểm triển khai cũ, không thay thế trạng thái mới này.
 
