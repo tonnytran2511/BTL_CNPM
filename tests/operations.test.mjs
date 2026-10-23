@@ -444,8 +444,10 @@ test(
       await t.test(
         "completion moves a vehicle and its parking allocation atomically",
         async () => {
-          const f = await fleet(),
-            p = await order(f);
+          const f = await fleet();
+          const vehicleId = f.vehicleIds[0];
+          const sourceSpaceCode = String(f.vehicleIds.indexOf(vehicleId));
+          const p = await order({ ...f, vehicleIds: [vehicleId] });
           assert.equal(
             (await post(`/redistributions/${p.id}/start`)).status,
             201,
@@ -455,7 +457,7 @@ test(
             409,
             "a full target must not complete",
           );
-          const afterFullTarget = await states(f.vehicleIds);
+          const afterFullTarget = await states([vehicleId]);
           assert.equal(afterFullTarget.length, 1);
           assert.equal(afterFullTarget[0].hub_id, f.sourceHubId);
           assert.equal(afterFullTarget[0].status, "redistributing");
@@ -470,8 +472,8 @@ test(
           );
           const sourceAfterRollback = (
             await pool.query(
-              "SELECT status,vehicle_id FROM parking_spaces WHERE hub_id=$1",
-              [f.sourceHubId],
+              "SELECT status,vehicle_id FROM parking_spaces WHERE hub_id=$1 AND code=$2",
+              [f.sourceHubId, sourceSpaceCode],
             )
           ).rows[0];
           assert.equal(
@@ -479,7 +481,7 @@ test(
             "occupied",
             "failed destination allocation must restore the source space",
           );
-          assert.equal(sourceAfterRollback.vehicle_id, f.vehicleIds[0]);
+          assert.equal(sourceAfterRollback.vehicle_id, vehicleId);
           const logsBeforeComplete = await call(
             "GET",
             "/operations/log",
@@ -502,14 +504,14 @@ test(
           assert.equal(completed.status, 201);
           assert.equal(completed.body.status, "completed");
           assert.ok(Date.parse(completed.body.completedAt));
-          const afterComplete = await states(f.vehicleIds);
+          const afterComplete = await states([vehicleId]);
           assert.equal(afterComplete.length, 1);
           assert.equal(afterComplete[0].hub_id, f.targetHubId);
           assert.equal(afterComplete[0].status, "available");
           const sourceAfterComplete = (
             await pool.query(
-              "SELECT status,vehicle_id FROM parking_spaces WHERE hub_id=$1",
-              [f.sourceHubId],
+              "SELECT status,vehicle_id FROM parking_spaces WHERE hub_id=$1 AND code=$2",
+              [f.sourceHubId, sourceSpaceCode],
             )
           ).rows[0];
           assert.equal(sourceAfterComplete.status, "available");
@@ -517,11 +519,11 @@ test(
           assert.equal(
             (
               await pool.query(
-                "SELECT status,vehicle_id FROM parking_spaces WHERE hub_id=$1",
-                [f.targetHubId],
+                "SELECT status,vehicle_id FROM parking_spaces WHERE hub_id=$1 AND vehicle_id=$2",
+                [f.targetHubId, vehicleId],
               )
             ).rows[0].vehicle_id,
-            f.vehicleIds[0],
+            vehicleId,
           );
           assert.equal(
             (await post(`/redistributions/${p.id}/complete`)).status,
