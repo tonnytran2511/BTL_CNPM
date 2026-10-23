@@ -108,7 +108,7 @@ Mọi endpoint cần đăng nhập (cookie session). `userId` lấy từ session
 - Hủy xe: chỉ chủ lượt đặt, chỉ khi `active`. Reservation thành `cancelled` (`closedAt` được ghi) và xe `reserved → available` bằng cập nhật có điều kiện: nếu xe đã bị đổi sang trạng thái khác (ví dụ sự cố, BR-10) thì không ghi đè.
 - Lỗi vẫn theo dạng `{statusCode, code: "HTTP_<status>", message}`; chưa có mã lỗi nghiệp vụ riêng.
 - Hết hạn (T16, BR-01): reservation `active` có `expires_at <= now()` (đồng hồ DB) chuyển `expired`, ghi `closedAt`, xe `reserved → available` (cập nhật có điều kiện, không ghi đè xe đã sang trạng thái khác) trong một transaction, khóa theo thứ tự reservation → xe. Được kích hoạt bởi: scheduler nội bộ chu kỳ `reservationExpirySweepSeconds`; trước khi đặt xe, liệt kê lượt đặt, tìm xe; và khi hủy một lượt đã quá hạn (commit việc nhả xe rồi trả 409). Quét lặp/song song an toàn vì từng reservation được khóa và kiểm tra lại.
-- Chưa làm: Idempotency-Key (BR-11).
+- Idempotency-Key (T17, BR-11): header `Idempotency-Key` (1–128 ký tự, tùy chọn) áp dụng cho `POST /vehicle-reservations`, `/:id/cancel`, `/:id/pickup` và `POST /trips/:id/return`. Phạm vi key là người gọi + thao tác (bảng `rental_idempotency`, migration 005). Cùng key + cùng payload trả lại đúng kết quả đã lưu (không chạy lại); cùng key + khác payload 409; key rỗng/quá dài 400; hai request cùng key chạy song song được tuần tự hóa. Chỉ lưu kết quả thành công: lỗi rollback nên key vẫn dùng lại được (ví dụ trả xe bị Hub đầy, thử lại sau khi có chỗ). Kết quả lưu là bản chụp tại lúc xử lý lần đầu. Không có header thì chỉ còn bảo vệ theo trạng thái như T07/T08. Web client luôn gửi key; chưa lưu key để tự dùng lại khi retry sau timeout nên vẫn không tự retry POST.
 
 ## T13 Simulation
 
@@ -128,9 +128,9 @@ Incident hiện chỉ ghi nhận/resolve; chưa tự đổi trạng thái vận 
 | POST /trips/:id/return                | Chủ trip; body `{targetHubId}`      | 200, TripView   |
 | GET /trips                            | Đăng nhập; chỉ chuyến của người gọi | 200, TripView[] |
 
-ID/body sai 400, chưa đăng nhập 401, sai chủ 403, không tồn tại 404, sai trạng thái/hết hạn/Hub đầy hoặc inactive 409. Nhận xe chỉ trước expires_at, từ reserved tại Hub nguồn active; trong cùng transaction tạo trip active, reservation fulfilled, xe in_use/hub_id null và giải phóng chỗ nguồn. Trả xe chỉ khi in_use; claim chỗ đích và hoàn tất trip/cập nhật vị trí cùng transaction. Pin cuối lấy pin hiện có, chưa có telemetry/hao pin.
+ID/body sai 400, chưa đăng nhập 401, sai chủ 403, không tồn tại 404, sai trạng thái/hết hạn/Hub đầy hoặc inactive 409. Nhận xe chỉ trước expires_at, từ reserved tại Hub nguồn active, và (T17) kiểm tra lại lúc nhận: xe không có sự cố `open` (BR-10) và pin hiện tại không thấp hơn `minimumRentalBatteryPercent`, nếu không trả 409 mà không đổi dữ liệu (reservation vẫn `active`, người dùng có thể hủy hoặc chờ hết hạn); trong cùng transaction tạo trip active, reservation fulfilled, xe in_use/hub_id null và giải phóng chỗ nguồn. Trả xe chỉ khi in_use; claim chỗ đích và hoàn tất trip/cập nhật vị trí cùng transaction. Pin cuối lấy pin hiện có, chưa có telemetry/hao pin.
 
-Lặp pickup của reservation fulfilled trả lại trip cũ. Lặp return của trip completed với cùng đích trả kết quả cũ; khác đích 409. Đây là xử lý theo trạng thái, chưa phải Idempotency-Key tổng quát T17. Không tự retry POST khi timeout.
+Lặp pickup của reservation fulfilled trả lại trip cũ. Lặp return của trip completed với cùng đích trả kết quả cũ; khác đích 409. Đây là xử lý theo trạng thái; khi gửi kèm `Idempotency-Key` (T17) kết quả lần đầu được lưu và trả lại như mô tả ở phần đặt xe. Không tự retry POST khi timeout.
 
 Hub đích đầy/inactive: rollback và trả 409 với `details: {suggestedHubs: HubSuggestion[]}`. Gợi ý chỉ là số liệu tại lúc đọc, không giữ chỗ; lấy tối đa `settings.returnHubSuggestionLimit`, số nguyên dương trong phạm vi integer PostgreSQL, được kiểm tra hợp lệ (thiếu/sai → 500 chung). Migration 004 lưu baseline 5 từ T08, có thể đổi trong DB; không có fallback/hằng số giới hạn trong service/UI. Điều kiện chỗ trống loại chỗ đã cam kết cho lịch đỗ còn hiệu lực như AllocationPort.
 

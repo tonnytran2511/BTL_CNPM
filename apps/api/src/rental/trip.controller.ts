@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpCode,
   Inject,
   Param,
@@ -11,6 +12,7 @@ import {
   Req,
 } from "@nestjs/common";
 import type { AuthRequest } from "../auth/auth.guard";
+import { IDEMPOTENCY_HEADER, parseIdempotencyKey } from "./idempotency";
 import { ReturnTripDto } from "./trip.dto";
 import { TripService } from "./trip.service";
 
@@ -34,7 +36,13 @@ export class TripController {
     @Req() req: AuthRequest,
     @Param("id", invalidId) id: string,
     @Body() body: ReturnTripDto,
+    @Headers(IDEMPOTENCY_HEADER) key?: string,
   ) {
-    return this.trips.returnVehicle(req.user.id, id, body.targetHubId);
+    return this.trips.returnVehicle(
+      req.user.id,
+      id,
+      body.targetHubId,
+      parseIdempotencyKey(key),
+    );
   }
 }

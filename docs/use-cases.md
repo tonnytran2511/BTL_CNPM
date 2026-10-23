@@ -70,7 +70,7 @@ Nguồn UML use-case diagram: [sinh viên](diagrams/use-cases-student.puml), [v�
 
 - Actor: sinh viên. Trigger: đặt xe đang hiển thị hoặc hủy đặt chỗ của mình.
 - Tiền điều kiện: xe available ở Hub active, đủ pin; không có đặt chỗ còn hiệu lực khác cho cùng xe.
-- Input: vehicleId; hủy dùng reservationId; mutation chưa có Idempotency-Key tổng quát; BR-11/T17 là phần tiếp theo.
+- Input: vehicleId; hủy dùng reservationId; header Idempotency-Key tùy chọn (T17, BR-11): cùng key + payload trả kết quả cũ, khác payload 409.
 - Luồng chính: (1) kiểm tra quyền/điều kiện; (2) giữ xe nguyên tử; (3) tạo reservation active với expiresAt từ cấu hình; (4) trả thời hạn nhận xe. Hủy hợp lệ đổi reservation cancelled và giải phóng xe.
 - Ngoại lệ: cạnh tranh giữ xe hoặc sai trạng thái → 409; sai quyền → 403; hết hạn thì không thể nhận xe. Nhận xe kiểm tra expiresAt sau khi chờ khóa; scheduler giải phóng hết hạn đã triển khai (T16).
 - Hậu điều kiện: tối đa một quyền giữ cùng xe; không giữ chỗ ở Hub đích; request thất bại không để reservation nửa chừng.
@@ -80,9 +80,9 @@ Nguồn UML use-case diagram: [sinh viên](diagrams/use-cases-student.puml), [v�
 
 - Actor: sinh viên. Trigger: xác nhận nhận xe đã đặt.
 - Tiền điều kiện: reservation thuộc người dùng, active, chưa hết hạn; xe reserved phù hợp và còn ở Hub nguồn.
-- Input: reservationId. Gửi lặp reservation fulfilled trả trip cũ; chưa có Idempotency-Key tổng quát (T17).
+- Input: reservationId (+ Idempotency-Key tùy chọn). Gửi lặp trả trip cũ, kể cả không có key (reservation fulfilled) hoặc có key (T17).
 - Luồng chính: trong một transaction, (1) khóa/kiểm tra reservation và xe; (2) xác nhận chỗ nguồn; (3) tạo trip active; (4) reservation fulfilled, xe in_use; (5) giải phóng chỗ nguồn; (6) commit và hiển thị chuyến đi.
-- Ngoại lệ: hết hạn/xe lỗi/sai trạng thái → từ chối; sai quyền → 403; lỗi một bước → rollback toàn bộ; gửi lặp không tạo trip mới.
+- Ngoại lệ: hết hạn/sai trạng thái → từ chối; T17: xe có sự cố đang mở, pin hiện tại dưới ngưỡng hoặc Hub nguồn ngưng hoạt động → 409 và giữ nguyên dữ liệu; sai quyền → 403; lỗi một bước → rollback toàn bộ; gửi lặp không tạo trip mới.
 - Hậu điều kiện: đúng một trip cho lần nhận xe; dashboard nguồn phản ánh chỗ được giải phóng.
 - Liên kết: BR-02/11; IT-10/11/12; AllocationPort của TV3.
 
@@ -90,8 +90,8 @@ Nguồn UML use-case diagram: [sinh viên](diagrams/use-cases-student.puml), [v�
 
 - Actor: sinh viên. Trigger: chọn Hub đích và xác nhận trả.
 - Tiền điều kiện: trip active thuộc người dùng; Hub đích active.
-- Input: tripId, targetHubId. Lặp return với cùng đích sau completed trả kết quả cũ; khác đích 409. Idempotency-Key tổng quát còn chờ T17.
-- Luồng chính: trong một transaction, (1) khóa/kiểm tra trip và xe; (2) chiếm chỗ đích qua allocation service; (3) cập nhật xe/hub và trip completed; (4) commit; (5) hiển thị kết quả và cập nhật dashboard. Bản T08 đưa xe về available và giữ mức pin hiện có; tìm/đặt vẫn áp dụng ngưỡng pin cấu hình. Telemetry/hao pin và kiểm tra lại pin lúc nhận thuộc T17.
+- Input: tripId, targetHubId. Lặp return với cùng đích sau completed trả kết quả cũ; khác đích 409. Có thể gửi Idempotency-Key (T17): cùng key + payload trả kết quả cũ, khác payload 409; lỗi (ví dụ đích đầy) không làm mất key.
+- Luồng chính: trong một transaction, (1) khóa/kiểm tra trip và xe; (2) chiếm chỗ đích qua allocation service; (3) cập nhật xe/hub và trip completed; (4) commit; (5) hiển thị kết quả và cập nhật dashboard. Bản T08 đưa xe về available và giữ mức pin hiện có; tìm/đặt vẫn áp dụng ngưỡng pin cấu hình. Kiểm tra lại pin lúc nhận đã có ở T17; telemetry/hao pin trong chuyến chưa có.
 - Ngoại lệ: đích đầy → 409, trip vẫn active, gợi ý Hub còn chỗ; không có Hub thay thế → thông báo chưa thể trả và liên hệ vận hành; lỗi allocation → rollback; request lặp không chiếm thêm chỗ.
 - Hậu điều kiện: xe chiếm đúng một chỗ ở đúng Hub; trip chỉ kết thúc khi trả thành công.
 - Liên kết: BR-03/11; IT-13/14/15/16.

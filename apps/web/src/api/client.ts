@@ -130,25 +130,32 @@ export const api = {
   },
   reservations: (signal?: AbortSignal) =>
     request<VehicleReservationView[]>("/vehicle-reservations", { signal }),
-  reserveVehicle: (vehicleId: string) =>
+  // BR-11: mỗi thao tác thuê xe gửi Idempotency-Key; caller có thể truyền key cũ khi thử lại cùng một thao tác.
+  reserveVehicle: (vehicleId: string, key: string = crypto.randomUUID()) =>
     request<VehicleReservationView>("/vehicle-reservations", {
       method: "POST",
+      headers: { "Idempotency-Key": key },
       body: JSON.stringify({ vehicleId }),
     }),
-  cancelReservation: (id: string) =>
+  cancelReservation: (id: string, key: string = crypto.randomUUID()) =>
     request<VehicleReservationView>(
       `/vehicle-reservations/${encodeURIComponent(id)}/cancel`,
-      { method: "POST" },
+      { method: "POST", headers: { "Idempotency-Key": key } },
     ),
-  pickupReservation: (id: string) =>
+  pickupReservation: (id: string, key: string = crypto.randomUUID()) =>
     request<TripView>(
       `/vehicle-reservations/${encodeURIComponent(id)}/pickup`,
-      { method: "POST" },
+      { method: "POST", headers: { "Idempotency-Key": key } },
     ),
   trips: (signal?: AbortSignal) => request<TripView[]>("/trips", { signal }),
-  returnTrip: (id: string, targetHubId: string) =>
+  returnTrip: (
+    id: string,
+    targetHubId: string,
+    key: string = crypto.randomUUID(),
+  ) =>
     request<TripView>(`/trips/${encodeURIComponent(id)}/return`, {
       method: "POST",
+      headers: { "Idempotency-Key": key },
       body: JSON.stringify({ targetHubId }),
     }),
 };

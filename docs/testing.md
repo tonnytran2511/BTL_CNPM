@@ -84,3 +84,7 @@ T12 chưa có UI, hoàn tất điều chuyển, Idempotency-Key hoặc ảnh hư
 Build frontend/backend pass; full API **77/77 tests** và frontend **28/28 tests** pass; format/diff checks pass. Thêm migration 004 cho giới hạn Hub gợi ý, bảo vệ generation theo user, UI mọi chuyến active, kiểm tra Hub-first lock contention và hết hạn trong lúc chờ khóa. Browser với API/PostgreSQL riêng kiểm tra một tài khoản nhận hai xe, chọn đích chéo, trả lần lượt, lịch sử/dashboard và DB khớp; không có error/warn console trong luồng đó. Giữ regression dashboard/auth, mobility, operations và simulation.
 
 Chi tiết tại [execution T08](test-runs/2026-10-20-t08-integration.md). Đây là ứng viên chờ review/tích hợp vào main, không phải xác nhận toàn bộ T16/T17 hoặc T23/T25 hoàn thành. PR #10/T15 đã merge trước đó.
+
+## T17 — xử lý lỗi thuê xe và Idempotency-Key (22/10/2026)
+
+`tests/rental-hardening.test.mjs` (PostgreSQL thật, 12 case): nhận xe bị từ chối khi pin giảm dưới ngưỡng, khi xe có sự cố mở, khi Hub nguồn inactive (dữ liệu không đổi, nhận lại được sau khi hết lỗi); trả xe vào Hub đầy giữ trip active và gợi ý Hub khác; Idempotency-Key cho đặt/hủy/nhận/trả (cùng key trả kết quả cũ, khác payload 409, key quá dài 400, key theo người dùng, 8 request song song cùng key chỉ tạo một reservation, nhận/trả lặp và song song chỉ một trip/một chỗ đỗ, request lỗi không đốt key). Chưa kiểm tra telemetry/hao pin trong chuyến và chưa có idempotency cho module đỗ/sạc ngoài cơ chế riêng của T11.

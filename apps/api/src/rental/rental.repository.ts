@@ -190,6 +190,15 @@ export class RentalTx {
       : null;
   }
 
+  /** Xe có sự cố đang mở (BR-10): không được giao cho người thuê dù trạng thái xe chưa kịp đổi. */
+  async hasOpenVehicleIncident(vehicleId: string): Promise<boolean> {
+    const result = await this.client.query(
+      "SELECT 1 FROM incidents WHERE resource_type='vehicle' AND resource_id=$1 AND status='open' LIMIT 1",
+      [vehicleId],
+    );
+    return result.rowCount === 1;
+  }
+
   /** Đổi trạng thái xe theo sự kiện bằng cập nhật có điều kiện (WHERE status = from). */
   async moveVehicle(id: string, event: RentalEvent): Promise<boolean> {
     const { from, to } = VEHICLE_STATUS_BY_EVENT[event];
