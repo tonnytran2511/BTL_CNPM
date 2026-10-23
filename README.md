@@ -1,26 +1,23 @@
 # Smart E-Mobility Hub
 
-Nền tảng bài tập lớn CNPM HK261, nhóm 5 người. Frontend React/TypeScript/Vite; backend NestJS/TypeScript; PostgreSQL với migration SQL và `pg`.
-
 ## T19 — điều phối hàng chờ và phiên sạc
 
-Nhánh: `t19/charging-scheduler`. Cập nhật ngày 23/10/2026 trên main `e918f9d`. Phụ trách: Mai Anh. Bản T19 này kế thừa T18 và main mới có T08 nhận/trả xe, T16 chống đặt trùng/hết hạn, T35 quản lý Hub. Chờ peer review và tích hợp; không coi toàn bộ bài làm đã nghiệm thu.
+Nhánh: `t19/charging-scheduler`. Cập nhật ngày 23/10/2026 trên main `e918f9d`.
+Phụ trách: Mai Anh.
 
 | Công việc T19        | Chức năng trong nhánh                                                                                                                                            |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Xếp hàng ưu tiên     | Chờ quá lâu trước, sau đó cần xe sớm, pin thấp; ngưỡng lấy từ cấu hình DB, cùng dữ liệu có thứ tự ổn định.                                                       |
-| Phân bổ cổng         | Operator chọn Hub; hệ thống cấp cổng còn trống cho yêu cầu đủ điều kiện trong cùng transaction với T18.                                                          |
+| Phân bổ cổng         | Operator chọn Hub; hệ thống cấp cổng còn trống cho yêu cầu đủ điều kiện trong cùng giao dịch dữ liệu.                                                            |
 | Quản lý phiên        | Bắt đầu, hoàn tất hoặc hủy; hoàn tất cần pin quan sát đạt mục tiêu; lỗi giữa chừng hoàn tác toàn bộ.                                                             |
 | Tích hợp xe thuê     | Operator tạo/hủy yêu cầu; khi giữ cổng xe chuyển sang charging, chặn đặt thuê/điều chuyển; kết thúc cập nhật pin và giải phóng xe qua service của module rental. |
 | Giao diện và đồng bộ | Hai khung yêu cầu sạc cập nhật sau thao tác; lịch đỗ/yêu cầu sạc theo cột dọc có cuộn và nút Lên/Xuống.                                                          |
 | Kiểm chứng           | Test PostgreSQL/HTTP cho gửi lặp, rollback và thao tác cạnh tranh; test hook cho đồng bộ, retry và đổi tài khoản. Kết quả bản cập nhật ghi tại docs/testing.md.  |
 
-**Kết quả bản cập nhật:** build, kiểm tra định dạng, **102/102 backend tests + 48/48 frontend tests pass**. Bản này chờ review; kết quả kiểm thử không thay cho nghiệm thu của nhóm.
-
-**Dùng thử:** đăng nhập operator → “Điều phối sạc” → gửi yêu cầu xe thuê hoặc chọn Hub để phân bổ → bắt đầu phiên → nhập pin thực tế khi hoàn tất/hủy.
+Đăng nhập operator → “Điều phối sạc” → gửi yêu cầu xe thuê hoặc chọn Hub để phân bổ → bắt đầu phiên → nhập pin thực tế khi hoàn tất/hủy.
 Xe cá nhân: đăng ký → đặt chỗ → check-in đúng Hub → gửi yêu cầu sạc. Yêu cầu còn queued chưa giữ xe thuê; xe được đặt/di chuyển trước đó sẽ không được phân bổ khi không còn đủ điều kiện.
 
-**Giới hạn:** chưa tự tăng pin hoặc tự chạy phân bổ theo chu kỳ; người vận hành chủ động xác nhận. Xử lý cổng hỏng, interrupted và đưa nhu cầu trở lại hàng chờ thuộc **T20**, chưa triển khai trong nhánh này. available vẫn phải đủ pin và ở Hub hoạt động mới thuê được.
+Hạn chế: chưa tự tăng pin hoặc tự chạy phân bổ theo chu kỳ; người vận hành chủ động xác nhận. Xử lý cổng hỏng, interrupted và đưa nhu cầu trở lại hàng chờ thuộc **T20**, chưa triển khai trong nhánh này. available vẫn phải đủ pin và ở Hub hoạt động mới thuê được.
 
 Chi tiết API và quy tắc tại [docs/charging-scheduler.md](docs/charging-scheduler.md); kết quả kiểm thử tại [docs/testing.md](docs/testing.md). Codex hỗ trợ code/test/tài liệu; Mai Anh cần đọc, giải thích và phối hợp review phần tích hợp.
 
@@ -33,8 +30,6 @@ Chi tiết API và quy tắc tại [docs/charging-scheduler.md](docs/charging-sc
 - Seed giả lập từ JSON; migration, kiểm thử PostgreSQL riêng và kiểu API dùng chung.
 
 Đã tích hợp đăng ký xe cá nhân, tra cứu/đặt/hủy lịch đỗ, check-in/check-out, gửi/xem yêu cầu sạc và AllocationPort; thuê xe có tìm/đặt/hủy/nhận/trả và lịch sử. T12 có API nhật ký sự cố và tạo/start/cancel lệnh trước khi chạy; chưa có UI quản trị hoặc hoàn tất điều chuyển. Hợp đồng tại `docs/api.md`.
-
-Vòng đời thuê xe, quản trị tài nguyên và sự cố/điều chuyển chưa hoàn chỉnh. T13 đã có engine mô phỏng tăng nhu cầu và operator UI; mô hình giới hạn ở lượt rời Hub, xem docs/simulation.md. Trong nhánh T19, scheduler và vòng đời phiên sạc đã triển khai như phần thông tin phía trên; xử lý gián đoạn vẫn thuộc T20.
 
 ## Setup
 
@@ -83,8 +78,6 @@ Seed là dữ liệu ví dụ do nhóm kiểm soát qua `SEED_DATA_FILE`; có th
 
 ## Kiểm tra
 
-### Demo T14 bằng database riêng
-
 ```sh
 npm run demo:t14
 ```
@@ -119,12 +112,6 @@ tests/                 integration test trên PostgreSQL thật
 
 Đọc `AGENTS.md`, `docs/guides/DESIGN.md`, `docs/api.md` và `docs/guides/CONTRIBUTING.md` trước khi bổ sung module. Không dùng frontend để quyết định quyền hoặc phân bổ tài nguyên.
 
-Nhóm trưởng dùng `docs/leader-review.md` để review/bàn giao; baseline nghiệp vụ và test chấp nhận tại `docs/business-rules.md`. Các request types dự kiến ở packages/contracts/planned.ts chưa phải endpoint chạy được.
-
 Đặc tả 15 use case: `docs/use-cases.md`; UML source: `docs/diagrams/`; kế hoạch 36 testcase tích hợp và traceability: `docs/integration-test-plan.md`. Kết quả chạy thực tế được ghi riêng tại `docs/testing.md`.
 
 Chạy production cần hosting, HTTPS/cookie Secure, cấu hình DB và chiến lược vận hành riêng; compose/local hiện phục vụ phát triển. Hướng dẫn này không khẳng định hệ thống đã được triển khai production.
-
-## Simulation T13
-
-Có mô phỏng tăng nhu cầu cho operator: chạy db:seed để thêm settings, nhập tham số và xem baseline/scenario trên cùng snapshot/seed. Engine đầu tiên chỉ mô phỏng lượt xe rời Hub; các kịch bản đỗ/sạc, đề xuất và lịch sử thuộc T22. Xem [docs/simulation.md](docs/simulation.md).
