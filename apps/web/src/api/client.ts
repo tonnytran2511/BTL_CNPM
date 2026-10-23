@@ -10,6 +10,8 @@ import type {
   VehicleReservationView,
   TripView,
   ApiError,
+  CreateHubRequest,
+  UpdateHubRequest,
 } from "@emobility/contracts";
 export class RequestError extends Error {
   constructor(
@@ -117,6 +119,30 @@ export const api = {
     request<NetworkOverview>("/network/overview", { signal }),
   detail: (id: string, signal?: AbortSignal) =>
     request<HubDetail>(`/hubs/${encodeURIComponent(id)}`, { signal }),
+  createHub: (body: CreateHubRequest) =>
+    request("/hubs", { method: "POST", body: JSON.stringify(body) }),
+  updateHub: (id: string, body: UpdateHubRequest) =>
+    request(`/hubs/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+  deleteHub: (id: string) =>
+    request(`/hubs/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  setParkingCapacity: (id: string, capacity: number) =>
+    request(`/hubs/${encodeURIComponent(id)}/parking-capacity`, {
+      method: "PUT",
+      body: JSON.stringify({ capacity }),
+    }),
+  addChargingPoint: (id: string, code: string) =>
+    request(`/hubs/${encodeURIComponent(id)}/charging-points`, {
+      method: "POST",
+      body: JSON.stringify({ code }),
+    }),
+  removeChargingPoint: (id: string, pointId: string) =>
+    request(
+      `/hubs/${encodeURIComponent(id)}/charging-points/${encodeURIComponent(pointId)}`,
+      { method: "DELETE" },
+    ),
   vehicles: (query: VehicleSearchQuery, signal?: AbortSignal) => {
     const params = new URLSearchParams();
     if (query.hubId) params.set("hubId", query.hubId);
