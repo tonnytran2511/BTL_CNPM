@@ -1,0 +1,52 @@
+{
+  "capturedAt": "2026-10-23T04:38:42.916Z",
+  "baseRevision": "5d0d4d2484c6ad4a068e9cc86fd113d9737ef5b4",
+  "t35Revision": "ee18a064132ea4714d4f8037e94cb9242b7a500b",
+  "environment": "disposable PostgreSQL/API/Vite via scripts/demo-t14.mjs",
+  "browser": {
+    "createdHub": {
+      "id": "c692410d-9e1e-425d-8342-c015cdf7c4fc",
+      "code": "T14-23OCT",
+      "name": "Hub kiểm chứng T14",
+      "location": "Môi trường demo tạm",
+      "status": "active"
+    },
+    "parking": {
+      "capacity": 4
+    },
+    "chargingPoints": [
+      {
+        "code": "T14-C1",
+        "status": "available"
+      }
+    ],
+    "reloadPersists": true,
+    "duplicateCode": {
+      "message": "Mã Hub đã tồn tại.",
+      "draftPreserved": true
+    },
+    "dashboard": {
+      "hubCount": 3,
+      "availableParking": 19,
+      "availableChargingPoints": 3
+    },
+    "student": {
+      "operatorNavigationVisible": false,
+      "directManagementHashRendersStudentOverview": true,
+      "screenshot": "t14-t35-student.png"
+    }
+  },
+  "txt": {
+    "downloadObserved": true,
+    "copy": "t14-t35-simulation.txt",
+    "snapshotCapturedAt": "2026-10-23T04:37:31.159Z",
+    "demand": [6, 27],
+    "served": [1, 1],
+    "unmet": [5, 26]
+  },
+  "notes": [
+    "Browser actions used UI; SQL only read back the created fixture.",
+    "Rental/mobility/operations regressions ran separately on isolated test databases.",
+    "No claim of human member sign-off or unmeasured NFR."
+  ]
+}
