@@ -127,3 +127,7 @@ Thêm 4 kiểm thử hồi quy hook cho đồng bộ hai chiều, đổi trạng
 ## T19 cập nhật main e918f9d — 23/10/2026
 
 Build và format/diff check pass; npm test **102/102 backend + 48/48 frontend pass**. Giữ T08/T16/T35 và T18 đã merge. Chi tiết [execution T19](test-runs/2026-10-23-t19-main-integration.md). Chưa demo trực quan lại bản ghép, chưa push T19.
+
+## T19 kiểm chứng ở checkout mới — 23/10/2026
+
+Giữ nguyên bản T19 và README Mai Anh đã chỉnh trên nền main e918f9d. Build/format pass. Lần chạy tổng backend có 101 pass và một suite lỗi EBUSY khi Windows dọn thư mục PostgreSQL tạm; không có assertion nghiệp vụ thất bại. Bổ sung maxRetries=10, retryDelay=100ms vào bước rm thư mục test T16 để xử lý khóa file tạm có giới hạn. Chạy lại riêng reservation-expiry.test.mjs: 12/12 pass; frontend: 48/48 pass. Các bộ backend đạt sau lần chạy lại, không mô tả thành một lần chạy tổng 102/102 mới. Không đổi nghiệp vụ hoặc schema; không thay chỉnh sửa README của Mai Anh.
