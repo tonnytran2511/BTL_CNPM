@@ -529,4 +529,31 @@ export class RentalRepository {
       )
     ).rowCount;
   }
+
+  async lockRedistributingVehicles(
+    client: PoolClient,
+    ids: string[],
+    hub: string,
+  ) {
+    return (
+      await client.query(
+        "SELECT id FROM vehicles WHERE id=ANY($1::uuid[]) AND hub_id=$2 AND status='redistributing' ORDER BY id FOR UPDATE",
+        [ids, hub],
+      )
+    ).rowCount;
+  }
+
+  async completeRedistributionVehicles(
+    client: PoolClient,
+    ids: string[],
+    sourceHub: string,
+    targetHub: string,
+  ) {
+    return (
+      await client.query(
+        "UPDATE vehicles SET status='available',hub_id=$3,updated_at=now() WHERE id=ANY($1::uuid[]) AND hub_id=$2 AND status='redistributing'",
+        [ids, sourceHub, targetHub],
+      )
+    ).rowCount;
+  }
 }

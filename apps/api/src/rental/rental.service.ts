@@ -64,4 +64,42 @@ export class RentalService {
         "Xe trong lệnh không còn đủ điều kiện điều chuyển.",
       );
   }
+
+  async validateRedistributingVehicles(
+    client: PoolClient,
+    ids: string[],
+    sourceHubId: string,
+  ) {
+    if (
+      !ids.length ||
+      (await this.repository.lockRedistributingVehicles(
+        client,
+        ids,
+        sourceHubId,
+      )) !== ids.length
+    )
+      throw new ConflictException(
+        "Xe trong lệnh không còn ở trạng thái điều chuyển tại Hub nguồn.",
+      );
+  }
+
+  async completeRedistributionVehicles(
+    client: PoolClient,
+    ids: string[],
+    sourceHubId: string,
+    targetHubId: string,
+  ) {
+    await this.validateRedistributingVehicles(client, ids, sourceHubId);
+    if (
+      (await this.repository.completeRedistributionVehicles(
+        client,
+        ids,
+        sourceHubId,
+        targetHubId,
+      )) !== ids.length
+    )
+      throw new ConflictException(
+        "Không thể cập nhật vị trí các xe điều chuyển.",
+      );
+  }
 }

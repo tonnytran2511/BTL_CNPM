@@ -1,4 +1,4 @@
-/** Proposed module contracts. These endpoints are not implemented yet. */
+/** Shared contracts for planned and incrementally implemented domain modules. */
 export interface TimeWindow {
   startsAt: string;
   endsAt: string;
@@ -49,6 +49,17 @@ export interface Incident {
   reportedBy: string;
   createdAt: string;
   resolvedAt: string | null;
+}
+export interface OperationLogEntry {
+  id: string;
+  commandType: "incident" | "redistribution";
+  commandId: string;
+  action: "created" | "resolved" | "started" | "cancelled" | "completed";
+  actorId: string;
+  actorName: string;
+  fromStatus: string | null;
+  toStatus: string;
+  occurredAt: string;
 }
 export type RedistributionStatus =
   "pending" | "in_progress" | "completed" | "cancelled";

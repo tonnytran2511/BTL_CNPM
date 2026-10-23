@@ -1015,3 +1015,102 @@ body:has(.simulation-guide-dialog[open]) {
   text-decoration: underline;
   cursor: pointer;
 }
+
+.operations-create-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 18px;
+  margin: 24px 0;
+}
+.operation-form,
+.operation-card {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--line, #dce5e3);
+  border-radius: 14px;
+}
+.operation-form h2,
+.operation-card h3,
+.operation-card p {
+  margin: 0;
+}
+.operation-form label {
+  display: grid;
+  gap: 6px;
+}
+.operation-form input,
+.operation-form select,
+.operation-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--line, #dce5e3);
+  border-radius: 8px;
+  color: inherit;
+  background: var(--surface, #fff);
+}
+.operation-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+.operation-form fieldset {
+  display: grid;
+  gap: 8px;
+  max-height: 240px;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--line, #dce5e3);
+  border-radius: 8px;
+}
+.operation-form .operation-checkbox {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+.operation-form .operation-checkbox input {
+  width: auto;
+}
+.operations-section {
+  margin: 34px 0;
+}
+.operation-list {
+  display: grid;
+  gap: 12px;
+}
+.operation-card {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+.operation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.operation-log {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.operation-log li {
+  display: grid;
+  grid-template-columns: minmax(130px, 180px) repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line, #dce5e3);
+  overflow-wrap: anywhere;
+}
+.operation-log time,
+.operation-log span {
+  color: var(--muted);
+}
+@media (max-width: 760px) {
+  .operation-card {
+    grid-template-columns: 1fr;
+  }
+  .operation-log li {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}

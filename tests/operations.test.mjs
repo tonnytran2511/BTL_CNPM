@@ -30,9 +30,9 @@ async function command(file, env) {
   const [code] = await once(child, "exit");
   assert.equal(code, 0, out);
 }
-// Real HTTP + PostgreSQL regression coverage for T12 and rental integration.
+// Real HTTP + PostgreSQL regression coverage for T12, T21, T37 and rental integration.
 test(
-  "T12 operations and rental integration against real PostgreSQL",
+  "Operations and rental integration against real PostgreSQL",
   { timeout: 120_000 },
   async (t) => {
     const directory = await mkdtemp(resolve(tmpdir(), "emobility-operations-"));
@@ -256,12 +256,29 @@ test(
           });
           assert.equal(incident.status, 201);
           assert.equal(incident.body.description, "Check brake");
+          const incidentList = await call("GET", "/incidents", operator);
+          assert.ok(incidentList.body.some((entry) => entry.id === incident.body.id));
+          assert.equal(
+            (await call("GET", "/incidents", student)).status,
+            403,
+          );
           const actor = (
             await pool.query("SELECT id FROM users WHERE role='operator'")
           ).rows[0].id;
           assert.equal(incident.body.reportedBy, actor);
           assert.equal(incident.body.status, "open");
           assert.ok(Date.parse(incident.body.createdAt));
+          assert.equal((await call("GET", "/operations/log", student)).status, 403);
+          const createdLog = await call("GET", "/operations/log", operator);
+          assert.equal(createdLog.status, 200);
+          assert.ok(createdLog.body.some((entry) =>
+            entry.commandId === incident.body.id &&
+            entry.action === "created" &&
+            entry.actorId === actor &&
+            entry.toStatus === "open" &&
+            entry.actorName === "Op" &&
+            Date.parse(entry.occurredAt),
+          ));
           assert.equal(
             (await post(`/redistributions/${pending.id}/start`)).status,
             409,
@@ -273,6 +290,13 @@ test(
           assert.equal(resolved.status, 201);
           assert.equal(resolved.body.status, "resolved");
           assert.ok(Date.parse(resolved.body.resolvedAt));
+          const resolvedLog = await call("GET", "/operations/log", operator);
+          assert.ok(resolvedLog.body.some((entry) =>
+            entry.commandId === incident.body.id &&
+            entry.action === "resolved" &&
+            entry.fromStatus === "open" &&
+            entry.toStatus === "resolved",
+          ));
           assert.equal(
             (await post(`/incidents/${incident.body.id}/resolve`)).status,
             409,
@@ -357,6 +381,8 @@ test(
         async () => {
           const f = await fleet(),
             p = await order(f);
+          const orders = await call("GET", "/redistributions", operator);
+          assert.ok(orders.body.some((entry) => entry.id === p.id));
           await pool.query("UPDATE hubs SET status='inactive' WHERE id=$1", [
             f.targetHubId,
           ]);
@@ -405,6 +431,92 @@ test(
                 v.status === "redistributing" && v.hub_id === f.sourceHubId,
             ),
           );
+        },
+      );
+      await t.test(
+        "completion moves a vehicle and its parking allocation atomically",
+        async () => {
+          const f = await fleet(),
+            p = await order(f);
+          assert.equal((await post(`/redistributions/${p.id}/start`)).status, 201);
+          assert.equal(
+            (await post(`/redistributions/${p.id}/complete`)).status,
+            409,
+            "a full target must not complete",
+          );
+          const afterFullTarget = await states(f.vehicleIds);
+          assert.equal(afterFullTarget.length, 1);
+          assert.equal(afterFullTarget[0].hub_id, f.sourceHubId);
+          assert.equal(afterFullTarget[0].status, "redistributing");
+          assert.equal(
+            (await pool.query("SELECT status FROM redistributions WHERE id=$1", [p.id])).rows[0].status,
+            "in_progress",
+          );
+          const sourceAfterRollback = (
+            await pool.query(
+              "SELECT status,vehicle_id FROM parking_spaces WHERE hub_id=$1",
+              [f.sourceHubId],
+            )
+          ).rows[0];
+          assert.equal(
+            sourceAfterRollback.status,
+            "occupied",
+            "failed destination allocation must restore the source space",
+          );
+          assert.equal(sourceAfterRollback.vehicle_id, f.vehicleIds[0]);
+          const logsBeforeComplete = await call("GET", "/operations/log", operator);
+          assert.equal(
+            logsBeforeComplete.body.some(
+              (entry) =>
+                entry.commandId === p.id && entry.action === "completed",
+            ),
+            false,
+            "failed completion must not produce an audit event",
+          );
+
+          await pool.query(
+            "INSERT INTO parking_spaces(hub_id,code,status) VALUES($1,'target-space','available')",
+            [f.targetHubId],
+          );
+          const completed = await post(`/redistributions/${p.id}/complete`);
+          assert.equal(completed.status, 201);
+          assert.equal(completed.body.status, "completed");
+          assert.ok(Date.parse(completed.body.completedAt));
+          const afterComplete = await states(f.vehicleIds);
+          assert.equal(afterComplete.length, 1);
+          assert.equal(afterComplete[0].hub_id, f.targetHubId);
+          assert.equal(afterComplete[0].status, "available");
+          const sourceAfterComplete = (
+            await pool.query(
+              "SELECT status,vehicle_id FROM parking_spaces WHERE hub_id=$1",
+              [f.sourceHubId],
+            )
+          ).rows[0];
+          assert.equal(sourceAfterComplete.status, "available");
+          assert.equal(sourceAfterComplete.vehicle_id, null);
+          assert.equal(
+            (await pool.query("SELECT status,vehicle_id FROM parking_spaces WHERE hub_id=$1", [f.targetHubId])).rows[0].vehicle_id,
+            f.vehicleIds[0],
+          );
+          assert.equal((await post(`/redistributions/${p.id}/complete`)).status, 409);
+          const audit = await call("GET", "/operations/log", operator);
+          const completedEvent = audit.body.find((entry) =>
+            entry.commandId === p.id &&
+            entry.action === "completed" &&
+            entry.fromStatus === "in_progress" &&
+            entry.toStatus === "completed"
+          );
+          assert.ok(completedEvent);
+          assert.equal(completedEvent.actorId, p.createdBy);
+          assert.ok(Date.parse(completedEvent.occurredAt));
+          assert.ok(audit.body.some((entry) =>
+            entry.commandId === p.id &&
+            entry.action === "started" &&
+            entry.fromStatus === "pending" &&
+            entry.toStatus === "in_progress" &&
+            entry.actorId === p.createdBy &&
+            Date.parse(entry.occurredAt),
+          ));
         },
       );
       await t.test(

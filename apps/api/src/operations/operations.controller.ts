@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -24,8 +25,26 @@ export class OperationsController {
   }
 
   @Post("incidents/:id/resolve")
-  resolveIncident(@Param("id", ParseUUIDPipe) id: string) {
-    return this.operations.resolveIncident(id);
+  resolveIncident(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Req() req: AuthRequest,
+  ) {
+    return this.operations.resolveIncident(id, req.user.id);
+  }
+
+  @Get("incidents")
+  incidents() {
+    return this.operations.incidents();
+  }
+
+  @Get("redistributions")
+  redistributions() {
+    return this.operations.redistributions();
+  }
+
+  @Get("operations/log")
+  operationLog() {
+    return this.operations.operationLog();
   }
 
   @Post("redistributions")
@@ -37,12 +56,26 @@ export class OperationsController {
   }
 
   @Post("redistributions/:id/start")
-  startRedistribution(@Param("id", ParseUUIDPipe) id: string) {
-    return this.operations.startRedistribution(id);
+  startRedistribution(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Req() req: AuthRequest,
+  ) {
+    return this.operations.startRedistribution(id, req.user.id);
   }
 
   @Post("redistributions/:id/cancel")
-  cancelRedistribution(@Param("id", ParseUUIDPipe) id: string) {
-    return this.operations.cancelRedistribution(id);
+  cancelRedistribution(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Req() req: AuthRequest,
+  ) {
+    return this.operations.cancelRedistribution(id, req.user.id);
+  }
+
+  @Post("redistributions/:id/complete")
+  completeRedistribution(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Req() req: AuthRequest,
+  ) {
+    return this.operations.completeRedistribution(id, req.user.id);
   }
 }

@@ -41,7 +41,7 @@ lowBatteryThreshold đã dùng ở dashboard; maximumParkingDurationMinutes đư
 
 ## Trạng thái dự kiến
 
-TV4 hiện triển khai lưu/resolve sự cố với actor và thời gian; lệnh điều chuyển có các trạng thái `pending`, `in_progress`, `cancelled`. Bắt đầu lệnh khóa Hub/xe, kiểm tra lại xe còn `available` tại nguồn và không có incident xe đang mở, rồi chuyển xe sang `redistributing` trong cùng transaction. Lệnh đang chạy chưa thể hoàn tất nếu chưa tích hợp allocation service TV3 để chiếm chỗ đỗ tại Hub đích; không được tự đặt trạng thái `completed` trước bước đó.
+TV4 triển khai lưu/resolve sự cố với actor và thời gian; lệnh điều chuyển có các trạng thái `pending`, `in_progress`, `completed`, `cancelled`. Bắt đầu khóa Hub/xe, kiểm tra lại xe còn `available` tại nguồn và không có incident xe đang mở, rồi chuyển xe sang `redistributing` trong cùng transaction. Hoàn tất kiểm tra lại Hub/xe/incident, giải phóng chỗ nguồn, chiếm chỗ đích qua allocation service TV3 và cập nhật xe qua RentalService TV2 trong cùng transaction. Đích đầy thì rollback, không ghi `completed`.
 
 - Vehicle reservation: active → cancelled / expired / fulfilled. Trạng thái kết thúc không quay lại active.
 - Trip: active → completed; sự cố không tự completed.

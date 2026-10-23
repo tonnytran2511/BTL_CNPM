@@ -17,6 +17,8 @@ export function useAppPage(role?: Role) {
         ? "simulation"
         : hash === "#/hubs/manage"
           ? "hub-management"
+          : hash === "#/operations"
+            ? "operations"
           : "overview";
   useEffect(() => {
     document.getElementById("main")?.focus();

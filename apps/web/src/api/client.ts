@@ -12,6 +12,11 @@ import type {
   ApiError,
   CreateHubRequest,
   UpdateHubRequest,
+  CreateIncidentRequest,
+  Incident,
+  OperationLogEntry,
+  Redistribution,
+  RedistributionRequest,
 } from "@emobility/contracts";
 export class RequestError extends Error {
   constructor(
@@ -177,4 +182,37 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ targetHubId }),
     }),
+  incidents: (signal?: AbortSignal) =>
+    request<Incident[]>("/incidents", { signal }),
+  createIncident: (body: CreateIncidentRequest) =>
+    request<Incident>("/incidents", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  resolveIncident: (id: string) =>
+    request<Incident>(`/incidents/${encodeURIComponent(id)}/resolve`, {
+      method: "POST",
+    }),
+  redistributions: (signal?: AbortSignal) =>
+    request<Redistribution[]>("/redistributions", { signal }),
+  createRedistribution: (body: RedistributionRequest) =>
+    request<Redistribution>("/redistributions", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  startRedistribution: (id: string) =>
+    request<Redistribution>(
+      `/redistributions/${encodeURIComponent(id)}/start`,
+      { method: "POST" },
+    ),
+  cancelRedistribution: (id: string) =>
+    request<Redistribution>(`/redistributions/${encodeURIComponent(id)}/cancel`, {
+      method: "POST",
+    }),
+  completeRedistribution: (id: string) =>
+    request<Redistribution>(`/redistributions/${encodeURIComponent(id)}/complete`, {
+      method: "POST",
+    }),
+  operationLog: (signal?: AbortSignal) =>
+    request<OperationLogEntry[]>("/operations/log", { signal }),
 };

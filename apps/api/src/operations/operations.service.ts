@@ -12,6 +12,10 @@ import type {
   RedistributionRequest,
 } from "@emobility/contracts";
 import { RentalService } from "../rental/rental.service";
+import {
+  ALLOCATION_PORT,
+  type AllocationPort,
+} from "../integration/allocation.port";
 import { OperationsRepository } from "./operations.repository";
 
 @Injectable()
@@ -19,6 +23,7 @@ export class OperationsService {
   constructor(
     @Inject(OperationsRepository) private readonly repo: OperationsRepository,
     @Inject(RentalService) private readonly rental: RentalService,
+    @Inject(ALLOCATION_PORT) private readonly allocation: AllocationPort,
   ) {}
   async createIncident(input: CreateIncidentRequest, actorId: string) {
     if (!input.description.trim())
@@ -35,9 +40,9 @@ export class OperationsService {
       return this.repo.createIncident(client, input, actorId);
     });
   }
-  async resolveIncident(id: string) {
+  async resolveIncident(id: string, actorId: string) {
     return this.repo.transaction(async (client) => {
-      const incident = await this.repo.resolveIncident(client, id);
+      const incident = await this.repo.resolveIncident(client, id, actorId);
       if (incident) return incident;
       if (!(await this.repo.incidentExists(client, id)))
         throw new NotFoundException("Không tìm thấy sự cố.");
@@ -76,7 +81,7 @@ export class OperationsService {
       return this.repo.createOrder(client, input, actorId);
     });
   }
-  async startRedistribution(id: string) {
+  async startRedistribution(id: string, actorId: string) {
     return this.repo.transaction(async (client) => {
       const order = await this.repo.order(client, id);
       if (!order)
@@ -90,17 +95,65 @@ export class OperationsService {
         order.vehicleIds,
         order.sourceHubId,
       );
-      return this.repo.start(client, id);
+      return this.repo.start(client, id, actorId);
     });
   }
-  async cancelRedistribution(id: string) {
+  async cancelRedistribution(id: string, actorId: string) {
     return this.repo.transaction(async (client) => {
       const order = await this.repo.order(client, id);
       if (!order)
         throw new NotFoundException("Không tìm thấy lệnh điều chuyển.");
       if (order.status !== "pending")
         throw new ConflictException("Chỉ lệnh đang chờ mới được hủy.");
-      return this.repo.cancel(client, id);
+      return this.repo.cancel(client, id, actorId);
     });
+  }
+
+  async completeRedistribution(id: string, actorId: string) {
+    return this.repo.transaction(async (client) => {
+      const order = await this.repo.order(client, id);
+      if (!order)
+        throw new NotFoundException("Không tìm thấy lệnh điều chuyển.");
+      if (order.status !== "in_progress")
+        throw new ConflictException(
+          "Chỉ lệnh đang điều chuyển mới hoàn tất được.",
+        );
+      await this.hubs(client, order.sourceHubId, order.targetHubId);
+      await this.rental.validateRedistributingVehicles(
+        client,
+        order.vehicleIds,
+        order.sourceHubId,
+      );
+      if (await this.repo.openVehicleIncident(client, order.vehicleIds))
+        throw new ConflictException("Xe trong lệnh có sự cố chưa được xử lý.");
+      for (const vehicleId of order.vehicleIds) {
+        await this.allocation.releaseRentalVehicleSpace(
+          vehicleId,
+          order.sourceHubId,
+          client,
+        );
+        await this.allocation.claimRentalVehicleSpace(
+          vehicleId,
+          order.targetHubId,
+          client,
+        );
+      }
+      await this.rental.completeRedistributionVehicles(
+        client,
+        order.vehicleIds,
+        order.sourceHubId,
+        order.targetHubId,
+      );
+      return this.repo.complete(client, id, actorId);
+    });
+  }
+  incidents() {
+    return this.repo.listIncidents();
+  }
+  redistributions() {
+    return this.repo.listRedistributions();
+  }
+  operationLog() {
+    return this.repo.listLogs();
   }
 }
