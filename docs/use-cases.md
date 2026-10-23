@@ -72,7 +72,7 @@ Nguồn UML use-case diagram: [sinh viên](diagrams/use-cases-student.puml), [v�
 - Tiền điều kiện: xe available ở Hub active, đủ pin; không có đặt chỗ còn hiệu lực khác cho cùng xe.
 - Input: vehicleId; hủy dùng reservationId; mutation chưa có Idempotency-Key tổng quát; BR-11/T17 là phần tiếp theo.
 - Luồng chính: (1) kiểm tra quyền/điều kiện; (2) giữ xe nguyên tử; (3) tạo reservation active với expiresAt từ cấu hình; (4) trả thời hạn nhận xe. Hủy hợp lệ đổi reservation cancelled và giải phóng xe.
-- Ngoại lệ: cạnh tranh giữ xe hoặc sai trạng thái → 409; sai quyền → 403; hết hạn thì không thể nhận xe. Nhận xe kiểm tra expiresAt sau khi chờ khóa; scheduler giải phóng hết hạn chưa triển khai (T16).
+- Ngoại lệ: cạnh tranh giữ xe hoặc sai trạng thái → 409; sai quyền → 403; hết hạn thì không thể nhận xe. Nhận xe kiểm tra expiresAt sau khi chờ khóa; scheduler giải phóng hết hạn đã triển khai (T16).
 - Hậu điều kiện: tối đa một quyền giữ cùng xe; không giữ chỗ ở Hub đích; request thất bại không để reservation nửa chừng.
 - Liên kết: BR-01/11; IT-07/08/09/10.
 
@@ -199,4 +199,4 @@ TV2/TV3 chốt trạng thái xe sau trả và ngưỡng pin; TV3 chốt check-in
 
 ### Cập nhật UC-05/06 theo T08 ngày 20/10
 
-Nhận xe fulfilled và trả xe completed đã có controller/service/UI; chi tiết API và repeat semantics tại api.md. UC-04/05 chưa có scheduler tự hết hạn T16. UC-05 chưa kiểm tra lại ngưỡng pin khi đã giữ xe (T17). UC-06 hiển thị mọi chuyến active, chọn đích riêng; không thêm giới hạn một chuyến mỗi người khi backend chưa có rule. Test trip.test.mjs gồm quyền, trạng thái, rollback, cạnh tranh chỗ, cấu hình gợi ý và thứ tự khóa Hub/xe; đây không phải xác nhận tất cả testcase IT-10–16 hoặc T17 đã đạt.
+Nhận xe fulfilled và trả xe completed đã có controller/service/UI; chi tiết API và repeat semantics tại api.md. UC-04/05 đã có scheduler tự hết hạn T16. UC-05 chưa kiểm tra lại ngưỡng pin khi đã giữ xe (T17). UC-06 hiển thị mọi chuyến active, chọn đích riêng; không thêm giới hạn một chuyến mỗi người khi backend chưa có rule. Test trip.test.mjs gồm quyền, trạng thái, rollback, cạnh tranh chỗ, cấu hình gợi ý và thứ tự khóa Hub/xe; đây không phải xác nhận tất cả testcase IT-10–16 hoặc T17 đã đạt.

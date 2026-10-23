@@ -5,6 +5,7 @@
     "lowBatteryThreshold": 25,
     "maximumParkingDurationMinutes": 1440,
     "reservationHoldMinutes": 15,
+    "reservationExpirySweepSeconds": 30,
     "minimumRentalBatteryPercent": 20
   },
   "hubs": [

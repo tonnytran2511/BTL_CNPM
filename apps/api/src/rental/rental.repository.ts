@@ -398,6 +398,35 @@ export class RentalRepository {
     return value;
   }
 
+  /** Chu kỳ quét reservation hết hạn (giây), lấy từ settings như mọi ngưỡng khác của module. */
+  async reservationExpirySweepSeconds(): Promise<number> {
+    const result = await this.db.query<{ value: unknown }>(
+      "SELECT value FROM settings WHERE key=$1",
+      ["reservationExpirySweepSeconds"],
+    );
+    const value = result.rows[0]?.value;
+    if (typeof value !== "number" || !Number.isInteger(value) || value <= 0)
+      throw new InternalServerErrorException(
+        "Cấu hình chu kỳ quét đặt xe hết hạn chưa hợp lệ.",
+      );
+    return value;
+  }
+
+  /**
+   * Reservation còn active nhưng đã quá hạn (đồng hồ database). Chỉ đọc id, KHÔNG khóa:
+   * từng cái được khóa và kiểm tra lại trong transaction riêng nên không giữ nhiều khóa cùng lúc.
+   */
+  async dueReservationIds(limit: number): Promise<string[]> {
+    const result = await this.db.query<{ id: string }>(
+      `SELECT id FROM vehicle_reservations
+        WHERE status='active' AND expires_at <= now()
+        ORDER BY expires_at, id
+        LIMIT $1`,
+      [limit],
+    );
+    return result.rows.map((row) => row.id);
+  }
+
   async searchRentable(filter: VehicleFilter): Promise<RentableVehicle[]> {
     const result = await this.db.query<RentableVehicle>(
       `SELECT v.id, v.code, v.type, v.battery_percent AS "batteryPercent", v.status,
