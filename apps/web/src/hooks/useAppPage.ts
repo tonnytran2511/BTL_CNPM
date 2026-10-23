@@ -19,7 +19,7 @@ export function useAppPage(role?: Role) {
           ? "hub-management"
           : hash === "#/operations"
             ? "operations"
-          : "overview";
+            : "overview";
   useEffect(() => {
     document.getElementById("main")?.focus();
     window.scrollTo(0, 0);

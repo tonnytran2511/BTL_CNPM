@@ -206,13 +206,19 @@ export const api = {
       { method: "POST" },
     ),
   cancelRedistribution: (id: string) =>
-    request<Redistribution>(`/redistributions/${encodeURIComponent(id)}/cancel`, {
-      method: "POST",
-    }),
+    request<Redistribution>(
+      `/redistributions/${encodeURIComponent(id)}/cancel`,
+      {
+        method: "POST",
+      },
+    ),
   completeRedistribution: (id: string) =>
-    request<Redistribution>(`/redistributions/${encodeURIComponent(id)}/complete`, {
-      method: "POST",
-    }),
+    request<Redistribution>(
+      `/redistributions/${encodeURIComponent(id)}/complete`,
+      {
+        method: "POST",
+      },
+    ),
   operationLog: (signal?: AbortSignal) =>
     request<OperationLogEntry[]>("/operations/log", { signal }),
 };

@@ -38,9 +38,8 @@ export function useOperations(
   >([]);
   const [log, setLog] = useState<OperationsModel["log"]>([]);
   const [incidentForm, setIncidentForm] = useState(emptyIncident);
-  const [redistributionForm, setRedistributionForm] = useState(
-    emptyRedistribution,
-  );
+  const [redistributionForm, setRedistributionForm] =
+    useState(emptyRedistribution);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -86,12 +85,14 @@ export function useOperations(
         onAccessRevoked();
         return;
       }
-      const [summaries, nextIncidents, nextOrders, nextLog] = await Promise.all([
-        api.hubs(controller.signal),
-        api.incidents(controller.signal),
-        api.redistributions(controller.signal),
-        api.operationLog(controller.signal),
-      ]);
+      const [summaries, nextIncidents, nextOrders, nextLog] = await Promise.all(
+        [
+          api.hubs(controller.signal),
+          api.incidents(controller.signal),
+          api.redistributions(controller.signal),
+          api.operationLog(controller.signal),
+        ],
+      );
       const details = await Promise.all(
         summaries.map((hub) => api.detail(hub.id, controller.signal)),
       );
@@ -109,11 +110,11 @@ export function useOperations(
         clear();
         onAccessRevoked();
       } else {
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "Không thể tải dữ liệu vận hành.",
-          );
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "Không thể tải dữ liệu vận hành.",
+        );
       }
     } finally {
       if (requestRef.current === controller) {
@@ -232,11 +233,14 @@ export function useOperations(
   const createIncident = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const submitted = { ...incidentForm };
-    await mutate(() => api.createIncident(submitted), () => {
-      setIncidentForm((current) =>
-        current === incidentForm ? emptyIncident : current,
-      );
-    });
+    await mutate(
+      () => api.createIncident(submitted),
+      () => {
+        setIncidentForm((current) =>
+          current === incidentForm ? emptyIncident : current,
+        );
+      },
+    );
   };
   const createRedistribution = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -244,11 +248,14 @@ export function useOperations(
       ...redistributionForm,
       vehicleIds: [...redistributionForm.vehicleIds],
     };
-    await mutate(() => api.createRedistribution(submitted), () => {
-      setRedistributionForm((current) =>
-        current === redistributionForm ? emptyRedistribution : current,
-      );
-    });
+    await mutate(
+      () => api.createRedistribution(submitted),
+      () => {
+        setRedistributionForm((current) =>
+          current === redistributionForm ? emptyRedistribution : current,
+        );
+      },
+    );
   };
   const act = async (work: (id: string) => Promise<unknown>, id: string) => {
     await mutate(() => work(id));
@@ -286,7 +293,9 @@ export function useOperations(
         hub.id !== redistributionForm.sourceHubId && hub.status === "active",
     ),
     hubNames: Object.fromEntries(hubs.map((hub) => [hub.id, hub.name])),
-    actorNames: Object.fromEntries(log.map((entry) => [entry.actorId, entry.actorName])),
+    actorNames: Object.fromEntries(
+      log.map((entry) => [entry.actorId, entry.actorName]),
+    ),
     incidents,
     redistributions,
     log,

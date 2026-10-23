@@ -2,27 +2,27 @@
 
 Prefix `/api`; JSON; ID UUID; thời gian ISO 8601 có timezone; pin và tỷ lệ sử dụng đơn vị %. Kiểu chính xác tại `packages/contracts/index.ts`.
 
-| Method / path                    | Quyền     | Response                         | Trạng thái                                                    |
-| -------------------------------- | --------- | -------------------------------- | ------------------------------------------------------------- |
-| GET /health                      | Public    | `{status: "ok"}` sau truy vấn DB | 200; DB lỗi → 500                                             |
-| GET /config                      | Public    | `PublicConfig`                   | 200                                                           |
-| POST /auth/login                 | Public    | `User`; Set-Cookie session       | 201; DTO sai 400; sai thông tin 401; rate limit 429           |
-| GET /auth/me                     | Đăng nhập | `User`                           | 200; session không hợp lệ 401                                 |
-| POST /auth/logout                | Public    | `{success: true}`; clear cookie  | 201; revoke session nếu có                                    |
-| GET /hubs                        | Đăng nhập | `HubSummary[]`                   | 200; sinh viên chỉ thấy Hub active                            |
-| GET /hubs/:id                    | Đăng nhập | `HubDetail`                      | 200; ID sai 400; không tồn tại/Hub inactive với sinh viên 404 |
-| GET /network/overview            | Operator  | `NetworkOverview`                | 200; sinh viên 403                                            |
-| GET /simulation/snapshot         | Operator  | `SimulationSnapshot`             | 200; sinh viên 403                                            |
-| GET /vehicles                    | Đăng nhập | `VehicleSearchResult`            | 200; query sai 400                                            |
-| POST /incidents                  | Operator  | `Incident`                       | 201; tài nguyên không tồn tại 404; payload sai 400            |
-| POST /incidents/:id/resolve      | Operator  | `Incident`                       | 201; không tồn tại 404; đã xử lý 409                          |
-| GET /incidents                   | Operator  | `Incident[]`                      | 200; tối đa 200 sự cố mới nhất                                 |
-| GET /redistributions             | Operator  | `Redistribution[]`                | 200; tối đa 200 lệnh mới nhất                                  |
-| GET /operations/log              | Operator  | `OperationLogEntry[]`             | 200; tối đa 500 sự kiện mới nhất                               |
-| POST /redistributions            | Operator  | `Redistribution`                 | 201; xe/Hub không đủ điều kiện 409; payload sai 400           |
-| POST /redistributions/:id/start  | Operator  | `Redistribution`                 | 201; không tồn tại 404; trạng thái/tài nguyên đổi 409         |
-| POST /redistributions/:id/cancel | Operator  | `Redistribution`                 | 201; chỉ lệnh pending mới hủy được; 404/409                   |
-| POST /redistributions/:id/complete | Operator | `Redistribution`                  | 201; chỉ lệnh in_progress; Hub đích đầy/sự cố xe 409          |
+| Method / path                      | Quyền     | Response                         | Trạng thái                                                    |
+| ---------------------------------- | --------- | -------------------------------- | ------------------------------------------------------------- |
+| GET /health                        | Public    | `{status: "ok"}` sau truy vấn DB | 200; DB lỗi → 500                                             |
+| GET /config                        | Public    | `PublicConfig`                   | 200                                                           |
+| POST /auth/login                   | Public    | `User`; Set-Cookie session       | 201; DTO sai 400; sai thông tin 401; rate limit 429           |
+| GET /auth/me                       | Đăng nhập | `User`                           | 200; session không hợp lệ 401                                 |
+| POST /auth/logout                  | Public    | `{success: true}`; clear cookie  | 201; revoke session nếu có                                    |
+| GET /hubs                          | Đăng nhập | `HubSummary[]`                   | 200; sinh viên chỉ thấy Hub active                            |
+| GET /hubs/:id                      | Đăng nhập | `HubDetail`                      | 200; ID sai 400; không tồn tại/Hub inactive với sinh viên 404 |
+| GET /network/overview              | Operator  | `NetworkOverview`                | 200; sinh viên 403                                            |
+| GET /simulation/snapshot           | Operator  | `SimulationSnapshot`             | 200; sinh viên 403                                            |
+| GET /vehicles                      | Đăng nhập | `VehicleSearchResult`            | 200; query sai 400                                            |
+| POST /incidents                    | Operator  | `Incident`                       | 201; tài nguyên không tồn tại 404; payload sai 400            |
+| POST /incidents/:id/resolve        | Operator  | `Incident`                       | 201; không tồn tại 404; đã xử lý 409                          |
+| GET /incidents                     | Operator  | `Incident[]`                     | 200; tối đa 200 sự cố mới nhất                                |
+| GET /redistributions               | Operator  | `Redistribution[]`               | 200; tối đa 200 lệnh mới nhất                                 |
+| GET /operations/log                | Operator  | `OperationLogEntry[]`            | 200; tối đa 500 sự kiện mới nhất                              |
+| POST /redistributions              | Operator  | `Redistribution`                 | 201; xe/Hub không đủ điều kiện 409; payload sai 400           |
+| POST /redistributions/:id/start    | Operator  | `Redistribution`                 | 201; không tồn tại 404; trạng thái/tài nguyên đổi 409         |
+| POST /redistributions/:id/cancel   | Operator  | `Redistribution`                 | 201; chỉ lệnh pending mới hủy được; 404/409                   |
+| POST /redistributions/:id/complete | Operator  | `Redistribution`                 | 201; chỉ lệnh in_progress; Hub đích đầy/sự cố xe 409          |
 
 Login body: `{email: string, password: string}`. Không nhận role từ client; field ngoài DTO bị từ chối. Response user chỉ gồm `id,email,name,role`.
 

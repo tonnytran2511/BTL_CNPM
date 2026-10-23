@@ -95,7 +95,10 @@ export function OperationsPage({ model }: { model: OperationsModel }) {
               required
               value={model.redistributionForm.sourceHubId}
               onChange={(event) =>
-                model.changeRedistribution("sourceHubId", event.currentTarget.value)
+                model.changeRedistribution(
+                  "sourceHubId",
+                  event.currentTarget.value,
+                )
               }
             >
               <option value="">Chọn Hub nguồn</option>
@@ -112,7 +115,10 @@ export function OperationsPage({ model }: { model: OperationsModel }) {
               required
               value={model.redistributionForm.targetHubId}
               onChange={(event) =>
-                model.changeRedistribution("targetHubId", event.currentTarget.value)
+                model.changeRedistribution(
+                  "targetHubId",
+                  event.currentTarget.value,
+                )
               }
             >
               <option value="">Chọn Hub đích</option>
@@ -200,7 +206,9 @@ export function OperationsPage({ model }: { model: OperationsModel }) {
           <p className="empty">Chưa có sự kiện vận hành.</p>
         )}
         <ol className="operation-log">
-          {model.log.map((entry) => <LogEntry key={entry.id} entry={entry} />)}
+          {model.log.map((entry) => (
+            <LogEntry key={entry.id} entry={entry} />
+          ))}
         </ol>
       </section>
     </section>
@@ -274,7 +282,9 @@ function IncidentCard({
   return (
     <article className="operation-card">
       <div>
-        <h3>{incident.resourceType} · {incident.resourceId}</h3>
+        <h3>
+          {incident.resourceType} · {incident.resourceId}
+        </h3>
         <p>{incident.description}</p>
         <p>
           {operationStatus(incident.status)} · Báo bởi{" "}
@@ -307,9 +317,7 @@ function LogEntry({ entry }: { entry: OperationLogEntry }) {
         {entry.commandType === "incident" ? "Sự cố" : "Lệnh điều chuyển"}
       </strong>
       <span>
-        {entry.fromStatus
-          ? `${operationStatus(entry.fromStatus)} → `
-          : ""}
+        {entry.fromStatus ? `${operationStatus(entry.fromStatus)} → ` : ""}
         {operationStatus(entry.toStatus)}
       </span>
       <span>
