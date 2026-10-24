@@ -191,6 +191,59 @@ export class RentalTx {
       : null;
   }
 
+  /**
+   * Khóa theo (người gọi, thao tác, key) đến hết transaction: hai request cùng key chạy tuần tự,
+   * request sau thấy kết quả đã lưu của request trước (BR-11).
+   */
+  async lockIdempotencyKey(
+    actorId: string,
+    operation: string,
+    key: string,
+  ): Promise<void> {
+    await this.client.query(
+      "SELECT pg_advisory_xact_lock(hashtextextended($1,0))",
+      [JSON.stringify(["rental", actorId, operation, key])],
+    );
+  }
+
+  /** Kết quả đã lưu cho key, hoặc null nếu key chưa được dùng. */
+  async findIdempotentResponse(
+    actorId: string,
+    operation: string,
+    key: string,
+  ): Promise<{ payload: string; response: unknown } | null> {
+    const result = await this.client.query<{
+      payload: string;
+      response: unknown;
+    }>(
+      "SELECT payload, response FROM rental_idempotency WHERE actor_id=$1 AND operation=$2 AND key=$3",
+      [actorId, operation, key],
+    );
+    return result.rows[0] ?? null;
+  }
+
+  async saveIdempotentResponse(
+    actorId: string,
+    operation: string,
+    key: string,
+    payload: string,
+    response: unknown,
+  ): Promise<void> {
+    await this.client.query(
+      "INSERT INTO rental_idempotency(actor_id, operation, key, payload, response) VALUES ($1,$2,$3,$4,$5)",
+      [actorId, operation, key, payload, JSON.stringify(response)],
+    );
+  }
+
+  /** Xe có sự cố đang mở (BR-10): không được giao cho người thuê dù trạng thái xe chưa kịp đổi. */
+  async hasOpenVehicleIncident(vehicleId: string): Promise<boolean> {
+    const result = await this.client.query(
+      "SELECT 1 FROM incidents WHERE resource_type='vehicle' AND resource_id=$1 AND status='open' LIMIT 1",
+      [vehicleId],
+    );
+    return result.rowCount === 1;
+  }
+
   /** Đổi trạng thái xe theo sự kiện bằng cập nhật có điều kiện (WHERE status = from). */
   async moveVehicle(id: string, event: RentalEvent): Promise<boolean> {
     const { from, to } = VEHICLE_STATUS_BY_EVENT[event];

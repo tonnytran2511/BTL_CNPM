@@ -12,6 +12,7 @@ import {
   type LockedReservation,
   type RentalTx,
 } from "./rental.repository";
+import { withIdempotency } from "./idempotency";
 import { canTransitionReservation, isRentable } from "./rental.rules";
 
 const NOT_AVAILABLE =
@@ -109,38 +110,41 @@ export class ReservationService {
   async reserve(
     userId: string,
     vehicleId: string,
+    key?: string,
   ): Promise<VehicleReservationView> {
     // Nhả trước các xe đã quá hạn giữ để người đặt sau không bị 409 vì một reservation đã chết.
     await this.expireDue();
     const minimumBatteryPercent =
       await this.repository.minimumRentalBatteryPercent();
     const holdMinutes = await this.repository.reservationHoldMinutes();
-    return this.repository.inTransaction(async (tx) => {
-      const vehicle = await tx.lockVehicle(vehicleId);
-      if (!vehicle) throw new NotFoundException("Không tìm thấy xe.");
-      if (
-        !vehicle.hubId ||
-        !vehicle.hubStatus ||
-        !isRentable(vehicle, vehicle.hubStatus, minimumBatteryPercent)
-      )
-        throw new ConflictException(NOT_AVAILABLE);
-      if (!(await tx.moveVehicle(vehicle.id, "reserve")))
-        throw new ConflictException(NOT_AVAILABLE);
-      let id: string;
-      try {
-        id = await tx.insertReservation({
-          userId,
-          vehicleId: vehicle.id,
-          hubId: vehicle.hubId,
-          holdMinutes,
-        });
-      } catch (error) {
-        if (isUniqueViolation(error))
+    return this.repository.inTransaction((tx) =>
+      withIdempotency(tx, userId, "reserve", key, { vehicleId }, async () => {
+        const vehicle = await tx.lockVehicle(vehicleId);
+        if (!vehicle) throw new NotFoundException("Không tìm thấy xe.");
+        if (
+          !vehicle.hubId ||
+          !vehicle.hubStatus ||
+          !isRentable(vehicle, vehicle.hubStatus, minimumBatteryPercent)
+        )
           throw new ConflictException(NOT_AVAILABLE);
-        throw error;
-      }
-      return tx.view(id);
-    });
+        if (!(await tx.moveVehicle(vehicle.id, "reserve")))
+          throw new ConflictException(NOT_AVAILABLE);
+        let id: string;
+        try {
+          id = await tx.insertReservation({
+            userId,
+            vehicleId: vehicle.id,
+            hubId: vehicle.hubId,
+            holdMinutes,
+          });
+        } catch (error) {
+          if (isUniqueViolation(error))
+            throw new ConflictException(NOT_AVAILABLE);
+          throw error;
+        }
+        return tx.view(id);
+      }),
+    );
   }
 
   /**
@@ -150,28 +154,38 @@ export class ReservationService {
   async cancel(
     userId: string,
     reservationId: string,
+    key?: string,
   ): Promise<VehicleReservationView> {
-    const outcome = await this.repository.inTransaction(
-      async (tx): Promise<VehicleReservationView | "expired"> => {
-        const reservation = await tx.lockReservation(reservationId);
-        if (!reservation)
-          throw new NotFoundException("Không tìm thấy lượt đặt xe.");
-        if (reservation.userId !== userId)
-          throw new ForbiddenException(
-            "Bạn không có quyền hủy lượt đặt xe này.",
-          );
-        if (await this.expireLocked(tx, reservation)) return "expired";
-        if (
-          !canTransitionReservation(reservation.status, "cancelled") ||
-          !(await tx.closeReservation(reservation.id, "cancelled"))
-        )
-          throw new ConflictException(
-            "Lượt đặt xe này không còn ở trạng thái có thể hủy.",
-          );
-        // Cập nhật có điều kiện: nếu xe đã bị đổi trạng thái (ví dụ sự cố, BR-10) thì không ghi đè.
-        await tx.moveVehicle(reservation.vehicleId, "cancel");
-        return tx.view(reservation.id);
-      },
+    const outcome = await this.repository.inTransaction((tx) =>
+      withIdempotency<VehicleReservationView | "expired">(
+        tx,
+        userId,
+        "cancel",
+        key,
+        { reservationId },
+        async () => {
+          const reservation = await tx.lockReservation(reservationId);
+          if (!reservation)
+            throw new NotFoundException("Không tìm thấy lượt đặt xe.");
+          if (reservation.userId !== userId)
+            throw new ForbiddenException(
+              "Bạn không có quyền hủy lượt đặt xe này.",
+            );
+          if (await this.expireLocked(tx, reservation)) return "expired";
+          if (
+            !canTransitionReservation(reservation.status, "cancelled") ||
+            !(await tx.closeReservation(reservation.id, "cancelled"))
+          )
+            throw new ConflictException(
+              "Lượt đặt xe này không còn ở trạng thái có thể hủy.",
+            );
+          // Cập nhật có điều kiện: nếu xe đã bị đổi trạng thái (ví dụ sự cố, BR-10) thì không ghi đè.
+          await tx.moveVehicle(reservation.vehicleId, "cancel");
+          return tx.view(reservation.id);
+        },
+        // Nhánh hết hạn đã commit việc nhả xe rồi trả 409: không lưu thành "kết quả" của key.
+        (result) => result === "expired",
+      ),
     );
     if (outcome === "expired") throw new ConflictException(EXPIRED_MESSAGE);
     return outcome;
