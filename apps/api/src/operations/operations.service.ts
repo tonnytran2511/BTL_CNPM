@@ -1,3 +1,4 @@
+import { ChargingFailureService } from "../mobility/charging-failure.service";
 import {
   BadRequestException,
   ConflictException,
@@ -19,8 +20,25 @@ export class OperationsService {
   constructor(
     @Inject(OperationsRepository) private readonly repo: OperationsRepository,
     @Inject(RentalService) private readonly rental: RentalService,
+    @Inject(ChargingFailureService)
+    private readonly chargingFailure: ChargingFailureService,
   ) {}
-  async createIncident(input: CreateIncidentRequest, actorId: string) {
+  async createIncident(
+    input: CreateIncidentRequest,
+    actorId: string,
+    key?: string,
+  ) {
+    if (input.resourceType === "charging_point")
+      return (
+        await this.chargingFailure.report(actorId, input.resourceId, input, key)
+      ).incident;
+    if (
+      input.sessionId !== undefined ||
+      input.achievedBatteryPercent !== undefined
+    )
+      throw new BadRequestException(
+        "Thông tin phiên/pin chỉ dùng cho sự cố cổng sạc.",
+      );
     if (!input.description.trim())
       throw new BadRequestException("Mô tả sự cố không được để trống.");
     return this.repo.transaction(async (client) => {
@@ -35,7 +53,16 @@ export class OperationsService {
       return this.repo.createIncident(client, input, actorId);
     });
   }
-  async resolveIncident(id: string) {
+  async resolveIncident(id: string, actorId?: string, key?: string) {
+    const incident = await this.repo.transaction((c) =>
+      this.repo.incident(c, id),
+    );
+    if (incident?.resourceType === "charging_point")
+      return this.chargingFailure.resolveIncident(
+        actorId ?? incident.reportedBy,
+        id,
+        key,
+      );
     return this.repo.transaction(async (client) => {
       const incident = await this.repo.resolveIncident(client, id);
       if (incident) return incident;

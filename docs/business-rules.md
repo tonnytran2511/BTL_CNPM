@@ -58,3 +58,7 @@ TV4 hiện triển khai lưu/resolve sự cố với actor và thời gian; lệ
 - Hoàn tất/hủy phiên trả xe về available bằng cập nhật có điều kiện trong transaction sạc. Điều kiện pin tối thiểu/Hub hoạt động của thuê xe tiếp tục áp dụng.
 - Hủy yêu cầu queued không đổi trạng thái xe; xe đã được thuê/điều chuyển có thể bị loại khỏi hàng ưu tiên nhưng operator vẫn thấy yêu cầu còn chờ để hủy.
 - Pin không tự tăng, operator nhập số quan sát. Chính sách ưu tiên và giới hạn tại charging-scheduler.md cần peer review trước merge.
+
+## T20 — áp dụng BR-08 ở nhánh local
+
+Phiên ở cổng hỏng chuyển interrupted; scheduled không tăng pin, charging cần pin quan sát và đúng sessionId. Chưa đạt mục tiêu: request queued giữ created_at; đạt: fulfilled. Cổng giữ failed tới xác nhận sửa; recovery không chạy lại phiên cũ. Xe thuê trả về available theo chính sách queued chưa giữ xe của T19, vẫn phải vượt điều kiện thuê/Hub hoạt động. API incidents cũ xử lý cùng transaction cho charging_point. Xem charging-failure-recovery.md về retry, stale form và giới hạn.

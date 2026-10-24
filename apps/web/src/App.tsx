@@ -1,3 +1,5 @@
+import { useChargingFailures } from "./hooks/useChargingFailures";
+import { ChargingFailurePanel } from "./components/ChargingFailurePanel";
 import { useChargingManager } from "./hooks/useChargingManager";
 import { ChargingManager } from "./components/ChargingManager";
 import { useFoundation } from "./hooks/useFoundation";
@@ -19,6 +21,11 @@ import { useHubManagement } from "./hooks/useHubManagement";
 import { HubManagementPage } from "./pages/HubManagementPage";
 export function App() {
   const model = useFoundation();
+  const chargingFailures = useChargingFailures(
+    model.user,
+    model.refresh,
+    model.updatedAt,
+  );
   const simulation = useSimulation(model.user);
   const page = useAppPage(model.user?.role);
   const hubManagement = useHubManagement(
@@ -206,6 +213,9 @@ export function App() {
             <MobilityPanel model={mobility} hubs={model.hubs} />
             {model.user.role === "operator" && (
               <ChargingManager model={chargingManager} hubs={model.hubs} />
+            )}
+            {model.user.role === "operator" && (
+              <ChargingFailurePanel model={chargingFailures} />
             )}
             <VehicleSearch
               hubs={model.hubs}

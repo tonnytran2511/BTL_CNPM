@@ -130,3 +130,11 @@ MobilityModule export ChargingAllocationService để giữ cổng cho xe cá nh
 ## T19 — điều phối sạc xe cá nhân
 
 Đã triển khai local cho xe cá nhân và xe thuê, chờ review: UI → useChargingManager → charging API → ChargingWorkflowService → repository. Thuật toán ưu tiên là hàm thuần, ngưỡng lấy settings. Phân bổ dùng ChargingAllocationService trong cùng transaction; kết thúc ghi pin quan sát và giải phóng cổng cùng transaction. Chi tiết và các phần chờ tại [charging-scheduler.md](../charging-scheduler.md).
+
+## T20 — 23/10/2026
+
+Đã triển khai local báo hỏng/repair cổng, interrupted, pin quan sát và requeue/fulfilled trong cùng transaction với incident và trạng thái xe thuê. Giữ thời gian chờ request; cổng failed hoặc có incident open không nhận phiên mới. Chưa peer review/merge. Chi tiết và giới hạn tại [charging-failure-recovery.md](../charging-failure-recovery.md).
+
+## T19/T20 — tích hợp ngày 24/10/2026
+
+T19 đã tích hợp trên main `f8e6c9b`; bản ghép T20 giữ hướng dẫn setup và bổ sung xử lý cổng hỏng, interrupted/requeue và phục hồi cổng. Commit nguồn T20 `225db0c` reset form khi đổi cổng/phiên và từ chối form cũ, tránh ghi pin sang xe khác. Build, format, 103 test backend và 56 test frontend pass trên bản ghép. Kết quả kỹ thuật không thay xác nhận nghiệm thu/demo và giải thích của thành viên.

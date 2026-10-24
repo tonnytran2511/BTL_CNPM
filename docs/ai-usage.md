@@ -54,3 +54,7 @@ T19: Codex hỗ trợ điều phối sạc xe cá nhân, UI operator, kiểm th�
 20/10/2026 — Theo yêu cầu Mai Anh, Codex bổ sung RentalChargingService và nối sạc xe thuê vào T19, UI operator, kiểm thử tranh chấp/rollback và tài liệu. Không còn chờ tích hợp Duy Tân cho luồng này; T20 sự cố vẫn riêng.
 
 23/10/2026: Theo yêu cầu Mai Anh, Codex cập nhật T19 với main e918f9d và T18 đã merge, giữ test/tài liệu của các module. Tách RentalChargingModule để tránh phụ thuộc vòng với T08, giữ các sửa đồng bộ/cuộn dọc và thêm thông tin T19 vào README. Build, 102 backend + 48 frontend tests và format/diff checks pass; chưa push T19/peer review.
+
+23/10/2026: Theo yêu cầu Mai Anh, Codex triển khai T20 trên nhánh riêng kế thừa T19: service/repository/controller, tích hợp incident cùng PoolClient, gián đoạn và cập nhật pin/requeue, repair, UI hooks và kiểm thử PostgreSQL/HTTP/cạnh tranh/rollback. Khai báo này không thay peer review và giải thích của thành viên; chưa push/merge T20.
+
+24/10/2026: Theo yêu cầu Minh Tường, Codex review T19/T20, tái hiện lỗi pin khi đổi cổng/phiên, kiểm tra bản sửa `225db0c` của Mai Anh và tích hợp T20 lên main đã có T19. Codex giải quyết conflict README, giữ hướng dẫn setup, cập nhật trạng thái tài liệu và chạy build/format cùng 103 test backend + 56 test frontend đều pass. Không thay xác nhận nghiệm thu hoặc giải thích của thành viên.
