@@ -19,6 +19,7 @@ export function parseIdempotencyKey(
 }
 
 /**
+ * Logic Idempotency-Key (BR-11); toàn bộ SQL nằm trong RentalTx (AGENTS/DESIGN: SQL ở repository).
  * Chạy `work` trong transaction của `tx` với Idempotency-Key (phạm vi actor + operation):
  * - cùng key, cùng payload: trả lại kết quả đã lưu, không chạy lại;
  * - cùng key, khác payload: 409;
@@ -37,28 +38,17 @@ export async function withIdempotency<T>(
 ): Promise<T> {
   if (key === undefined) return work();
   const body = JSON.stringify(payload);
-  await tx.client.query(
-    "SELECT pg_advisory_xact_lock(hashtextextended($1,0))",
-    [JSON.stringify(["rental", actorId, operation, key])],
-  );
-  const old = (
-    await tx.client.query<{ payload: string; response: T }>(
-      "SELECT payload, response FROM rental_idempotency WHERE actor_id=$1 AND operation=$2 AND key=$3",
-      [actorId, operation, key],
-    )
-  ).rows[0];
+  await tx.lockIdempotencyKey(actorId, operation, key);
+  const old = await tx.findIdempotentResponse(actorId, operation, key);
   if (old) {
     if (old.payload !== body)
       throw new ConflictException(
         "Idempotency-Key đã được dùng với nội dung khác.",
       );
-    return old.response;
+    return old.response as T;
   }
   const result = await work();
   if (!skipStore(result))
-    await tx.client.query(
-      "INSERT INTO rental_idempotency(actor_id, operation, key, payload, response) VALUES ($1,$2,$3,$4,$5)",
-      [actorId, operation, key, body, JSON.stringify(result)],
-    );
+    await tx.saveIdempotentResponse(actorId, operation, key, body, result);
   return result;
 }
