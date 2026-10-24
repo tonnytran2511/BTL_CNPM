@@ -1,3 +1,7 @@
+import { useChargingFailures } from "./hooks/useChargingFailures";
+import { ChargingFailurePanel } from "./components/ChargingFailurePanel";
+import { useChargingManager } from "./hooks/useChargingManager";
+import { ChargingManager } from "./components/ChargingManager";
 import { useFoundation } from "./hooks/useFoundation";
 import { useSimulation } from "./hooks/useSimulation";
 import { SimulationPage } from "./pages/SimulationPage";
@@ -19,6 +23,11 @@ import { useOperations } from "./hooks/useOperations";
 import { OperationsPage } from "./pages/OperationsPage";
 export function App() {
   const model = useFoundation();
+  const chargingFailures = useChargingFailures(
+    model.user,
+    model.refresh,
+    model.updatedAt,
+  );
   const simulation = useSimulation(model.user);
   const page = useAppPage(model.user?.role);
   const hubManagement = useHubManagement(
@@ -39,7 +48,12 @@ export function App() {
     model.updatedAt,
     model.sessionExpired,
   );
-  const mobility = useMobility(model.user, model.refresh);
+  const mobility = useMobility(model.user, model.refresh, model.updatedAt);
+  const chargingManager = useChargingManager(
+    model.user,
+    model.refresh,
+    model.updatedAt,
+  );
   const {
     vehicles,
     reservations,
@@ -214,6 +228,12 @@ export function App() {
               </div>
             </section>
             <MobilityPanel model={mobility} hubs={model.hubs} />
+            {model.user.role === "operator" && (
+              <ChargingManager model={chargingManager} hubs={model.hubs} />
+            )}
+            {model.user.role === "operator" && (
+              <ChargingFailurePanel model={chargingFailures} />
+            )}
             <VehicleSearch
               hubs={model.hubs}
               filter={vehicles.filter}

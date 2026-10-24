@@ -1,3 +1,5 @@
+import "reflect-metadata";
+import { OperationsRepository } from "../apps/api/dist/operations/operations.repository.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
@@ -551,6 +553,34 @@ test(
                 Date.parse(entry.occurredAt),
             ),
           );
+        },
+      );
+      await t.test(
+        "redistribution Hub locks allow concurrent reservation foreign-key checks",
+        async () => {
+          const f = await fleet();
+          const locked = await pool.connect(),
+            checking = await pool.connect();
+          try {
+            await locked.query("BEGIN");
+            await checking.query("BEGIN");
+            await checking.query("SET LOCAL lock_timeout='500ms'");
+            await new OperationsRepository(null).lockHubs(locked, [
+              f.sourceHubId,
+              f.targetHubId,
+            ]);
+            // Reservation INSERT needs KEY SHARE on the source Hub after locking its vehicle.
+            // Blocking that FK lock creates a cycle with redistribution waiting for the vehicle.
+            await checking.query(
+              "SELECT id FROM hubs WHERE id=$1 FOR KEY SHARE",
+              [f.sourceHubId],
+            );
+          } finally {
+            await checking.query("ROLLBACK");
+            await locked.query("ROLLBACK");
+            checking.release();
+            locked.release();
+          }
         },
       );
       await t.test(

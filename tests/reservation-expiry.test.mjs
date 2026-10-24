@@ -88,7 +88,13 @@ async function startStack(name, sweepSeconds) {
     stack.server?.kill();
     await stack.pool?.end();
     await db.stop().catch(() => {});
-    await rm(directory, { recursive: true, force: true });
+    // Windows can briefly retain a PostgreSQL file handle after process exit.
+    await rm(directory, {
+      recursive: true,
+      force: true,
+      maxRetries: 10,
+      retryDelay: 100,
+    });
   };
   try {
     await db.initialise();

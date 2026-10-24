@@ -48,3 +48,15 @@ Nhóm cần tự review, chỉnh sửa và chạy lại; ghi rõ các phần đ�
 20/10/2026: Theo yêu cầu Mai Anh, Codex chuyển phần T18 sang worktree riêng trên nền main c73dabe trong folder BTL_CNPM-main (2), giữ các module đã tích hợp. Bổ sung service/repository/model giữ cổng xe cá nhân nguyên tử, test PostgreSQL đồng thời/rollback và tài liệu. npm test trên nền tích hợp pass 54 API + 18 frontend tests. Không viết thay rental/incident; các contract chưa có được ghi rõ. T18 được lưu commit local để T19 kế thừa; chưa push, peer review/merge phần mới.
 
 23/10/2026: Codex hỗ trợ Mai Anh cập nhật nhánh T18 với main a80ca54 trên folder (3)), giải quyết 5 xung đột giữ cả test/tài liệu hai phía; thêm 5 vòng phân bổ sạc/xóa cổng đồng thời. Build, 84 API + 40 frontend tests và format/diff checks pass. Chưa push, chưa peer review/merge bản cập nhật.
+
+T19: Codex hỗ trợ điều phối sạc xe cá nhân, UI operator, kiểm thử và tài liệu. Quy tắc ưu tiên là đề xuất cần review; chưa tích hợp sạc xe thuê hoặc sự cố cổng.
+
+20/10/2026 — Theo yêu cầu Mai Anh, Codex bổ sung RentalChargingService và nối sạc xe thuê vào T19, UI operator, kiểm thử tranh chấp/rollback và tài liệu. Không còn chờ tích hợp Duy Tân cho luồng này; T20 sự cố vẫn riêng.
+
+23/10/2026: Theo yêu cầu Mai Anh, Codex cập nhật T19 với main e918f9d và T18 đã merge, giữ test/tài liệu của các module. Tách RentalChargingModule để tránh phụ thuộc vòng với T08, giữ các sửa đồng bộ/cuộn dọc và thêm thông tin T19 vào README. Build, 102 backend + 48 frontend tests và format/diff checks pass; chưa push T19/peer review.
+
+23/10/2026: Theo yêu cầu Mai Anh, Codex triển khai T20 trên nhánh riêng kế thừa T19: service/repository/controller, tích hợp incident cùng PoolClient, gián đoạn và cập nhật pin/requeue, repair, UI hooks và kiểm thử PostgreSQL/HTTP/cạnh tranh/rollback. Khai báo này không thay peer review và giải thích của thành viên; chưa push/merge T20.
+
+24/10/2026: Theo yêu cầu Minh Tường, Codex review T19/T20, tái hiện lỗi pin khi đổi cổng/phiên, kiểm tra bản sửa `225db0c` của Mai Anh và tích hợp T20 lên main đã có T19. Codex giải quyết conflict README, giữ hướng dẫn setup, cập nhật trạng thái tài liệu và chạy build/format cùng 103 test backend + 56 test frontend đều pass. Không thay xác nhận nghiệm thu hoặc giải thích của thành viên.
+
+24/10/2026: Theo yêu cầu Minh Tường, Codex tích hợp main `0f1a10a` vào PR #17 của Quỳnh Anh, giải quyết conflict operations/rental/CSS và duplicate import. Codex nối actor của T20 sang operation log T37, bổ sung regression log đúng một lần và khóa Hub không chặn FK của reservation, cập nhật tài liệu và kiểm tra build/test/format. Giữ commit gốc thành viên; phần sửa tích hợp cần được thành viên hiểu và giải thích.

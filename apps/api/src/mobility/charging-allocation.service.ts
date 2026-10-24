@@ -1,3 +1,4 @@
+import { RentalChargingService } from "../rental/rental-charging.service";
 import {
   ConflictException,
   ForbiddenException,
@@ -15,6 +16,8 @@ export class ChargingAllocationService {
   constructor(
     @Inject(ChargingAllocationRepository)
     private readonly repo: ChargingAllocationRepository,
+    @Inject(RentalChargingService)
+    private readonly rental: RentalChargingService,
   ) {}
 
   /** Internal T18 primitive. The caller supplies a transaction and must rollback on any failure. */
@@ -54,7 +57,10 @@ export class ChargingAllocationService {
     if (!point) throw new NotFoundException("Không tìm thấy cổng sạc.");
     if (point.hub_id !== request.hub_id)
       throw new ConflictException("Cổng và yêu cầu phải thuộc cùng Hub.");
-    if (point.status === "failed")
+    if (
+      point.status === "failed" ||
+      (await this.repo.pointHasOpenIncident(client, pointId))
+    )
       throw new ConflictException("Cổng sạc đang hỏng.");
     if (!vehicle || vehicle.owner_id !== request.user_id)
       throw new ConflictException("Xe không còn thuộc người gửi yêu cầu.");
@@ -88,5 +94,59 @@ export class ChargingAllocationService {
     if (!(await this.repo.allocateRequest(client, requestId)))
       throw new ConflictException("Yêu cầu không còn trong hàng chờ.");
     return this.repo.createSession(client, requestId, pointId);
+  }
+  /** Hub -> fleet vehicle -> request -> point; fleet writes go through its owning service. */
+  async allocateRentalRequest(
+    actor: User,
+    requestId: string,
+    pointId: string,
+    c: PoolClient,
+  ): Promise<ChargingAllocation> {
+    if (actor.role !== "operator")
+      throw new ForbiddenException("Chỉ người vận hành được phân bổ cổng sạc.");
+    const located = await this.repo.locateRequest(c, requestId);
+    if (!located?.vehicle_id)
+      throw new NotFoundException("Không tìm thấy yêu cầu xe thuê.");
+    const hub = await this.repo.lockHub(c, located.hub_id);
+    if (!hub || hub.status !== "active")
+      throw new ConflictException("Hub ngừng hoạt động.");
+    const vehicle = await this.rental.lock(c, located.vehicle_id);
+    const request = await this.repo.lockRequest(c, requestId);
+    const point = await this.repo.lockPoint(c, pointId);
+    if (
+      !request ||
+      request.vehicle_id !== located.vehicle_id ||
+      request.hub_id !== located.hub_id
+    )
+      throw new ConflictException("Yêu cầu đã thay đổi.");
+    if (
+      !point ||
+      point.hub_id !== request.hub_id ||
+      point.status === "failed" ||
+      (await this.repo.pointHasOpenIncident(c, pointId))
+    )
+      throw new ConflictException("Cổng không phù hợp.");
+    const existing = await this.repo.activeSession(c, requestId);
+    if (
+      request.status === "allocated" &&
+      existing?.chargingPointId === pointId &&
+      point.status === "occupied"
+    ) {
+      await this.rental.allocated(c, located.vehicle_id, located.hub_id);
+      return existing;
+    }
+    if (
+      request.status !== "queued" ||
+      existing ||
+      vehicle.battery_percent >= request.target_battery_percent
+    )
+      throw new ConflictException("Yêu cầu không còn đủ điều kiện.");
+    await this.rental.claim(c, located.vehicle_id, located.hub_id);
+    if (
+      !(await this.repo.claimPoint(c, pointId)) ||
+      !(await this.repo.allocateRequest(c, requestId))
+    )
+      throw new ConflictException("Tài nguyên vừa thay đổi.");
+    return this.repo.createSession(c, requestId, pointId);
   }
 }

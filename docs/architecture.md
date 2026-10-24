@@ -263,7 +263,7 @@ stateDiagram-v2
   in_progress --> completed: kiểm tra lại, chuyển chỗ và Hub trong transaction
 ```
 
-T21 bổ sung hoàn tất điều chuyển: OperationsService khóa Hub theo ID, gọi AllocationPort để giải phóng chỗ nguồn và chiếm chỗ đích, rồi gọi RentalService cập nhật `hub_id` và trạng thái xe, tất cả dùng cùng PoolClient. Đích đầy hoặc điều kiện đổi thì transaction rollback. Lệnh `in_progress` không thể hủy; vị trí thực tế phải được xác nhận bằng hoàn tất. Incident vẫn là nhật ký open/resolved và chặn điều chuyển xe đang có sự cố mở; không tự chuyển Hub inactive, xe maintenance hay cổng failed. Workflow reservation/trip/charging bị ảnh hưởng tiếp tục thuộc service chủ quản theo BR-08/BR-10. Chưa có Idempotency-Key cho T07/T12/T21; client không tự retry mutation.
+T21 bổ sung hoàn tất điều chuyển: OperationsService khóa Hub theo ID, gọi AllocationPort để giải phóng chỗ nguồn và chiếm chỗ đích, rồi gọi RentalService cập nhật `hub_id` và trạng thái xe, tất cả dùng cùng PoolClient. Đích đầy hoặc điều kiện đổi thì transaction rollback. Lệnh `in_progress` không thể hủy; vị trí thực tế phải được xác nhận bằng hoàn tất. Incident xe/Hub giữ nhật ký open/resolved và chặn điều chuyển xe đang có sự cố mở; không tự chuyển Hub inactive hoặc xe maintenance. Incident cổng sạc đi qua ChargingFailureService của T20 để gián đoạn/phục hồi nguyên tử; actor xử lý được truyền sang nhật ký T37. Workflow reservation/trip/charging bị ảnh hưởng tiếp tục thuộc service chủ quản theo BR-08/BR-10. Chưa có Idempotency-Key cho T07/T12/T21; client không tự retry mutation.
 
 T37 thêm operation log append-only theo convention ứng dụng: mỗi lần tạo/resolve incident hoặc đổi trạng thái redistribution ghi loại/ID lệnh, actor, thời điểm và trạng thái trước/sau cùng transaction; không lưu payload/secret. Operator tra cứu sự cố, lệnh và lịch sử qua API và trang Vận hành.
 
@@ -327,7 +327,7 @@ flowchart LR
   Repo --> DB[(PostgreSQL)]
 ```
 
-Trip và allocation dùng cùng PoolClient để xe/chỗ/trip commit nguyên tử. Operations chỉ gọi RentalService để giữ xe khi start; chưa hoàn tất điều chuyển. Simulation đọc snapshot nhất quán và settings, engine không truy cập DB; không áp dụng kết quả lên vận hành. T35 đã có UI → useHubManagement → API → HubManagementService → HubManagementRepository. CRUD/cấu hình layout không chuyển trạng thái vận hành của xe hay phiên sạc. Mutation khóa Hub; xóa cổng khóa tiếp cổng trước kiểm tra incident để đồng bộ với Operations. Capacity đọc giới hạn từ settings; giữ nguyên booking/lịch sử và rollback nếu không đủ chỗ xóa an toàn.
+Trip và allocation dùng cùng PoolClient để xe/chỗ/trip commit nguyên tử. Operations gọi RentalService để giữ xe khi start; T21 hoàn tất điều chuyển qua AllocationPort và RentalService trong cùng transaction. Simulation đọc snapshot nhất quán và settings, engine không truy cập DB; không áp dụng kết quả lên vận hành. T35 đã có UI → useHubManagement → API → HubManagementService → HubManagementRepository. CRUD/cấu hình layout không chuyển trạng thái vận hành của xe hay phiên sạc. Mutation khóa Hub; xóa cổng khóa tiếp cổng trước kiểm tra incident để đồng bộ với Operations. Capacity đọc giới hạn từ settings; giữ nguyên booking/lịch sử và rollback nếu không đủ chỗ xóa an toàn.
 
 ```mermaid
 erDiagram
@@ -346,3 +346,20 @@ erDiagram
 ```
 
 ERD trên bổ sung quan hệ các bảng migration 002 operations và 003 rental; cột/constraint chi tiết vẫn theo SQL đã chia sẻ. `incidents.resource_id` là tham chiếu đa hình được service kiểm tra theo resource_type, không phải FK trực tiếp tới một bảng duy nhất. Bảng charging_sessions đã có schema nhưng chưa có vòng đời chạy phiên; không suy từ ERD ra tính năng đã hoàn thành.
+
+## T19 — tích hợp trạng thái sạc xe thuê (20/10/2026)
+
+ChargingWorkflowService/ChargingAllocationService → RentalChargingService → RentalRepository, tất cả dùng chung PoolClient của MobilityRepository.transaction. Module sạc không tự ghi vehicles.
+
+```mermaid
+stateDiagram-v2
+  available --> charging: phân bổ cổng, tạo scheduled
+  charging --> charging: bắt đầu phiên
+  charging --> available: hoàn tất hoặc hủy, ghi pin nếu phiên đã chạy
+```
+
+queued chưa giữ xe; reservation và redistribution kiểm tra trạng thái trên cùng hàng xe đã khóa. Pin dưới ngưỡng thuê hoặc Hub inactive vẫn không xuất hiện trong tìm xe dù status available. Sự cố/interrupted chưa thuộc luồng T19 này. Xem charging-scheduler.md về API, transaction và kiểm thử.
+
+## T20 — sự cố cổng sạc
+
+ChargingFailurePanel → useChargingFailures → chargingFailureApi → ChargingFailureController → ChargingFailureService. Service dùng MobilityRepository.transaction, ChargingFailureRepository, RentalChargingService và ChargingIncidentService với cùng PoolClient. OperationsService chuyển incident charging_point sang workflow T20; các incident khác giữ nguyên. ChargingIncidentModule là module lá, không tạo vòng OperationsModule/RentalModule/MobilityModule. Sơ đồ vòng đời và chính sách tại charging-failure-recovery.md.

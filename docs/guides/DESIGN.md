@@ -126,3 +126,19 @@ Nhận/trả dùng TripService và AllocationPort cùng PoolClient; khóa Hub tr
 ## T18 — 20/10/2026, nền tích hợp c73dabe
 
 MobilityModule export ChargingAllocationService để giữ cổng cho xe cá nhân, dùng cùng transaction của caller. Khóa Hub → xe → request → point; kiểm tra lại quyền operator, chủ xe, vị trí, pin và cổng; đổi point occupied, request allocated và tạo session scheduled nguyên tử. Gửi lặp cùng request/point trả phiên active hiện có. Chưa có scheduler hoặc API start/complete/cancel (T19), chưa có xử lý gián đoạn (T20). RentalService hiện có search/reservation và ranh giới điều chuyển nhưng chưa có thao tác giữ/đổi trạng thái xe cho sạc; phối hợp Duy Tân tại điểm này, không tự sửa module rental. T18 chờ review/tích hợp; chi tiết docs/allocation-safety.md.
+
+## T19 — điều phối sạc xe cá nhân
+
+Đã triển khai local cho xe cá nhân và xe thuê, chờ review: UI → useChargingManager → charging API → ChargingWorkflowService → repository. Thuật toán ưu tiên là hàm thuần, ngưỡng lấy settings. Phân bổ dùng ChargingAllocationService trong cùng transaction; kết thúc ghi pin quan sát và giải phóng cổng cùng transaction. Chi tiết và các phần chờ tại [charging-scheduler.md](../charging-scheduler.md).
+
+## T20 — 23/10/2026
+
+Đã triển khai local báo hỏng/repair cổng, interrupted, pin quan sát và requeue/fulfilled trong cùng transaction với incident và trạng thái xe thuê. Giữ thời gian chờ request; cổng failed hoặc có incident open không nhận phiên mới. Chưa peer review/merge. Chi tiết và giới hạn tại [charging-failure-recovery.md](../charging-failure-recovery.md).
+
+## T19/T20 — tích hợp ngày 24/10/2026
+
+T19 đã tích hợp trên main `f8e6c9b`; bản ghép T20 giữ hướng dẫn setup và bổ sung xử lý cổng hỏng, interrupted/requeue và phục hồi cổng. Commit nguồn T20 `225db0c` reset form khi đổi cổng/phiên và từ chối form cũ, tránh ghi pin sang xe khác. Build, format, 103 test backend và 56 test frontend pass trên bản ghép. Kết quả kỹ thuật không thay xác nhận nghiệm thu/demo và giải thích của thành viên.
+
+## PR #17 — tích hợp T21/T37 với T19/T20 ngày 24/10/2026
+
+Nhánh Quỳnh Anh cập nhật main `0f1a10a`: giữ hoàn tất điều chuyển, giao diện/lịch sử vận hành và xử lý sự cố sạc T20. Sửa cổng/resolve incident ghi đúng actor cùng transaction với nhật ký T37. Khóa Hub điều chuyển dùng FOR NO KEY UPDATE theo ID để tuần tự hóa mutation mà không chặn khóa FK KEY SHARE của đặt xe. Chưa coi cập nhật PR là đã merge hoặc nghiệm thu/demo của sinh viên.

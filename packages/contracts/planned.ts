@@ -36,6 +36,8 @@ export interface RedistributionRequest {
 export type IncidentResourceType = "vehicle" | "charging_point" | "hub";
 export type IncidentStatus = "open" | "resolved";
 export interface CreateIncidentRequest {
+  sessionId?: string;
+  achievedBatteryPercent?: number;
   resourceType: IncidentResourceType;
   resourceId: string;
   description: string;

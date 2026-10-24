@@ -145,7 +145,7 @@ export class OperationsRepository {
   async lockHubs(client: PoolClient, ids: string[]) {
     return (
       await client.query<{ id: string; status: string }>(
-        "SELECT id,status FROM hubs WHERE id=ANY($1::uuid[]) ORDER BY id FOR UPDATE",
+        "SELECT id,status FROM hubs WHERE id=ANY($1::uuid[]) ORDER BY id FOR NO KEY UPDATE",
         [ids],
       )
     ).rows;
@@ -253,5 +253,27 @@ export class OperationsRepository {
       toStatus: "completed",
     });
     return (await this.order(client, id))!;
+  }
+  async incident(
+    client: PoolClient,
+    id: string,
+  ): Promise<Incident | undefined> {
+    return (
+      await client.query<Incident>(
+        `SELECT id,resource_type AS "resourceType",resource_id AS "resourceId",description,status,reported_by AS "reportedBy",created_at AS "createdAt",resolved_at AS "resolvedAt" FROM incidents WHERE id=$1`,
+        [id],
+      )
+    ).rows[0];
+  }
+  async chargingIncidents(
+    client: PoolClient,
+    point: string,
+  ): Promise<Incident[]> {
+    return (
+      await client.query<Incident>(
+        `SELECT id,resource_type AS "resourceType",resource_id AS "resourceId",description,status,reported_by AS "reportedBy",created_at AS "createdAt",resolved_at AS "resolvedAt" FROM incidents WHERE resource_type='charging_point' AND resource_id=$1 ORDER BY created_at,id FOR UPDATE`,
+        [point],
+      )
+    ).rows;
   }
 }
