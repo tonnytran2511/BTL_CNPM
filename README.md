@@ -106,3 +106,24 @@ Chạy production cần hosting, HTTPS/cookie Secure, cấu hình DB và chiến
 ## Simulation T13
 
 Có mô phỏng tăng nhu cầu cho operator: chạy db:seed để thêm settings, nhập tham số và xem baseline/scenario trên cùng snapshot/seed. Engine đầu tiên chỉ mô phỏng lượt xe rời Hub; các kịch bản đỗ/sạc, đề xuất và lịch sử thuộc T22. Xem [docs/simulation.md](docs/simulation.md).
+
+## T19 — chi tiết chức năng theo nhánh
+
+## T19 — điều phối hàng chờ và phiên sạc
+
+Nhánh: `t19/charging-scheduler`. Cập nhật ngày 23/10/2026 trên main `e918f9d`.
+Phụ trách: Mai Anh.
+
+| Công việc T19        | Chức năng trong nhánh                                                                                                                                            |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Xếp hàng ưu tiên     | Chờ quá lâu trước, sau đó cần xe sớm, pin thấp; ngưỡng lấy từ cấu hình DB, cùng dữ liệu có thứ tự ổn định.                                                       |
+| Phân bổ cổng         | Operator chọn Hub; hệ thống cấp cổng còn trống cho yêu cầu đủ điều kiện trong cùng giao dịch dữ liệu.                                                            |
+| Quản lý phiên        | Bắt đầu, hoàn tất hoặc hủy; hoàn tất cần pin quan sát đạt mục tiêu; lỗi giữa chừng hoàn tác toàn bộ.                                                             |
+| Tích hợp xe thuê     | Operator tạo/hủy yêu cầu; khi giữ cổng xe chuyển sang charging, chặn đặt thuê/điều chuyển; kết thúc cập nhật pin và giải phóng xe qua service của module rental. |
+| Giao diện và đồng bộ | Hai khung yêu cầu sạc cập nhật sau thao tác; lịch đỗ/yêu cầu sạc theo cột dọc có cuộn và nút Lên/Xuống.                                                          |
+| Kiểm chứng           | Test PostgreSQL/HTTP cho gửi lặp, rollback và thao tác cạnh tranh; test hook cho đồng bộ, retry và đổi tài khoản. Kết quả bản cập nhật ghi tại docs/testing.md.  |
+
+Đăng nhập operator → “Điều phối sạc” → gửi yêu cầu xe thuê hoặc chọn Hub để phân bổ → bắt đầu phiên → nhập pin thực tế khi hoàn tất/hủy.
+Xe cá nhân: đăng ký → đặt chỗ → check-in đúng Hub → gửi yêu cầu sạc. Yêu cầu còn queued chưa giữ xe thuê; xe được đặt/di chuyển trước đó sẽ không được phân bổ khi không còn đủ điều kiện.
+
+Hạn chế: chưa tự tăng pin hoặc tự chạy phân bổ theo chu kỳ; người vận hành chủ động xác nhận. Xử lý cổng hỏng, interrupted và đưa nhu cầu trở lại hàng chờ thuộc **T20**, chưa triển khai trong nhánh này. available vẫn phải đủ pin và ở Hub hoạt động mới thuê được.

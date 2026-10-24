@@ -1,3 +1,5 @@
+import { useChargingManager } from "./hooks/useChargingManager";
+import { ChargingManager } from "./components/ChargingManager";
 import { useFoundation } from "./hooks/useFoundation";
 import { useSimulation } from "./hooks/useSimulation";
 import { SimulationPage } from "./pages/SimulationPage";
@@ -30,7 +32,12 @@ export function App() {
     model.updatedAt,
     model.sessionExpired,
   );
-  const mobility = useMobility(model.user, model.refresh);
+  const mobility = useMobility(model.user, model.refresh, model.updatedAt);
+  const chargingManager = useChargingManager(
+    model.user,
+    model.refresh,
+    model.updatedAt,
+  );
   const {
     vehicles,
     reservations,
@@ -197,6 +204,9 @@ export function App() {
               </div>
             </section>
             <MobilityPanel model={mobility} hubs={model.hubs} />
+            {model.user.role === "operator" && (
+              <ChargingManager model={chargingManager} hubs={model.hubs} />
+            )}
             <VehicleSearch
               hubs={model.hubs}
               filter={vehicles.filter}

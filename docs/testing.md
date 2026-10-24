@@ -102,3 +102,32 @@ Bản T18 cũ trên nền tuần 1 pass 17 tests; đó không phải số test c
 ## T18 cập nhật main — 23/10/2026
 
 Ghép main a80ca54, giữ cả test/tài liệu T18 và T08/T35. Build pass; npm test **84 API + 40 frontend** pass; format/diff check pass. Thêm 5 vòng phân bổ/xóa cổng đồng thời. Chi tiết tại [execution T18](test-runs/2026-10-23-t18-main-integration.md). Chỉ local, chưa push/merge theo yêu cầu Mai Anh.
+
+## T19
+
+`npm.cmd test` đã pass 59 kiểm thử backend và 18 frontend. Bổ sung kiểm thử thứ tự ưu tiên và luồng sạc với PostgreSQL/HTTP độc lập, gồm gửi lặp và hoàn tất/hủy đồng thời. Xem [bàn giao T19](charging-scheduler.md); chưa kiểm tra trực quan thủ công màn hình mới.
+
+## 20/10/2026 — T19 tích hợp sạc xe thuê
+
+- `npm.cmd run build` và `npm.cmd run format:check`: pass.
+- `npm.cmd run test:web`: 22/22 pass (5 file); gồm 4 kiểm thử hook quản lý sạc mới.
+- Backend chạy tuần tự bằng Node test runner với `--test-concurrency=1`, toàn bộ 8 file *.test.mjs. Tổng 60 test: 59 pass, 1 suite T07 báo EBUSY khi Windows dọn folder PostgreSQL tạm; mọi assertion chức năng trong suite đó pass. Chạy lại `node --test tests/reservation.test.mjs`: 11/11 pass, cleanup thành công. Kết quả các bộ đạt sau lần chạy lại này, không phải một lần tổng 60/60.
+- Foundation riêng: 19/19 pass, bao gồm sạc xe thuê và cạnh tranh với đặt thuê/điều chuyển.
+- Fixture riêng tạo rồi xóa dữ liệu trên PostgreSQL tạm; không dùng database demo T19 đang chạy.
+- Kiểm thử lỗi chèn session và lỗi sau cập nhật pin đều xác nhận rollback. Gửi lại sau rollback dùng cùng key thực thi thành công.
+- Web localhost:5119 và proxy /api/health trả HTTP 200 sau build. Chưa xác minh trực quan thủ công toàn màn hình mới.
+
+T19 không còn chờ hợp đồng sạc xe thuê từ Duy Tân; đã có RentalChargingService nhận cùng PoolClient. T20 sự cố/interrupted vẫn chưa triển khai.
+
+## 20/10/2026 — đồng bộ hai khung yêu cầu sạc
+
+Khắc phục yêu cầu xe thuê tạo ở Điều phối sạc chưa hiện ngay tại danh sách Yêu cầu sạc phía trên; chiều ngược lại và đổi trạng thái phiên cũng tải lại cả hai khung theo lần cập nhật dữ liệu chung. Không reset bước nhập và không để response cũ ghi đè danh sách mới.
+Thêm 4 kiểm thử hồi quy hook cho đồng bộ hai chiều, đổi trạng thái và response chậm. `npm.cmd run test:web`: 26/26 pass; frontend build và kiểm tra định dạng được xác minh riêng. Backend/API không đổi.
+
+## T19 cập nhật main e918f9d — 23/10/2026
+
+Build và format/diff check pass; npm test **102/102 backend + 48/48 frontend pass**. Giữ T08/T16/T35 và T18 đã merge. Chi tiết [execution T19](test-runs/2026-10-23-t19-main-integration.md). Chưa demo trực quan lại bản ghép, chưa push T19.
+
+## T19 kiểm chứng ở checkout mới — 23/10/2026
+
+Giữ nguyên bản T19 và README Mai Anh đã chỉnh trên nền main e918f9d. Build/format pass. Lần chạy tổng backend có 101 pass và một suite lỗi EBUSY khi Windows dọn thư mục PostgreSQL tạm; không có assertion nghiệp vụ thất bại. Bổ sung maxRetries=10, retryDelay=100ms vào bước rm thư mục test T16 để xử lý khóa file tạm có giới hạn. Chạy lại riêng reservation-expiry.test.mjs: 12/12 pass; frontend: 48/48 pass. Các bộ backend đạt sau lần chạy lại, không mô tả thành một lần chạy tổng 102/102 mới. Không đổi nghiệp vụ hoặc schema; không thay chỉnh sửa README của Mai Anh.

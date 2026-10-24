@@ -6,7 +6,9 @@
     "maximumParkingDurationMinutes": 1440,
     "reservationHoldMinutes": 15,
     "reservationExpirySweepSeconds": 30,
-    "minimumRentalBatteryPercent": 20
+    "minimumRentalBatteryPercent": 20,
+    "chargingUrgencyWindowMinutes": 60,
+    "chargingMaximumWaitMinutes": 120
   },
   "hubs": [
     {
@@ -35,8 +37,14 @@
         }
       ],
       "chargingPoints": [
-        { "code": "C01", "status": "occupied" },
-        { "code": "C02", "status": "available" }
+        {
+          "code": "C01",
+          "status": "occupied"
+        },
+        {
+          "code": "C02",
+          "status": "available"
+        }
       ]
     },
     {
@@ -59,8 +67,14 @@
         }
       ],
       "chargingPoints": [
-        { "code": "C01", "status": "available" },
-        { "code": "C02", "status": "failed" }
+        {
+          "code": "C01",
+          "status": "available"
+        },
+        {
+          "code": "C02",
+          "status": "failed"
+        }
       ]
     }
   ]

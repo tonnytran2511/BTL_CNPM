@@ -154,3 +154,7 @@ GET trips trả mọi chuyến active và tối đa 100 chuyến completed mới
 ## T18 — giữ cổng sạc nguyên tử
 
 Không thêm hoặc thay đổi endpoint HTTP trong T18. Backend export ChargingAllocationService.allocatePrivateRequest(actor, requestId, pointId, client) để T19 dùng. Quyền operator, xe cá nhân còn đỗ đúng Hub, pin còn cần sạc và cổng cùng Hub/available được kiểm tra trong transaction; point occupied bao gồm đã được giữ cho session scheduled. Cổng failed không được cấp mới. Rental search/reservation đã có trong main, nhưng phân bổ sạc xe thuê chờ contract chuyển trạng thái xe dùng cùng transaction. Scheduler, API vòng đời phiên và giao diện quản lý phiên thuộc T19. Chi tiết docs/allocation-safety.md.
+
+## T19 — API quản lý sạc
+
+Xem [hợp đồng điều phối sạc](charging-scheduler.md): overview, schedule và start/complete/cancel. Chỉ operator; POST yêu cầu Idempotency-Key. Phạm vi xe cá nhân và xe thuê; operator có thể tạo/hủy yêu cầu xe thuê và quản lý phiên. RentalChargingService giữ/giải phóng trạng thái xe trong cùng transaction.

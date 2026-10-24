@@ -30,7 +30,10 @@ export class MobilityRepository {
   }
   async activeHub(c: PoolClient, id: string) {
     return (
-      await c.query("SELECT id,status FROM hubs WHERE id=$1 FOR UPDATE", [id])
+      await c.query(
+        "SELECT id,status FROM hubs WHERE id=$1 FOR NO KEY UPDATE",
+        [id],
+      )
     ).rows[0];
   }
   async setting(c: PoolClient, key: string) {

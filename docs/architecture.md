@@ -343,3 +343,16 @@ erDiagram
 ```
 
 ERD trên bổ sung quan hệ các bảng migration 002 operations và 003 rental; cột/constraint chi tiết vẫn theo SQL đã chia sẻ. `incidents.resource_id` là tham chiếu đa hình được service kiểm tra theo resource_type, không phải FK trực tiếp tới một bảng duy nhất. Bảng charging_sessions đã có schema nhưng chưa có vòng đời chạy phiên; không suy từ ERD ra tính năng đã hoàn thành.
+
+## T19 — tích hợp trạng thái sạc xe thuê (20/10/2026)
+
+ChargingWorkflowService/ChargingAllocationService → RentalChargingService → RentalRepository, tất cả dùng chung PoolClient của MobilityRepository.transaction. Module sạc không tự ghi vehicles.
+
+```mermaid
+stateDiagram-v2
+  available --> charging: phân bổ cổng, tạo scheduled
+  charging --> charging: bắt đầu phiên
+  charging --> available: hoàn tất hoặc hủy, ghi pin nếu phiên đã chạy
+```
+
+queued chưa giữ xe; reservation và redistribution kiểm tra trạng thái trên cùng hàng xe đã khóa. Pin dưới ngưỡng thuê hoặc Hub inactive vẫn không xuất hiện trong tìm xe dù status available. Sự cố/interrupted chưa thuộc luồng T19 này. Xem charging-scheduler.md về API, transaction và kiểm thử.
