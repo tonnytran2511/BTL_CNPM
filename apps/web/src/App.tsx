@@ -1,3 +1,7 @@
+import { useChargingFailures } from "./hooks/useChargingFailures";
+import { ChargingFailurePanel } from "./components/ChargingFailurePanel";
+import { useChargingManager } from "./hooks/useChargingManager";
+import { ChargingManager } from "./components/ChargingManager";
 import { useFoundation } from "./hooks/useFoundation";
 import { useSimulation } from "./hooks/useSimulation";
 import { SimulationPage } from "./pages/SimulationPage";
@@ -15,8 +19,15 @@ import { useMobility } from "./hooks/useMobility";
 import { MobilityPanel } from "./components/MobilityPanel";
 import { useHubManagement } from "./hooks/useHubManagement";
 import { HubManagementPage } from "./pages/HubManagementPage";
+import { useOperations } from "./hooks/useOperations";
+import { OperationsPage } from "./pages/OperationsPage";
 export function App() {
   const model = useFoundation();
+  const chargingFailures = useChargingFailures(
+    model.user,
+    model.refresh,
+    model.updatedAt,
+  );
   const simulation = useSimulation(model.user);
   const page = useAppPage(model.user?.role);
   const hubManagement = useHubManagement(
@@ -25,12 +36,24 @@ export function App() {
     model.sessionExpired,
     model.accessRevoked,
   );
+  const operations = useOperations(
+    model.user,
+    model.user?.role === "operator" && page === "operations",
+    model.config?.pollIntervalMs ?? 0,
+    model.sessionExpired,
+    model.accessRevoked,
+  );
   const hub = useHubDetail(
     model.user?.id,
     model.updatedAt,
     model.sessionExpired,
   );
-  const mobility = useMobility(model.user, model.refresh);
+  const mobility = useMobility(model.user, model.refresh, model.updatedAt);
+  const chargingManager = useChargingManager(
+    model.user,
+    model.refresh,
+    model.updatedAt,
+  );
   const {
     vehicles,
     reservations,
@@ -115,12 +138,20 @@ export function App() {
             >
               Quản lý Hub
             </a>
+            <a
+              href="#/operations"
+              aria-current={page === "operations" ? "page" : undefined}
+            >
+              Vận hành
+            </a>
           </>
         )}
       </nav>
       <main id="main" tabIndex={-1}>
         {page === "hub-management" ? (
           <HubManagementPage model={hubManagement} />
+        ) : page === "operations" ? (
+          <OperationsPage model={operations} />
         ) : page === "simulation" ? (
           <SimulationPage
             model={simulation}
@@ -197,6 +228,12 @@ export function App() {
               </div>
             </section>
             <MobilityPanel model={mobility} hubs={model.hubs} />
+            {model.user.role === "operator" && (
+              <ChargingManager model={chargingManager} hubs={model.hubs} />
+            )}
+            {model.user.role === "operator" && (
+              <ChargingFailurePanel model={chargingFailures} />
+            )}
             <VehicleSearch
               hubs={model.hubs}
               filter={vehicles.filter}

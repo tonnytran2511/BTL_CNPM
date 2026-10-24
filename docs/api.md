@@ -2,23 +2,27 @@
 
 Prefix `/api`; JSON; ID UUID; thời gian ISO 8601 có timezone; pin và tỷ lệ sử dụng đơn vị %. Kiểu chính xác tại `packages/contracts/index.ts`.
 
-| Method / path                    | Quyền     | Response                         | Trạng thái                                                    |
-| -------------------------------- | --------- | -------------------------------- | ------------------------------------------------------------- |
-| GET /health                      | Public    | `{status: "ok"}` sau truy vấn DB | 200; DB lỗi → 500                                             |
-| GET /config                      | Public    | `PublicConfig`                   | 200                                                           |
-| POST /auth/login                 | Public    | `User`; Set-Cookie session       | 201; DTO sai 400; sai thông tin 401; rate limit 429           |
-| GET /auth/me                     | Đăng nhập | `User`                           | 200; session không hợp lệ 401                                 |
-| POST /auth/logout                | Public    | `{success: true}`; clear cookie  | 201; revoke session nếu có                                    |
-| GET /hubs                        | Đăng nhập | `HubSummary[]`                   | 200; sinh viên chỉ thấy Hub active                            |
-| GET /hubs/:id                    | Đăng nhập | `HubDetail`                      | 200; ID sai 400; không tồn tại/Hub inactive với sinh viên 404 |
-| GET /network/overview            | Operator  | `NetworkOverview`                | 200; sinh viên 403                                            |
-| GET /simulation/snapshot         | Operator  | `SimulationSnapshot`             | 200; sinh viên 403                                            |
-| GET /vehicles                    | Đăng nhập | `VehicleSearchResult`            | 200; query sai 400                                            |
-| POST /incidents                  | Operator  | `Incident`                       | 201; tài nguyên không tồn tại 404; payload sai 400            |
-| POST /incidents/:id/resolve      | Operator  | `Incident`                       | 201; không tồn tại 404; đã xử lý 409                          |
-| POST /redistributions            | Operator  | `Redistribution`                 | 201; xe/Hub không đủ điều kiện 409; payload sai 400           |
-| POST /redistributions/:id/start  | Operator  | `Redistribution`                 | 201; không tồn tại 404; trạng thái/tài nguyên đổi 409         |
-| POST /redistributions/:id/cancel | Operator  | `Redistribution`                 | 201; chỉ lệnh pending mới hủy được; 404/409                   |
+| Method / path                      | Quyền     | Response                         | Trạng thái                                                    |
+| ---------------------------------- | --------- | -------------------------------- | ------------------------------------------------------------- |
+| GET /health                        | Public    | `{status: "ok"}` sau truy vấn DB | 200; DB lỗi → 500                                             |
+| GET /config                        | Public    | `PublicConfig`                   | 200                                                           |
+| POST /auth/login                   | Public    | `User`; Set-Cookie session       | 201; DTO sai 400; sai thông tin 401; rate limit 429           |
+| GET /auth/me                       | Đăng nhập | `User`                           | 200; session không hợp lệ 401                                 |
+| POST /auth/logout                  | Public    | `{success: true}`; clear cookie  | 201; revoke session nếu có                                    |
+| GET /hubs                          | Đăng nhập | `HubSummary[]`                   | 200; sinh viên chỉ thấy Hub active                            |
+| GET /hubs/:id                      | Đăng nhập | `HubDetail`                      | 200; ID sai 400; không tồn tại/Hub inactive với sinh viên 404 |
+| GET /network/overview              | Operator  | `NetworkOverview`                | 200; sinh viên 403                                            |
+| GET /simulation/snapshot           | Operator  | `SimulationSnapshot`             | 200; sinh viên 403                                            |
+| GET /vehicles                      | Đăng nhập | `VehicleSearchResult`            | 200; query sai 400                                            |
+| POST /incidents                    | Operator  | `Incident`                       | 201; tài nguyên không tồn tại 404; payload sai 400            |
+| POST /incidents/:id/resolve        | Operator  | `Incident`                       | 201; không tồn tại 404; đã xử lý 409                          |
+| GET /incidents                     | Operator  | `Incident[]`                     | 200; tối đa 200 sự cố mới nhất                                |
+| GET /redistributions               | Operator  | `Redistribution[]`               | 200; tối đa 200 lệnh mới nhất                                 |
+| GET /operations/log                | Operator  | `OperationLogEntry[]`            | 200; tối đa 500 sự kiện mới nhất                              |
+| POST /redistributions              | Operator  | `Redistribution`                 | 201; xe/Hub không đủ điều kiện 409; payload sai 400           |
+| POST /redistributions/:id/start    | Operator  | `Redistribution`                 | 201; không tồn tại 404; trạng thái/tài nguyên đổi 409         |
+| POST /redistributions/:id/cancel   | Operator  | `Redistribution`                 | 201; chỉ lệnh pending mới hủy được; 404/409                   |
+| POST /redistributions/:id/complete | Operator  | `Redistribution`                 | 201; chỉ lệnh in_progress; Hub đích đầy/sự cố xe 409          |
 
 Login body: `{email: string, password: string}`. Không nhận role từ client; field ngoài DTO bị từ chối. Response user chỉ gồm `id,email,name,role`.
 
@@ -49,7 +53,9 @@ Các endpoint dưới đây là đề xuất, **chưa tồn tại**; chủ modul
 | TV4        | Hub CRUD/cấu hình tài nguyên; incident/redistribution đã triển khai bên trên               |
 | TV5        | POST /simulations; GET /simulations/:id; GET /simulations                                  |
 
-TV4 đã triển khai các endpoint quản trị Hub/tài nguyên ở dưới cùng với incident và redistribution nêu ở trên. `POST /redistributions` chỉ tạo lệnh `pending`; `start` kiểm tra lại Hub, xe available tại nguồn và incident đang mở trong transaction rồi chuyển xe sang `redistributing`. `cancel` chỉ áp dụng trước khi bắt đầu. Hoàn tất điều chuyển cần allocation service của TV3 để chiếm chỗ ở Hub đích; endpoint hoàn tất chưa được bật cho đến khi service đó được tích hợp.
+TV4 đã triển khai các endpoint quản trị Hub/tài nguyên ở dưới cùng với incident và redistribution nêu ở trên. `POST /redistributions` chỉ tạo lệnh `pending`; `start` kiểm tra lại Hub, xe available tại nguồn và incident đang mở trong transaction rồi chuyển xe sang `redistributing`. `cancel` chỉ áp dụng trước khi bắt đầu. `complete` chỉ áp dụng cho lệnh `in_progress`: trong cùng transaction kiểm tra lại điều kiện, giải phóng chỗ nguồn, chiếm chỗ đích qua AllocationPort TV3, cập nhật xe qua RentalService TV2 và ghi `completed`. Nếu đích hết chỗ hoặc có incident mở, mọi thay đổi rollback. Các sự kiện thay đổi trạng thái được ghi cùng transaction vào operation log.
+
+`GET /incidents`, `GET /redistributions` và `GET /operations/log` chỉ dành cho operator. Operation log lưu loại lệnh, ID lệnh, hành động, actor, trạng thái trước/sau và thời gian; không lưu payload tự do, mật khẩu hoặc token.
 
 ## T35 — Quản trị Hub và tài nguyên
 
@@ -131,9 +137,9 @@ Mọi endpoint cần đăng nhập (cookie session). `userId` lấy từ session
 
 ## Giới hạn T12 sau tích hợp
 
-Payload incident: `{resourceType: "vehicle" | "charging_point" | "hub", resourceId, description}`; description phải chứa ký tự không trắng, trim trước khi lưu. Payload redistribution: `{sourceHubId, targetHubId, vehicleIds}`; Hub khác nhau, danh sách không trống/trùng. ID/actor lấy từ session; field ngoài DTO bị từ chối. Hub/xe sai trạng thái hoặc xe có incident đang mở chặn tạo/bắt đầu điều chuyển; start kiểm tra lại trong transaction. Hai lệnh hoặc reservation/start tranh cùng xe chỉ một thao tác chiếm được xe.
+Payload incident: `{resourceType: "vehicle" | "charging_point" | "hub", resourceId, description}`; description phải chứa ký tự không trắng, trim trước khi lưu. Payload redistribution: `{sourceHubId, targetHubId, vehicleIds}`; Hub khác nhau, danh sách không trống/trùng. ID/actor lấy từ session; field ngoài DTO bị từ chối. Hub/xe sai trạng thái hoặc xe có incident đang mở chặn tạo/bắt đầu/hoàn tất điều chuyển; start/complete kiểm tra lại trong transaction. Hai lệnh hoặc reservation/start tranh cùng xe chỉ một thao tác chiếm được xe.
 
-Incident hiện chỉ ghi nhận/resolve; chưa tự đổi trạng thái vận hành hoặc xử lý reservation/trip/charging. Lệnh in_progress chưa có endpoint hoàn tất hay hủy; vị trí/chỗ nguồn được giữ đến workflow điều chuyển tiếp theo. Chưa có Idempotency-Key cho T12; không tự replay POST khi timeout. Các giới hạn này là phần chưa triển khai, không phải thay đổi quy tắc BR-08/BR-10/BR-11.
+Incident ghi nhận/resolve nhưng không tự đổi trạng thái vận hành hoặc xử lý reservation/trip/charging. `POST /redistributions/:id/complete` chỉ hoàn tất `in_progress`: trong cùng transaction xác minh lại Hub/xe/sự cố, giải phóng chỗ nguồn, chiếm chỗ đích qua AllocationPort, cập nhật xe qua RentalService và đóng lệnh. Hub đích đầy làm rollback toàn bộ transaction. Chưa có Idempotency-Key cho T12; không tự replay POST khi timeout. Incident của xe đang thuê/được giữ vẫn cần workflow phối hợp TV2 theo BR-10.
 
 ## T08 — nhận/trả và lịch sử chuyến
 
@@ -154,3 +160,11 @@ GET trips trả mọi chuyến active và tối đa 100 chuyến completed mới
 ## T18 — giữ cổng sạc nguyên tử
 
 Không thêm hoặc thay đổi endpoint HTTP trong T18. Backend export ChargingAllocationService.allocatePrivateRequest(actor, requestId, pointId, client) để T19 dùng. Quyền operator, xe cá nhân còn đỗ đúng Hub, pin còn cần sạc và cổng cùng Hub/available được kiểm tra trong transaction; point occupied bao gồm đã được giữ cho session scheduled. Cổng failed không được cấp mới. Rental search/reservation đã có trong main, nhưng phân bổ sạc xe thuê chờ contract chuyển trạng thái xe dùng cùng transaction. Scheduler, API vòng đời phiên và giao diện quản lý phiên thuộc T19. Chi tiết docs/allocation-safety.md.
+
+## T19 — API quản lý sạc
+
+Xem [hợp đồng điều phối sạc](charging-scheduler.md): overview, schedule và start/complete/cancel. Chỉ operator; POST yêu cầu Idempotency-Key. Phạm vi xe cá nhân và xe thuê; operator có thể tạo/hủy yêu cầu xe thuê và quản lý phiên. RentalChargingService giữ/giải phóng trạng thái xe trong cùng transaction.
+
+## T20 — sự cố cổng sạc
+
+GET /mobility/charging/points và POST /mobility/charging/points/:id/fail|recover chỉ dành operator. Các POST mới cần Idempotency-Key; phiên charging cần sessionId và pin quan sát. POST incidents/resolve cho charging_point dùng cùng workflow T20, giữ contract trả Incident. Phần ghi chú incident chỉ là nhật ký ở các mục trước là lịch sử trước T20. Hợp đồng và mã lỗi chi tiết: [charging-failure-recovery.md](charging-failure-recovery.md).

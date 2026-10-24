@@ -1,3 +1,4 @@
+import { ScrollableHistory } from "./ScrollableHistory";
 import type { HubSummary } from "@emobility/contracts";
 import type { useMobility } from "../hooks/useMobility";
 import {
@@ -286,7 +287,7 @@ export function MobilityPanel({ model: m, hubs }: Props) {
       >
         <h3>Lịch đỗ của tôi</h3>
         {!m.bookings.length && <p className="empty">Chưa có lịch đỗ.</p>}
-        <div className="mobility-list">
+        <ScrollableHistory label="Lịch đỗ của tôi" count={m.bookings.length}>
           {m.bookings.map((b) => (
             <article key={b.id}>
               <strong>
@@ -327,14 +328,14 @@ export function MobilityPanel({ model: m, hubs }: Props) {
               </div>
             </article>
           ))}
-        </div>
+        </ScrollableHistory>
         <h3>Yêu cầu sạc</h3>
         <p className="muted">
-          Danh sách theo thời điểm gửi. Điều phối ưu tiên và chạy phiên sạc sẽ
-          được bổ sung ở giai đoạn tiếp theo.
+          Danh sách theo thời điểm gửi. Người vận hành phân bổ cổng và cập nhật
+          phiên sạc cho xe cá nhân đủ điều kiện.
         </p>
         {!m.queue.length && <p className="empty">Chưa có yêu cầu sạc.</p>}
-        <div className="mobility-list">
+        <ScrollableHistory label="Yêu cầu sạc" count={m.queue.length}>
           {m.queue.map((q) => (
             <article key={q.id}>
               <strong>
@@ -349,7 +350,7 @@ export function MobilityPanel({ model: m, hubs }: Props) {
               </p>
             </article>
           ))}
-        </div>
+        </ScrollableHistory>
       </section>
     </section>
   );

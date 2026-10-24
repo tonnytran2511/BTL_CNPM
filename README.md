@@ -106,3 +106,41 @@ Chạy production cần hosting, HTTPS/cookie Secure, cấu hình DB và chiến
 ## Simulation T13
 
 Có mô phỏng tăng nhu cầu cho operator: chạy db:seed để thêm settings, nhập tham số và xem baseline/scenario trên cùng snapshot/seed. Engine đầu tiên chỉ mô phỏng lượt xe rời Hub; các kịch bản đỗ/sạc, đề xuất và lịch sử thuộc T22. Xem [docs/simulation.md](docs/simulation.md).
+
+## T20 — xử lý sự cố cổng sạc
+
+Phụ trách: Mai Anh. T20 được tích hợp cùng T19; lỗi giữ pin cũ khi đổi cổng/phiên đã được sửa và có kiểm thử hồi quy.
+
+| Công việc T20   | Chức năng                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Báo hỏng        | Operator chọn cổng, nhập mô tả; cổng failed, chặn cấp/bắt đầu phiên mới.                                                        |
+| Gián đoạn phiên | scheduled/charging → interrupted; phiên đang chạy phải nhập đúng pin quan sát và ID phiên.                                      |
+| Giữ nhu cầu     | Chưa đạt pin mục tiêu thì đưa request về queued, giữ ID/thời gian chờ; đủ pin thì fulfilled. Operator có thể cấp lại cổng khác. |
+| Khôi phục       | Sau khi sửa và kiểm tra, operator xác nhận sửa xong; đóng incident cổng, đưa cổng về available, không chạy lại phiên cũ.        |
+| Tích hợp        | Cả API sự cố cũ và UI mới dùng chung transaction; sự cố, pin, xe thuê, phiên và request rollback cùng nhau khi lỗi.             |
+| Kiểm chứng      | Kiểm thử gửi lặp, pin/phiên cũ, phân bổ/hoàn tất/xóa cổng đồng thời, rollback và quyền operator.                                |
+
+**Dùng thử:** đăng nhập operator → **Sự cố cổng sạc** → chọn cổng → mô tả và pin thực tế nếu đang sạc → **Báo hỏng cổng và xử lý phiên**. Sau khi sửa, chọn cổng hỏng và bấm **Xác nhận đã sửa xong**.
+
+Không tự tăng pin, tự sửa cổng hoặc tự phân bổ lại theo chu kỳ. Xử lý xe/Hub hỏng và trip đang chạy ngoài phạm vi T20. Hướng dẫn/API chi tiết tại [docs/charging-failure-recovery.md](docs/charging-failure-recovery.md).
+
+Phần T19 phía dưới là chức năng nền được kế thừa.
+
+## T19 — điều phối hàng chờ và phiên sạc
+
+Nhánh: `t19/charging-scheduler`. Cập nhật ngày 23/10/2026 trên main `e918f9d`.
+Phụ trách: Mai Anh.
+
+| Công việc T19        | Chức năng trong nhánh                                                                                                                                            |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Xếp hàng ưu tiên     | Chờ quá lâu trước, sau đó cần xe sớm, pin thấp; ngưỡng lấy từ cấu hình DB, cùng dữ liệu có thứ tự ổn định.                                                       |
+| Phân bổ cổng         | Operator chọn Hub; hệ thống cấp cổng còn trống cho yêu cầu đủ điều kiện trong cùng giao dịch dữ liệu.                                                            |
+| Quản lý phiên        | Bắt đầu, hoàn tất hoặc hủy; hoàn tất cần pin quan sát đạt mục tiêu; lỗi giữa chừng hoàn tác toàn bộ.                                                             |
+| Tích hợp xe thuê     | Operator tạo/hủy yêu cầu; khi giữ cổng xe chuyển sang charging, chặn đặt thuê/điều chuyển; kết thúc cập nhật pin và giải phóng xe qua service của module rental. |
+| Giao diện và đồng bộ | Hai khung yêu cầu sạc cập nhật sau thao tác; lịch đỗ/yêu cầu sạc theo cột dọc có cuộn và nút Lên/Xuống.                                                          |
+| Kiểm chứng           | Test PostgreSQL/HTTP cho gửi lặp, rollback và thao tác cạnh tranh; test hook cho đồng bộ, retry và đổi tài khoản. Kết quả bản cập nhật ghi tại docs/testing.md.  |
+
+Đăng nhập operator → “Điều phối sạc” → gửi yêu cầu xe thuê hoặc chọn Hub để phân bổ → bắt đầu phiên → nhập pin thực tế khi hoàn tất/hủy.
+Xe cá nhân: đăng ký → đặt chỗ → check-in đúng Hub → gửi yêu cầu sạc. Yêu cầu còn queued chưa giữ xe thuê; xe được đặt/di chuyển trước đó sẽ không được phân bổ khi không còn đủ điều kiện.
+
+Hạn chế: chưa tự tăng pin hoặc tự chạy phân bổ theo chu kỳ; người vận hành chủ động xác nhận. T20 đã bổ sung xử lý cổng hỏng, interrupted và đưa nhu cầu trở lại hàng chờ như mục phía trên. available vẫn phải đủ pin và ở Hub hoạt động mới thuê được.

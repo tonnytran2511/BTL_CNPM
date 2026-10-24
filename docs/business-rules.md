@@ -41,7 +41,7 @@ lowBatteryThreshold đã dùng ở dashboard; maximumParkingDurationMinutes đư
 
 ## Trạng thái dự kiến
 
-TV4 hiện triển khai lưu/resolve sự cố với actor và thời gian; lệnh điều chuyển có các trạng thái `pending`, `in_progress`, `cancelled`. Bắt đầu lệnh khóa Hub/xe, kiểm tra lại xe còn `available` tại nguồn và không có incident xe đang mở, rồi chuyển xe sang `redistributing` trong cùng transaction. Lệnh đang chạy chưa thể hoàn tất nếu chưa tích hợp allocation service TV3 để chiếm chỗ đỗ tại Hub đích; không được tự đặt trạng thái `completed` trước bước đó.
+TV4 triển khai lưu/resolve sự cố với actor và thời gian; lệnh điều chuyển có các trạng thái `pending`, `in_progress`, `completed`, `cancelled`. Bắt đầu khóa Hub/xe, kiểm tra lại xe còn `available` tại nguồn và không có incident xe đang mở, rồi chuyển xe sang `redistributing` trong cùng transaction. Hoàn tất kiểm tra lại Hub/xe/incident, giải phóng chỗ nguồn, chiếm chỗ đích qua allocation service TV3 và cập nhật xe qua RentalService TV2 trong cùng transaction. Đích đầy thì rollback, không ghi `completed`.
 
 - Vehicle reservation: active → cancelled / expired / fulfilled. Trạng thái kết thúc không quay lại active.
 - Trip: active → completed; sự cố không tự completed.
@@ -50,3 +50,15 @@ TV4 hiện triển khai lưu/resolve sự cố với actor và thời gian; lệ
 - Redistribution: pending → in_progress → completed / cancelled; hủy đang in_progress phải có xử lý vị trí thực tế, không chỉ đổi status.
 
 Đây là lifecycle baseline, không thay thế sơ đồ hành vi và đặc tả chi tiết của chủ module. Mọi thay đổi BR ảnh hưởng nhiều module phải được ghi trong PR và DESIGN trước khi merge.
+
+## T19 — đề xuất quy tắc tích hợp sạc xe thuê
+
+- Yêu cầu queued chưa giữ xe; chỉ phân bổ xe available, đỗ thật tại Hub hoạt động và không có active reservation/trip.
+- Khi phân bổ cổng, xe charging ngay ở phiên scheduled để chặn đặt thuê/điều chuyển; bắt đầu phiên không giữ xe lần thứ hai.
+- Hoàn tất/hủy phiên trả xe về available bằng cập nhật có điều kiện trong transaction sạc. Điều kiện pin tối thiểu/Hub hoạt động của thuê xe tiếp tục áp dụng.
+- Hủy yêu cầu queued không đổi trạng thái xe; xe đã được thuê/điều chuyển có thể bị loại khỏi hàng ưu tiên nhưng operator vẫn thấy yêu cầu còn chờ để hủy.
+- Pin không tự tăng, operator nhập số quan sát. Chính sách ưu tiên và giới hạn tại charging-scheduler.md cần peer review trước merge.
+
+## T20 — áp dụng BR-08 ở nhánh local
+
+Phiên ở cổng hỏng chuyển interrupted; scheduled không tăng pin, charging cần pin quan sát và đúng sessionId. Chưa đạt mục tiêu: request queued giữ created_at; đạt: fulfilled. Cổng giữ failed tới xác nhận sửa; recovery không chạy lại phiên cũ. Xe thuê trả về available theo chính sách queued chưa giữ xe của T19, vẫn phải vượt điều kiện thuê/Hub hoạt động. API incidents cũ xử lý cùng transaction cho charging_point. Xem charging-failure-recovery.md về retry, stale form và giới hạn.

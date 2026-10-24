@@ -26,6 +26,22 @@ try {
       ],
     );
   }
+  for (const key of [
+    "chargingUrgencyWindowMinutes",
+    "chargingMaximumWaitMinutes",
+  ]) {
+    const value = data.settings[key];
+    if (
+      !Number.isSafeInteger(value) ||
+      value < 0 ||
+      (key === "chargingMaximumWaitMinutes" && value === 0)
+    )
+      throw new Error(`Invalid ${key}`);
+    await client.query(
+      "INSERT INTO settings(key,value) VALUES($1,$2) ON CONFLICT(key) DO NOTHING",
+      [key, JSON.stringify(value)],
+    );
+  }
   const threshold = data.settings.lowBatteryThreshold;
   const maximumParkingDurationMinutes =
     data.settings.maximumParkingDurationMinutes;

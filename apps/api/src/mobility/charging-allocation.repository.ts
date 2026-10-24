@@ -16,10 +16,11 @@ export class ChargingAllocationRepository {
     ).rows[0];
   }
 
+  // Serialize Hub mutations without blocking FK KEY SHARE when rental creates a reservation.
   async lockHub(client: PoolClient, id: string) {
     return (
       await client.query<{ status: string }>(
-        "SELECT status FROM hubs WHERE id=$1 FOR UPDATE",
+        "SELECT status FROM hubs WHERE id=$1 FOR NO KEY UPDATE",
         [id],
       )
     ).rows[0];
@@ -103,5 +104,15 @@ export class ChargingAllocationRepository {
         [requestId, pointId],
       )
     ).rows[0];
+  }
+  async pointHasOpenIncident(c: PoolClient, id: string) {
+    return Boolean(
+      (
+        await c.query(
+          "SELECT 1 FROM incidents WHERE resource_type='charging_point' AND resource_id=$1 AND status='open' LIMIT 1",
+          [id],
+        )
+      ).rowCount,
+    );
   }
 }

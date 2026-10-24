@@ -1,3 +1,4 @@
+import { RentalChargingService } from "../rental/rental-charging.service";
 import {
   BadRequestException,
   ConflictException,
@@ -21,6 +22,8 @@ import type {
 export class MobilityService implements AllocationPort {
   constructor(
     @Inject(MobilityRepository) private readonly repo: MobilityRepository,
+    @Inject(RentalChargingService)
+    private readonly rental: RentalChargingService,
   ) {}
   private async hub(c: PoolClient, id: string, requireActive = true) {
     const hub = await this.repo.activeHub(c, id);
@@ -234,10 +237,7 @@ export class MobilityService implements AllocationPort {
             throw new ForbiddenException(
               "Chỉ người vận hành yêu cầu sạc xe thuê.",
             );
-          const v = await this.repo.rentalVehicle(c, input.vehicle.id);
-          if (!v) throw new NotFoundException("Không tìm thấy xe.");
-          if (v.hub_id !== input.hubId || v.status !== "available")
-            throw new ConflictException("Xe thuê không sẵn sàng tại Hub này.");
+          const v = await this.rental.ready(c, input.vehicle.id, input.hubId);
           battery = v.battery_percent;
         }
         if (typeof battery !== "number")

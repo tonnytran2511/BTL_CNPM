@@ -141,6 +141,21 @@ test(
         ready,
         `${startupOutput}\nAPI readiness failed at ${base}/health: ${lastHealthCheck}; child exit code: ${server.exitCode}`,
       );
+      await t.test(
+        "T20 charging failure, recovery and incident integration",
+        async () => {
+          await command("tests/charging-failure-check.mjs", env);
+        },
+      );
+      await t.test(
+        "T19 rental charging lifecycle and cross-module races",
+        async () => {
+          await command("tests/rental-charging-check.mjs", env);
+        },
+      );
+      await t.test("T19 private charging workflow", async () => {
+        await command("tests/charging-workflow-check.mjs", env);
+      });
       await t.test("Mai Anh parking and charging integration", async () => {
         await command("tests/mobility-check.mjs", env);
       });

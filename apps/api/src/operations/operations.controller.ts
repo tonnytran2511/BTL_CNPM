@@ -1,6 +1,8 @@
 import {
   Body,
+  Headers,
   Controller,
+  Get,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -19,13 +21,36 @@ export class OperationsController {
   ) {}
 
   @Post("incidents")
-  createIncident(@Body() body: IncidentDto, @Req() req: AuthRequest) {
-    return this.operations.createIncident(body, req.user.id);
+  createIncident(
+    @Body() body: IncidentDto,
+    @Req() req: AuthRequest,
+    @Headers("idempotency-key") key?: string,
+  ) {
+    return this.operations.createIncident(body, req.user.id, key);
   }
 
   @Post("incidents/:id/resolve")
-  resolveIncident(@Param("id", ParseUUIDPipe) id: string) {
-    return this.operations.resolveIncident(id);
+  resolveIncident(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Req() req: AuthRequest,
+    @Headers("idempotency-key") key?: string,
+  ) {
+    return this.operations.resolveIncident(id, req.user.id, key);
+  }
+
+  @Get("incidents")
+  incidents() {
+    return this.operations.incidents();
+  }
+
+  @Get("redistributions")
+  redistributions() {
+    return this.operations.redistributions();
+  }
+
+  @Get("operations/log")
+  operationLog() {
+    return this.operations.operationLog();
   }
 
   @Post("redistributions")
@@ -37,12 +62,26 @@ export class OperationsController {
   }
 
   @Post("redistributions/:id/start")
-  startRedistribution(@Param("id", ParseUUIDPipe) id: string) {
-    return this.operations.startRedistribution(id);
+  startRedistribution(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Req() req: AuthRequest,
+  ) {
+    return this.operations.startRedistribution(id, req.user.id);
   }
 
   @Post("redistributions/:id/cancel")
-  cancelRedistribution(@Param("id", ParseUUIDPipe) id: string) {
-    return this.operations.cancelRedistribution(id);
+  cancelRedistribution(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Req() req: AuthRequest,
+  ) {
+    return this.operations.cancelRedistribution(id, req.user.id);
+  }
+
+  @Post("redistributions/:id/complete")
+  completeRedistribution(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Req() req: AuthRequest,
+  ) {
+    return this.operations.completeRedistribution(id, req.user.id);
   }
 }
