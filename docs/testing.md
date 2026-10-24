@@ -135,3 +135,7 @@ Giữ nguyên bản T19 và README Mai Anh đã chỉnh trên nền main e918f9d
 ## T20 — 23/10/2026
 
 Build pass; npm test **103/103 API + 53/53 frontend pass**; format/diff checks pass. Có kiểm thử gián đoạn/requeue/repair, API incidents cũ, replay, rollback và fail/allocate/complete/delete đồng thời. Chi tiết [execution T20](test-runs/2026-10-23-t20-failure-recovery.md). Chỉ local, chưa push/merge; chưa demo trình duyệt toàn luồng.
+
+## PR #17 — tích hợp T21/T37 ngày 24/10/2026
+
+Bản ghép nhánh Quỳnh Anh với main `0f1a10a` đã chạy `npm run build`, `npm run format:check` và `npm test`: 105 backend + 56 frontend tests pass. Regression bổ sung xác minh create/resolve sự cố cổng T20 ghi log T37 đúng actor, chỉ một lần kể cả request bị từ chối; khóa Hub điều chuyển không chặn KEY SHARE của reservation. Bộ operations cũng kiểm tra hoàn tất/rollback khi đích đầy và cạnh tranh thuê/điều chuyển. Chưa demo trình duyệt hoặc xác nhận nghiệm thu của thành viên; cập nhật PR không đồng nghĩa đã merge.

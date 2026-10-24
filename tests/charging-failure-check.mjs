@@ -249,6 +249,26 @@ try {
     ok(resolved);
     assert.equal((await state(f)).point_status, "available");
     ok(await call(`/incidents/${failed.body.id}/resolve`, op, {}), 409);
+    const audit = (
+      await db.query(
+        "SELECT action,actor_id,from_status,to_status FROM operation_logs WHERE command_type='incident' AND command_id=$1 ORDER BY occurred_at,id",
+        [failed.body.id],
+      )
+    ).rows;
+    assert.equal(
+      audit.length,
+      2,
+      "create and resolve are logged exactly once, including rejected replay",
+    );
+    assert.deepEqual(
+      audit.find((entry) => entry.action === "resolved"),
+      {
+        action: "resolved",
+        actor_id: actor.id,
+        from_status: "open",
+        to_status: "resolved",
+      },
+    );
   }
   const target = await fixture(),
     targetSession = await scheduled(target);

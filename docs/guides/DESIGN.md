@@ -138,3 +138,7 @@ MobilityModule export ChargingAllocationService để giữ cổng cho xe cá nh
 ## T19/T20 — tích hợp ngày 24/10/2026
 
 T19 đã tích hợp trên main `f8e6c9b`; bản ghép T20 giữ hướng dẫn setup và bổ sung xử lý cổng hỏng, interrupted/requeue và phục hồi cổng. Commit nguồn T20 `225db0c` reset form khi đổi cổng/phiên và từ chối form cũ, tránh ghi pin sang xe khác. Build, format, 103 test backend và 56 test frontend pass trên bản ghép. Kết quả kỹ thuật không thay xác nhận nghiệm thu/demo và giải thích của thành viên.
+
+## PR #17 — tích hợp T21/T37 với T19/T20 ngày 24/10/2026
+
+Nhánh Quỳnh Anh cập nhật main `0f1a10a`: giữ hoàn tất điều chuyển, giao diện/lịch sử vận hành và xử lý sự cố sạc T20. Sửa cổng/resolve incident ghi đúng actor cùng transaction với nhật ký T37. Khóa Hub điều chuyển dùng FOR NO KEY UPDATE theo ID để tuần tự hóa mutation mà không chặn khóa FK KEY SHARE của đặt xe. Chưa coi cập nhật PR là đã merge hoặc nghiệm thu/demo của sinh viên.

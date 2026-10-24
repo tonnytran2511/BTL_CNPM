@@ -196,7 +196,7 @@ export class ChargingFailureService {
       const incidents = await this.incidents.list(c, point);
       for (const incident of incidents)
         if (incident.status === "open")
-          await this.incidents.resolve(c, incident.id);
+          await this.incidents.resolve(c, incident.id, actor);
       await this.repo.recover(c, point);
       return { pointId: point, status: "available" as const };
     });
@@ -217,7 +217,7 @@ export class ChargingFailureService {
       );
       if (current?.status !== "open")
         throw new ConflictException("Sự cố đã được xử lý.");
-      const resolved = await this.incidents.resolve(c, id);
+      const resolved = await this.incidents.resolve(c, id, actor);
       if (
         !(await this.incidents.list(c, incident.resourceId)).some(
           (i) => i.status === "open",

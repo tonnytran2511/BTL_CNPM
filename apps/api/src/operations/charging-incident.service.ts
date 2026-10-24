@@ -30,7 +30,7 @@ export class ChargingIncidentService {
       )
     );
   }
-  resolve(c: PoolClient, id: string) {
-    return this.repo.resolveIncident(c, id);
+  resolve(c: PoolClient, id: string, actor: string) {
+    return this.repo.resolveIncident(c, id, actor);
   }
 }

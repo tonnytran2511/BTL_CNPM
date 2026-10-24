@@ -19,6 +19,8 @@ import { useMobility } from "./hooks/useMobility";
 import { MobilityPanel } from "./components/MobilityPanel";
 import { useHubManagement } from "./hooks/useHubManagement";
 import { HubManagementPage } from "./pages/HubManagementPage";
+import { useOperations } from "./hooks/useOperations";
+import { OperationsPage } from "./pages/OperationsPage";
 export function App() {
   const model = useFoundation();
   const chargingFailures = useChargingFailures(
@@ -31,6 +33,13 @@ export function App() {
   const hubManagement = useHubManagement(
     model.user,
     model.user?.role === "operator" && page === "hub-management",
+    model.sessionExpired,
+    model.accessRevoked,
+  );
+  const operations = useOperations(
+    model.user,
+    model.user?.role === "operator" && page === "operations",
+    model.config?.pollIntervalMs ?? 0,
     model.sessionExpired,
     model.accessRevoked,
   );
@@ -129,12 +138,20 @@ export function App() {
             >
               Quản lý Hub
             </a>
+            <a
+              href="#/operations"
+              aria-current={page === "operations" ? "page" : undefined}
+            >
+              Vận hành
+            </a>
           </>
         )}
       </nav>
       <main id="main" tabIndex={-1}>
         {page === "hub-management" ? (
           <HubManagementPage model={hubManagement} />
+        ) : page === "operations" ? (
+          <OperationsPage model={operations} />
         ) : page === "simulation" ? (
           <SimulationPage
             model={simulation}

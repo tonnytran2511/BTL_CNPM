@@ -260,9 +260,12 @@ stateDiagram-v2
   [*] --> pending: tạo lệnh, chưa di chuyển xe
   pending --> cancelled: hủy trước khi bắt đầu
   pending --> in_progress: kiểm tra lại Hub, xe, sự cố và khóa xe
+  in_progress --> completed: kiểm tra lại, chuyển chỗ và Hub trong transaction
 ```
 
-Đây là phạm vi T12: chưa có endpoint hoàn tất/hoàn tác lệnh đang chạy hoặc UI quản trị. `in_progress` giữ vị trí/chỗ nguồn cho đến workflow di chuyển thực tế ở task tiếp theo; không tự chiếm chỗ đích. Incident hiện là nhật ký open/resolved; không tự chuyển Hub inactive, xe maintenance hay cổng failed, và không tự xử lý reservation/trip/charging. Tác động của sự cố lên vận hành theo BR-08/BR-10 cần service của chủ module triển khai tiếp. Chưa có Idempotency-Key cho T07/T12; client không tự retry mutation.
+T21 bổ sung hoàn tất điều chuyển: OperationsService khóa Hub theo ID, gọi AllocationPort để giải phóng chỗ nguồn và chiếm chỗ đích, rồi gọi RentalService cập nhật `hub_id` và trạng thái xe, tất cả dùng cùng PoolClient. Đích đầy hoặc điều kiện đổi thì transaction rollback. Lệnh `in_progress` không thể hủy; vị trí thực tế phải được xác nhận bằng hoàn tất. Incident xe/Hub giữ nhật ký open/resolved và chặn điều chuyển xe đang có sự cố mở; không tự chuyển Hub inactive hoặc xe maintenance. Incident cổng sạc đi qua ChargingFailureService của T20 để gián đoạn/phục hồi nguyên tử; actor xử lý được truyền sang nhật ký T37. Workflow reservation/trip/charging bị ảnh hưởng tiếp tục thuộc service chủ quản theo BR-08/BR-10. Chưa có Idempotency-Key cho T07/T12/T21; client không tự retry mutation.
+
+T37 thêm operation log append-only theo convention ứng dụng: mỗi lần tạo/resolve incident hoặc đổi trạng thái redistribution ghi loại/ID lệnh, actor, thời điểm và trạng thái trước/sau cùng transaction; không lưu payload/secret. Operator tra cứu sự cố, lệnh và lịch sử qua API và trang Vận hành.
 
 ## T08 — tích hợp nhận/trả xe
 
@@ -324,7 +327,7 @@ flowchart LR
   Repo --> DB[(PostgreSQL)]
 ```
 
-Trip và allocation dùng cùng PoolClient để xe/chỗ/trip commit nguyên tử. Operations chỉ gọi RentalService để giữ xe khi start; chưa hoàn tất điều chuyển. Simulation đọc snapshot nhất quán và settings, engine không truy cập DB; không áp dụng kết quả lên vận hành. T35 đã có UI → useHubManagement → API → HubManagementService → HubManagementRepository. CRUD/cấu hình layout không chuyển trạng thái vận hành của xe hay phiên sạc. Mutation khóa Hub; xóa cổng khóa tiếp cổng trước kiểm tra incident để đồng bộ với Operations. Capacity đọc giới hạn từ settings; giữ nguyên booking/lịch sử và rollback nếu không đủ chỗ xóa an toàn.
+Trip và allocation dùng cùng PoolClient để xe/chỗ/trip commit nguyên tử. Operations gọi RentalService để giữ xe khi start; T21 hoàn tất điều chuyển qua AllocationPort và RentalService trong cùng transaction. Simulation đọc snapshot nhất quán và settings, engine không truy cập DB; không áp dụng kết quả lên vận hành. T35 đã có UI → useHubManagement → API → HubManagementService → HubManagementRepository. CRUD/cấu hình layout không chuyển trạng thái vận hành của xe hay phiên sạc. Mutation khóa Hub; xóa cổng khóa tiếp cổng trước kiểm tra incident để đồng bộ với Operations. Capacity đọc giới hạn từ settings; giữ nguyên booking/lịch sử và rollback nếu không đủ chỗ xóa an toàn.
 
 ```mermaid
 erDiagram
