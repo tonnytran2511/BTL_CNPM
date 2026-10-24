@@ -95,7 +95,12 @@ export function ChargingFailurePanel({
                 </button>
               </div>
             ) : (
-              <form onSubmit={m.report}>
+              <form
+                key={`${m.selected.id}:${m.selected.sessionId ?? ""}`}
+                data-point-id={m.selected.id}
+                data-session-id={m.selected.sessionId ?? ""}
+                onSubmit={m.report}
+              >
                 <fieldset disabled={m.busy || m.loading}>
                   <label>
                     Mô tả sự cố

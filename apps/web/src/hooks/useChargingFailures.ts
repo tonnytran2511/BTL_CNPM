@@ -106,8 +106,25 @@ export function useChargingFailures(
   const report = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selected) return;
+    // Reject submits from a stale form after the operator changes point/session.
+    const submittedPointId = event.currentTarget.dataset.pointId;
+    const submittedSessionId = event.currentTarget.dataset.sessionId;
+    if (
+      submittedPointId !== selected.id ||
+      submittedSessionId !== (selected.sessionId ?? "")
+    ) {
+      setError("Cổng hoặc phiên sạc đã thay đổi. Vui lòng nhập lại thông tin.");
+      return;
+    }
     const form = new FormData(event.currentTarget),
       actual = String(form.get("battery") ?? "");
+    if (
+      selected.sessionStatus === "charging" &&
+      (actual.trim() === "" || !Number.isFinite(Number(actual)))
+    ) {
+      setError("Vui lòng nhập pin thực tế cho đúng phiên sạc.");
+      return;
+    }
     const body: ChargingFailureInput = {
       description: String(form.get("description") ?? "").trim(),
       sessionId: selected.sessionId ?? undefined,
