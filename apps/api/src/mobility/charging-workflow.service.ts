@@ -71,6 +71,14 @@ export class ChargingWorkflowService {
       rentalPending: await this.repo.rentalPending(c),
     }));
   }
+  /** Read-only BR-07 projection; caller supplies the shared snapshot transaction and clock. */
+  async simulationQueue(c: PoolClient, hubId: string, capturedAt: number) {
+    return prioritizeCharging(
+      await this.repo.queue(c, hubId),
+      await this.policy(c),
+      capturedAt,
+    );
+  }
   private async mutate<T>(
     user: User,
     operation: string,

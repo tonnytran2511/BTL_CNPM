@@ -5,8 +5,9 @@ import { formatNumber, formatTime } from "../utils/format";
 interface Props {
   model: ReturnType<typeof useSimulation>;
   hubs: HubSummary[];
+  onOpenGuide?: () => void;
 }
-export function SimulationPanel({ model: m, hubs }: Props) {
+export function SimulationPanel({ model: m, hubs, onOpenGuide }: Props) {
   return (
     <section className="simulation-panel" aria-labelledby="simulation-title">
       <div className="section-heading">
@@ -14,6 +15,16 @@ export function SimulationPanel({ model: m, hubs }: Props) {
           <p className="eyebrow">THAM SỐ VÀ KẾT QUẢ</p>
           <h2 id="simulation-title">Mô phỏng tăng nhu cầu</h2>
         </div>
+        {onOpenGuide && (
+          <button
+            type="button"
+            className="secondary"
+            onClick={onOpenGuide}
+            aria-haspopup="dialog"
+          >
+            Hướng dẫn sử dụng
+          </button>
+        )}
       </div>
       <p className="simulation-intro">
         Mô phỏng lượt rời Hub bằng xe có sẵn. Mỗi xe phục vụ tối đa một yêu cầu;

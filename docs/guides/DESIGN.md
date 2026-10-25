@@ -1,5 +1,9 @@
 # Smart E-Mobility Hub — định hướng thiết kế
 
+## T22/T36 — 25/10/2026, baseline implementation chờ review
+
+Ba kịch bản resource-flow-v1 thuần dùng snapshot chung REPEATABLE READ READ ONLY qua HubsService, MobilitySnapshotService và rental projection. Parking loại chỗ đã hứa trong horizon; charging dùng queue BR-07 T19 và giả định service time công khai. History riêng simulation_runs lưu snapshot/params/limits/result/model/actor; retry key không nhân bản. Không tự áp dụng recommendation. Công thức/đề xuất/giới hạn tại docs/scenarios.md, contract tại packages/contracts/scenarios.ts. Giả định cần review nhóm, không thay quy tắc vận hành T19/T21 hoặc dự báo đã xác thực. T13 giữ nguyên.
+
 ## T14 — hoàn tất tích hợp T35 ngày 23/10/2026
 
 T35 của Quỳnh Anh đã merge qua PR #13 vào main `5d0d4d2`. Ba điểm review đã sửa: khóa cổng sạc trước kiểm tra incident, giữ form khi mutation thất bại, tách logic/model khỏi UI. T14 bổ sung regression HTTP/PostgreSQL cho CRUD, quyền operator, dashboard động, inactive Hub, sức chứa có hold/booking, rollback và incident/delete đồng thời. Giao diện và file TXT đã được kiểm tra trên DB tạm; bằng chứng tại `demo/T14-t35-completion.md`.

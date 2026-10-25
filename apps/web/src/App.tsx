@@ -4,6 +4,7 @@ import { useChargingManager } from "./hooks/useChargingManager";
 import { ChargingManager } from "./components/ChargingManager";
 import { useFoundation } from "./hooks/useFoundation";
 import { useSimulation } from "./hooks/useSimulation";
+import { useScenarios } from "./hooks/useScenarios";
 import { SimulationPage } from "./pages/SimulationPage";
 import { useAppPage } from "./hooks/useAppPage";
 import { useHubDetail } from "./hooks/useHubDetail";
@@ -29,6 +30,7 @@ export function App() {
     model.updatedAt,
   );
   const simulation = useSimulation(model.user);
+  const scenarios = useScenarios(model.user);
   const page = useAppPage(model.user?.role);
   const hubManagement = useHubManagement(
     model.user,
@@ -154,6 +156,7 @@ export function App() {
           <OperationsPage model={operations} />
         ) : page === "simulation" ? (
           <SimulationPage
+            scenarios={scenarios}
             model={simulation}
             hubs={model.hubs}
             error={model.error}

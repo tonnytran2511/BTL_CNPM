@@ -1,5 +1,9 @@
 # Smart E-Mobility Hub
 
+## T22 — simulation mở rộng (local chờ review)
+
+Trang Mô phỏng có ba kịch bản tăng nhu cầu lấy xe, chiếm thêm chỗ đỗ và cổng sạc hỏng; so sánh baseline/scenario, timeline, impact, đề xuất tham khảo và lịch sử lưu PostgreSQL riêng. Chạy `npm run db:migrate` để áp dụng migration 007 trước khi dùng; không cần reset DB hoặc seed lại dữ liệu vận hành. Dropdown cho phép chọn T22 hoặc T13 cũ; hướng dẫn T13 nằm trong phần T13. Đọc [giả định và giới hạn T22](docs/scenarios.md) trước demo; service time sạc là tham số giả lập, không phải dự báo pin/năng lượng. Không tự áp dụng đề xuất vào vận hành.
+
 Nền tảng bài tập lớn CNPM HK261, nhóm 5 người. Frontend React/TypeScript/Vite; backend NestJS/TypeScript; PostgreSQL với migration SQL và `pg`.
 
 ## Những phần đang chạy

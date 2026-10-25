@@ -16,6 +16,9 @@ export class RentalChargingService {
   candidates(c: PoolClient) {
     return this.repo.chargingCandidates(c);
   }
+  simulationVehicles(c: PoolClient, minimumBatteryPercent: number) {
+    return this.repo.simulationVehicles(c, minimumBatteryPercent);
+  }
   async lock(c: PoolClient, id: string) {
     const v = await this.repo.lockChargingVehicle(c, id);
     if (!v) throw new NotFoundException("Không tìm thấy xe thuê.");

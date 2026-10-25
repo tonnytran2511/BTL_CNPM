@@ -1,5 +1,7 @@
 # Nhật ký hỗ trợ AI
 
+25/10/2026: Theo yêu cầu Minh Khuê, Codex triển khai T22 sau khi T19/T20/T21 đã có trên nền 8b93438, sau đó làm T36. Thêm projection read-only do chủ module sở hữu, engine ba kịch bản/metrics/recommendations, history và retry key, UI/hook/API/model riêng, migration 007, kiểm thử PostgreSQL/HTTP, 60 seeds × 3 scenarios và regression frontend. Codex tự review và sửa history race, ghi rõ giả định parking/charging và hạn chế visual verification. Không tự thực thi recommendation hoặc cập nhật worksheet; chưa peer review/commit/push. Minh Khuê cần đọc, demo và giải thích trước tích hợp; execution tại docs/test-runs/2026-10-25-t22-t36.md.
+
 23/10/2026: Theo yêu cầu Minh Tường hoàn tất sau T35, Codex review bản PR #13 đã merge, thêm regression HTTP/PostgreSQL (đặc biệt incident/delete đồng thời), chạy build/test và demo UI trên DB tạm; xác minh TXT tải thực tế, lưu ảnh/báo cáo và cập nhật tài liệu T14. Không triển khai thay T16/T19–T22/T37, không tự xác nhận peer review hoặc khả năng giải thích của thành viên.
 
 20/10/2026: Theo yêu cầu Minh Tường làm T14, Codex tích hợp PR #11, chạy demo Chrome trên Nest/Vite/PostgreSQL riêng cho thuê xe, đặt/check-in/out, queue sạc và simulation; kiểm tra API T12 và hash 13 bảng trước/sau simulation. Bổ sung runner demo database tạm, báo cáo T14, bằng chứng JSON, defect/gap log và cập nhật use case/thiết kế. Minh Tường chọn ghi T35 là phụ thuộc còn chờ, không triển khai thay owner; chưa nghiệm thu đủ T14. Không xác nhận video, peer review hoặc TXT download khi chưa có bằng chứng.

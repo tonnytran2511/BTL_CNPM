@@ -11,6 +11,7 @@ import EmbeddedPostgres from "embedded-postgres";
 import pg from "pg";
 import { root } from "../scripts/env.mjs";
 import { checkDashboard } from "./dashboard-check.mjs";
+import { checkScenarios } from "./scenarios-check.mjs";
 async function freePort() {
   const server = createServer();
   server.listen(0, "127.0.0.1");
@@ -79,12 +80,19 @@ test(
     const base = `http://127.0.0.1:${apiPort}/api`;
     const request = async (
       path,
-      { cookie, body, method = "GET", origin = env.WEB_ORIGIN } = {},
+      {
+        cookie,
+        body,
+        method = "GET",
+        origin = env.WEB_ORIGIN,
+        headers = {},
+      } = {},
     ) => {
       const response = await fetch(base + path, {
         method,
         headers: {
           "Content-Type": "application/json",
+          ...headers,
           ...(cookie ? { Cookie: cookie } : {}),
           ...(method !== "GET" ? { Origin: origin } : {}),
         },
@@ -340,6 +348,12 @@ test(
             "UPDATE settings SET value=$1 WHERE key='simulationMaximumSteps'",
             [JSON.stringify(config.body.maximumSteps)],
           );
+        },
+      );
+      await t.test(
+        "T22 scenarios, persisted history, permissions, retries and operational isolation",
+        async () => {
+          await checkScenarios({ request, pool, operator, student, hubs });
         },
       );
       await t.test(

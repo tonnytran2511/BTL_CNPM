@@ -1,4 +1,6 @@
 import { ChargingIncidentModule } from "../operations/charging-incident.module";
+import { MobilitySnapshotRepository } from "./mobility-snapshot.repository";
+import { MobilitySnapshotService } from "./mobility-snapshot.service";
 import { ChargingFailureController } from "./charging-failure.controller";
 import { ChargingFailureRepository } from "./charging-failure.repository";
 import { ChargingFailureService } from "./charging-failure.service";
@@ -21,6 +23,8 @@ import { ChargingWorkflowController } from "./charging-workflow.controller";
     ChargingFailureController,
   ],
   providers: [
+    MobilitySnapshotRepository,
+    MobilitySnapshotService,
     ChargingFailureRepository,
     ChargingFailureService,
     MobilityRepository,
@@ -32,6 +36,7 @@ import { ChargingWorkflowController } from "./charging-workflow.controller";
     { provide: ALLOCATION_PORT, useExisting: MobilityService },
   ],
   exports: [
+    MobilitySnapshotService,
     ALLOCATION_PORT,
     MobilityService,
     ChargingAllocationService,

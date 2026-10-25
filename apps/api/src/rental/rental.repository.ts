@@ -568,6 +568,22 @@ export class RentalRepository {
       ORDER BY h.name,v.code`)
     ).rows;
   }
+  /** Conservative read-only fleet projection for what-if simulation; never expires or mutates reservations. */
+  async simulationVehicles(c: PoolClient, minimumBatteryPercent: number) {
+    return (
+      await c.query<{ id: string; hubId: string }>(
+        `SELECT v.id,v.hub_id AS "hubId"
+      FROM vehicles v JOIN hubs h ON h.id=v.hub_id
+      WHERE h.status='active' AND v.status='available' AND v.battery_percent >= $1
+      AND EXISTS(SELECT 1 FROM parking_spaces p WHERE p.vehicle_id=v.id AND p.hub_id=v.hub_id AND p.status='occupied')
+      AND NOT EXISTS(SELECT 1 FROM vehicle_reservations r WHERE r.vehicle_id=v.id AND r.status='active')
+      AND NOT EXISTS(SELECT 1 FROM trips t WHERE t.vehicle_id=v.id AND t.status='active')
+      AND NOT EXISTS(SELECT 1 FROM incidents i WHERE i.resource_type='vehicle' AND i.resource_id=v.id AND i.status='open')
+      ORDER BY v.id`,
+        [minimumBatteryPercent],
+      )
+    ).rows;
+  }
   async lockChargingVehicle(c: PoolClient, id: string) {
     return (
       await c.query<{

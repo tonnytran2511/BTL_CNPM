@@ -1,4 +1,6 @@
-# T13 — mô phỏng tăng nhu cầu
+# Simulation — T13 và T22
+
+T22 bổ sung ba kịch bản, impact, đề xuất và lịch sử riêng; hợp đồng/giả định tại [scenarios.md](scenarios.md). Phần bên dưới mô tả endpoint và mô hình T13 cũ, giữ tương thích và không tự lưu history. Trạng thái nghiệm thu T22 ghi riêng trong execution log.
 
 Trạng thái: T13 và UI PR #9 đã tích hợp vào main; T14 ngày 20/10 kiểm tra Chrome/API/PostgreSQL cùng luồng thuê/đỗ/sạc. Giả định là baseline đề xuất, chưa phải mô hình nhu cầu thực tế đã được xác thực.
 

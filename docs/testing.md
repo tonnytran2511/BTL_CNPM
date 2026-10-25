@@ -1,5 +1,9 @@
 # Kiểm chứng nền tảng — 14/10/2026
 
+## T22/T36 — 25/10/2026, local chờ review
+
+Build frontend/backend pass; 113 backend + 62 frontend tests pass. Ba kịch bản/history/retry/role/DTO và snapshot không ghi vận hành được kiểm tra trên PostgreSQL/HTTP riêng. T36 kiểm tra 60 seeds × 3 kinds, bất biến, wait/utilization tính tay và recommendation theo tài nguyên. Regression frontend bảo vệ key retry, session cũ, clear, saved params/report và history race. Chi tiết/giới hạn tại [execution T22/T36](test-runs/2026-10-25-t22-t36.md); chưa xác minh walkthrough trình duyệt, chưa peer review/commit/push phần mới. Các giả định baseline tại [scenarios.md](scenarios.md).
+
 ## T14/T35 — kiểm chứng sau PR #13, 23/10/2026
 
 Base main `5d0d4d2` (T35 head `ee18a06`). Build API/web và bộ test hiện có pass 82 API / 40 frontend. Bổ sung một subtest vào foundation để chạy `tests/hub-management-check.mjs` trên HTTP + PostgreSQL tạm: đủ 6 mutation routes kiểm tra 401/403, CRUD/code trùng/DTO, cấu hình giới hạn, Hub inactive, dashboard động, hold và booking tương lai chặn giảm capacity với rollback, cổng occupied, và incident/delete đồng thời. Regression đồng thời đợi lock thực qua `pg_stat_activity`, không suy luận pass từ mock hoặc sleep cố định.

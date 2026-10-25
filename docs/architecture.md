@@ -1,5 +1,15 @@
 # Kiến trúc và dữ liệu nền tảng
 
+## T22 — snapshot và history riêng (25/10/2026, local chờ review)
+
+SimulationModule import HubsModule và MobilityModule; mobility export MobilitySnapshotService, dùng ChargingWorkflowService cho queue BR-07 và RentalChargingService cho projection xe read-only. Service mở readSnapshot chung và truyền cùng PoolClient xuống từng module. SimulationRepository chỉ đọc settings và đọc/ghi bảng history thuộc simulation; không truy vấn trực tiếp bảng vận hành của module khác.
+
+HubsService.snapshot nhận PoolClient tùy chọn để ghép snapshot cùng transaction; caller cũ không truyền client vẫn dùng read-only transaction riêng. Timestamp là transaction_timestamp của PostgreSQL. Đầu vào engine là snapshot/params/limits có version; không gọi database, đồng hồ hoặc random toàn cục.
+
+Migration 007 thêm simulation_runs: id UUID, created_by FK users, created_at timestamptz, snapshot/result JSONB, idempotency_key và payload chuẩn hóa; unique(created_by,idempotency_key), index phân trang. Snapshot chứa Hub/resource IDs và số liệu, không credentials/session. Không FK Hub để lưu bằng chứng lịch sử sau đổi/xóa tài nguyên. API detail không trả snapshot raw; history list chỉ metadata. Không thêm đường ghi từ recommendation vào vận hành.
+
+Baseline/scenario dùng cùng snapshot và seed. Ba workflow độc lập, không giả lập hành trình xuyên Hub. Các service time, queue và quy tắc parking là giả định được ghi tại [scenarios.md](scenarios.md); không đồng nhất với năng lượng sạc thật. History lưu kết quả đã hoàn thành, đọc lại không chạy lại engine. UI/hook/client/model tách riêng; form mới không ghi đè nhãn bản cũ.
+
 Sơ đồ này phản ánh bản đang triển khai. Phạm vi module đã triển khai và còn chờ được phân biệt tại tài liệu API và báo cáo T14.
 
 ```mermaid
