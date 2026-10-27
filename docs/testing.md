@@ -1,5 +1,9 @@
 # Kiểm chứng nền tảng — 14/10/2026
 
+## T22/T36 — 25/10/2026, local chờ review
+
+Build frontend/backend pass; 113 backend + 62 frontend tests pass. Ba kịch bản/history/retry/role/DTO và snapshot không ghi vận hành được kiểm tra trên PostgreSQL/HTTP riêng. T36 kiểm tra 60 seeds × 3 kinds, bất biến, wait/utilization tính tay và recommendation theo tài nguyên. Regression frontend bảo vệ key retry, session cũ, clear, saved params/report và history race. Chi tiết/giới hạn tại [execution T22/T36](test-runs/2026-10-25-t22-t36.md); chưa xác minh walkthrough trình duyệt, chưa peer review/commit/push phần mới. Các giả định baseline tại [scenarios.md](scenarios.md).
+
 ## T14/T35 — kiểm chứng sau PR #13, 23/10/2026
 
 Base main `5d0d4d2` (T35 head `ee18a06`). Build API/web và bộ test hiện có pass 82 API / 40 frontend. Bổ sung một subtest vào foundation để chạy `tests/hub-management-check.mjs` trên HTTP + PostgreSQL tạm: đủ 6 mutation routes kiểm tra 401/403, CRUD/code trùng/DTO, cấu hình giới hạn, Hub inactive, dashboard động, hold và booking tương lai chặn giảm capacity với rollback, cổng occupied, và incident/delete đồng thời. Regression đồng thời đợi lock thực qua `pg_stat_activity`, không suy luận pass từ mock hoặc sleep cố định.
@@ -143,3 +147,7 @@ Build pass; npm test **103/103 API + 53/53 frontend pass**; format/diff checks p
 ## PR #17 — tích hợp T21/T37 ngày 24/10/2026
 
 Bản ghép nhánh Quỳnh Anh với main `0f1a10a` đã chạy `npm run build`, `npm run format:check` và `npm test`: 105 backend + 56 frontend tests pass. Regression bổ sung xác minh create/resolve sự cố cổng T20 ghi log T37 đúng actor, chỉ một lần kể cả request bị từ chối; khóa Hub điều chuyển không chặn KEY SHARE của reservation. Bộ operations cũng kiểm tra hoàn tất/rollback khi đích đầy và cạnh tranh thuê/điều chuyển. Chưa demo trình duyệt hoặc xác nhận nghiệm thu của thành viên; cập nhật PR không đồng nghĩa đã merge.
+
+## T17/T22/T36 — bản tích hợp 27/10/2026
+
+PR #16 đã tích hợp thành main `de65b75`; PR #18 ghép main đó và chuyển truy vấn thời gian snapshot từ HubsService xuống HubsRepository. `npm run format:check`, `npm run build`, `npm test` pass trên bản ghép: 126 backend + 62 frontend tests. Bao gồm hardening/idempotency thuê xe, ba kịch bản và 60 seed cho bất biến mô hình, snapshot không đổi dữ liệu vận hành, lịch sử/replay/pagination và đồng bộ UI. Hai migration `007_rental_idempotency.sql` và `007_simulation_runs.sql` cùng chạy được vì migration runner dùng toàn bộ tên file. Chưa xác nhận demo/nghiệm thu nhóm, kiểm thử chéo đủ năm thành viên hoặc đóng băng chức năng. Giới hạn mô hình tại docs/scenarios.md; web T17 chưa giữ key khi thử lại sau timeout.

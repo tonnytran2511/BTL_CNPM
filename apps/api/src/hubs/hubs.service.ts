@@ -5,6 +5,7 @@ import type {
   SimulationSnapshot,
 } from "@emobility/contracts";
 import { HubsRepository } from "./hubs.repository";
+import type { PoolClient } from "pg";
 @Injectable()
 export class HubsService {
   constructor(
@@ -45,15 +46,19 @@ export class HubsService {
     );
     return { hubs, totals, updatedAt: new Date().toISOString() };
   }
-  snapshot(): Promise<SimulationSnapshot> {
-    return this.repository.snapshot(async (client) => {
+  snapshot(client?: PoolClient): Promise<SimulationSnapshot> {
+    const read = async (client: PoolClient) => {
       const summaries = await this.repository.summaries(client);
       const hubs = [];
       for (const hub of summaries) {
         const detail = await this.repository.detail(hub.id, client);
         if (detail) hubs.push(detail);
       }
-      return { capturedAt: new Date().toISOString(), hubs };
-    });
+      return {
+        capturedAt: await this.repository.snapshotCapturedAt(client),
+        hubs,
+      };
+    };
+    return client ? read(client) : this.repository.snapshot(read);
   }
 }

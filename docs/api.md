@@ -1,5 +1,17 @@
 # Hợp đồng API nền tảng v0.1
 
+## T22 — scenario và lịch sử (25/10/2026, local chờ review)
+
+Tất cả endpoint mới cần operator; không session 401, student 403. T13 giữ nguyên. Prefix /api như các endpoint khác.
+
+- GET `/simulations/scenario-config` → ScenarioLimits: limits T13 cộng maximumGeneratedRequests, maximumHorizonMinutes, historyPageSize từ settings được validation.
+- POST `/simulations/runs` → 201 SavedSimulation `{id,createdAt,createdBy,result}`; Idempotency-Key 1–128 ký tự không trắng bắt buộc. Actor từ session. Cùng actor/key/params trả bản lưu cũ; khác params 409; race không tạo row trùng. Chỉ lưu sau tính toán thành công.
+- Body phẳng: kind (`demand_surge|parking_full|charging_failure`), hubId UUID, horizonMinutes, stepMinutes, seed uint32, baselineArrivalsPerStep, scenarioArrivalsPerStep, additionalOccupiedSpaces, failedChargingPointIds (UUID[], unique, tối đa 1000), chargingServiceMinutes. Tất cả bắt buộc; trường thừa 400. Non-demand dùng hai rate bằng nhau; trường scenario không áp dụng là 0/[]; service time bội step không vượt horizon. Backend kiểm tra limits/membership. Sai đầu vào 400, cấu hình hỏng 500. Không nhận snapshot/actor/model/result từ client.
+- GET `/simulations/runs?before=<uuid>` → `{items,nextBefore}`. Metadata item: id, createdAt UTC, hubName ở snapshot, kind, modelVersion. Sort created_at DESC/id DESC; before là ID cuối trang trước, không có thì trang mới nhất. UUID sai 400; cursor không tồn tại trả rỗng. Operator xem chung history, page size theo settings.
+- GET `/simulations/runs/:id` → SavedSimulation; UUID sai 400, row không có 404. Trả result đã lưu (params/limits/model/timeline/impact/recommendations), không lấy lại tên Hub hoặc tính lại theo dữ liệu hiện tại. Không lộ snapshot raw/key/payload/credentials.
+
+Schema simulation_runs lưu snapshot/result JSONB riêng và actor/retry metadata; không FK Hub. Không endpoint áp dụng recommendation/xóa history. Giả định, đơn vị và limits tại [scenarios.md](scenarios.md). ScenarioInput/RunSimulationRequest cũ trong planned.ts vẫn là đề xuất, không phải payload endpoint mới.
+
 Prefix `/api`; JSON; ID UUID; thời gian ISO 8601 có timezone; pin và tỷ lệ sử dụng đơn vị %. Kiểu chính xác tại `packages/contracts/index.ts`.
 
 | Method / path                      | Quyền     | Response                         | Trạng thái                                                    |

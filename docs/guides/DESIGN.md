@@ -1,5 +1,9 @@
 # Smart E-Mobility Hub — định hướng thiết kế
 
+## T22/T36 — 25/10/2026, baseline implementation chờ review
+
+Ba kịch bản resource-flow-v1 thuần dùng snapshot chung REPEATABLE READ READ ONLY qua HubsService, MobilitySnapshotService và rental projection. Parking loại chỗ đã hứa trong horizon; charging dùng queue BR-07 T19 và giả định service time công khai. History riêng simulation_runs lưu snapshot/params/limits/result/model/actor; retry key không nhân bản. Không tự áp dụng recommendation. Công thức/đề xuất/giới hạn tại docs/scenarios.md, contract tại packages/contracts/scenarios.ts. Giả định cần review nhóm, không thay quy tắc vận hành T19/T21 hoặc dự báo đã xác thực. T13 giữ nguyên.
+
 ## T14 — hoàn tất tích hợp T35 ngày 23/10/2026
 
 T35 của Quỳnh Anh đã merge qua PR #13 vào main `5d0d4d2`. Ba điểm review đã sửa: khóa cổng sạc trước kiểm tra incident, giữ form khi mutation thất bại, tách logic/model khỏi UI. T14 bổ sung regression HTTP/PostgreSQL cho CRUD, quyền operator, dashboard động, inactive Hub, sức chứa có hold/booking, rollback và incident/delete đồng thời. Giao diện và file TXT đã được kiểm tra trên DB tạm; bằng chứng tại `demo/T14-t35-completion.md`.
@@ -142,3 +146,7 @@ T19 đã tích hợp trên main `f8e6c9b`; bản ghép T20 giữ hướng dẫn 
 ## PR #17 — tích hợp T21/T37 với T19/T20 ngày 24/10/2026
 
 Nhánh Quỳnh Anh cập nhật main `0f1a10a`: giữ hoàn tất điều chuyển, giao diện/lịch sử vận hành và xử lý sự cố sạc T20. Sửa cổng/resolve incident ghi đúng actor cùng transaction với nhật ký T37. Khóa Hub điều chuyển dùng FOR NO KEY UPDATE theo ID để tuần tự hóa mutation mà không chặn khóa FK KEY SHARE của đặt xe. Chưa coi cập nhật PR là đã merge hoặc nghiệm thu/demo của sinh viên.
+
+## T17/T22/T36 — tích hợp ngày 27/10/2026
+
+PR #16 bổ sung kiểm tra pin/incident khi nhận xe và idempotency thuê xe; SQL nằm trong RentalTx. PR #18 kế thừa main đã có T17, thêm ba kịch bản, lịch sử và TXT cùng engine thuần; snapshot chỉ đọc qua service chủ module với cùng PoolClient. Thời gian snapshot do HubsRepository lấy từ transaction DB. Migration được nhận diện theo toàn bộ tên file; hai file tiền tố 007 độc lập, không đổi migration đã chia sẻ. Hạn chế retry phía web T17 và các giả định mô hình tại docs/scenarios.md vẫn giữ nguyên. Kết quả kỹ thuật không thay xác nhận demo/nghiệm thu của thành viên.
