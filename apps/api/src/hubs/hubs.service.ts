@@ -54,10 +54,10 @@ export class HubsService {
         const detail = await this.repository.detail(hub.id, client);
         if (detail) hubs.push(detail);
       }
-      const clock = await client.query(
-        "SELECT transaction_timestamp() AS captured",
-      );
-      return { capturedAt: clock.rows[0].captured.toISOString(), hubs };
+      return {
+        capturedAt: await this.repository.snapshotCapturedAt(client),
+        hubs,
+      };
     };
     return client ? read(client) : this.repository.snapshot(read);
   }

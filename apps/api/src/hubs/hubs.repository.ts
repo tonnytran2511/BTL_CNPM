@@ -14,6 +14,12 @@ import { Database } from "../database/database.module";
 @Injectable()
 export class HubsRepository {
   constructor(@Inject(Database) private readonly db: Database) {}
+  async snapshotCapturedAt(client: PoolClient): Promise<string> {
+    const clock = await client.query<{ captured: Date }>(
+      "SELECT transaction_timestamp() AS captured",
+    );
+    return clock.rows[0].captured.toISOString();
+  }
   private async threshold(client?: PoolClient): Promise<number> {
     const result = client
       ? await client.query("SELECT value FROM settings WHERE key=$1", [

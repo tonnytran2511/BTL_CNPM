@@ -146,3 +146,7 @@ T19 đã tích hợp trên main `f8e6c9b`; bản ghép T20 giữ hướng dẫn 
 ## PR #17 — tích hợp T21/T37 với T19/T20 ngày 24/10/2026
 
 Nhánh Quỳnh Anh cập nhật main `0f1a10a`: giữ hoàn tất điều chuyển, giao diện/lịch sử vận hành và xử lý sự cố sạc T20. Sửa cổng/resolve incident ghi đúng actor cùng transaction với nhật ký T37. Khóa Hub điều chuyển dùng FOR NO KEY UPDATE theo ID để tuần tự hóa mutation mà không chặn khóa FK KEY SHARE của đặt xe. Chưa coi cập nhật PR là đã merge hoặc nghiệm thu/demo của sinh viên.
+
+## T17/T22/T36 — tích hợp ngày 27/10/2026
+
+PR #16 bổ sung kiểm tra pin/incident khi nhận xe và idempotency thuê xe; SQL nằm trong RentalTx. PR #18 kế thừa main đã có T17, thêm ba kịch bản, lịch sử và TXT cùng engine thuần; snapshot chỉ đọc qua service chủ module với cùng PoolClient. Thời gian snapshot do HubsRepository lấy từ transaction DB. Migration được nhận diện theo toàn bộ tên file; hai file tiền tố 007 độc lập, không đổi migration đã chia sẻ. Hạn chế retry phía web T17 và các giả định mô hình tại docs/scenarios.md vẫn giữ nguyên. Kết quả kỹ thuật không thay xác nhận demo/nghiệm thu của thành viên.
