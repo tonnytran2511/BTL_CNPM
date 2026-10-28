@@ -11,3 +11,19 @@ Nguồn: [demo T14](../demo/T14-integrated-demo.md), đọc code/API trên main 
 | T14-UI01 / P2 | Đề xuất trải nghiệm — chủ UI review                    | Chi tiết Hub cuối trang và nhiều module cùng trang cần cuộn; báo cáo TV5 19/10 đề xuất modal/tách trang                                                        | Đề xuất, chưa phải lỗi dữ liệu. Chờ nhóm chốt sau gate; không tự thêm chức năng xóa lịch sử                                                                                                  |
 
 Các lỗi tích hợp T08 đã sửa (ẩn active trip, phản hồi phiên cũ, thứ tự khóa, expiry sau chờ) và retest nằm trong [execution T08](test-runs/2026-10-20-t08-integration.md). Không mở lại các lỗi đó như blocker mới khi regression còn pass. Chưa có xác nhận peer review của thành viên cho log này.
+
+## Đối chiếu ứng viên T23/T29 — 28/10/2026
+
+Không xóa ghi nhận lịch sử 23/10. Base `376b160`; execution/coverage mới tại `docs/test-runs/2026-10-28-release.md` và `2026-10-28-traceability.md`.
+
+| ID / mức                   | Loại / owner                           | Tái hiện; expected / actual                                                                                                    | Xử lý / trạng thái                                                                                                                            |
+| -------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| W23-D01 / P2               | Tài liệu / Minh Tường                  | Đọc README/UC-10/13/14/15/sơ đồ operator/architecture trên main; còn ghi scheduler/complete/history chưa có dù T19–22 đã merge | Sửa theo implementation, thêm sơ đồ tích hợp và báo cáo. Review lại contract và đường dẫn trong đợt này                                       |
+| T14-G02 / P2               | Gap UI cũ / Quỳnh Anh                  | Ghi nhận ban đầu thiếu UI/complete; nay OperationsPage + T21/T37 đã có                                                         | Đóng gap kỹ thuật: Chrome create/start/complete và log, suite operations + release-check pass. Giữ giới hạn cứu hộ trip và cancel in_progress |
+| W23-E01 / P2               | Công cụ/bằng chứng / Minh Tường        | Bấm TXT T22, chờ download event; Chrome tool hết thời gian, chưa có path để đọc file                                           | Chưa kết luận lỗi ứng dụng. Report formatter có frontend regression; cần xác minh file tải ở trình duyệt trước nộp                            |
+| W23-L01 / P2               | Giới hạn NFR / Minh Tường              | Chưa chạy tải p95 1s/20 user/30 Hub/300 xe/5 phút                                                                              | Chưa đo, không ghi đạt hoặc dùng thời gian chạy unit test thay phép đo tải                                                                    |
+| W23-H01 / P1 gate bàn giao | Xác nhận con người / Minh Tường + nhóm | Chưa có xác nhận kiểm thử chéo T26–28/T38, video final, rehearsal, máy khác hoặc biên nhận nộp                                 | Giữ mở; có phân vai/checklist và storyboard, không tính test Codex thành nghiệm thu sinh viên                                                 |
+
+Trong tập test mới không tái hiện lỗi chặn hoặc làm sai dữ liệu. Đây là kết luận có giới hạn theo execution, không khẳng định không còn defect trong toàn hệ thống.
+
+W23-T01 / P2 — script verify:delivery của Minh Tường/Codex: lần đầu truyền DATABASE_URL rỗng khiến dotenv không đọc URL test .env, ba test file fail trước chạy. Đã sửa remove biến kế thừa theo tên trong env mẫu; cài mới retest pass 129 backend + 62 frontend lúc 17:29. Không sửa config runtime để chấp nhận URL rỗng.

@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-10-28T10:29:57.208Z",
+  "sourceCommit": "376b1605c0e9cc22eb6960b37bd763d593f9cb6e",
+  "candidateIncludesWorkingChanges": true,
+  "freshDirectory": true,
+  "separateMachine": false,
+  "checks": [
+    "npm ci",
+    "setup:env",
+    "format:check",
+    "build",
+    "test"
+  ],
+  "result": "pass",
+  "node": "v25.9.0",
+  "platform": "darwin",
+  "architecture": "x64"
+}

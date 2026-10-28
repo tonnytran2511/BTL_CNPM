@@ -1,5 +1,9 @@
 # Kiểm chứng nền tảng — 14/10/2026
 
+## Bản ứng viên tuần 2/leader tuần 3 — 28/10/2026
+
+Cài mới candidate trong thư mục sạch cùng host qua `npm run verify:delivery`: npm ci/setup:env/format/build pass, 129 backend + 62 frontend pass, 0 fail. Bổ sung ba regression T23/T29 và Chrome smoke thuê/trả/dispatch/ba kịch bản/history. Execution và lịch sử verifier fail/retest tại [28/10 release](test-runs/2026-10-28-release.md), coverage có giới hạn tại [traceability](test-runs/2026-10-28-traceability.md). Không cộng số các lần chạy hoặc nhận là toàn bộ biến thể 36 IT đã pass. Bằng chứng tải TXT còn cần xác minh; video final, rehearsal/máy khác/nộp bài chưa có xác nhận.
+
 ## T22/T36 — 25/10/2026, local chờ review
 
 Build frontend/backend pass; 113 backend + 62 frontend tests pass. Ba kịch bản/history/retry/role/DTO và snapshot không ghi vận hành được kiểm tra trên PostgreSQL/HTTP riêng. T36 kiểm tra 60 seeds × 3 kinds, bất biến, wait/utilization tính tay và recommendation theo tài nguyên. Regression frontend bảo vệ key retry, session cũ, clear, saved params/report và history race. Chi tiết/giới hạn tại [execution T22/T36](test-runs/2026-10-25-t22-t36.md); chưa xác minh walkthrough trình duyệt, chưa peer review/commit/push phần mới. Các giả định baseline tại [scenarios.md](scenarios.md).

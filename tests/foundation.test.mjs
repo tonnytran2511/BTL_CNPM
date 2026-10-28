@@ -12,6 +12,7 @@ import pg from "pg";
 import { root } from "../scripts/env.mjs";
 import { checkDashboard } from "./dashboard-check.mjs";
 import { checkScenarios } from "./scenarios-check.mjs";
+import { checkRelease } from "./release-check.mjs";
 async function freePort() {
   const server = createServer();
   server.listen(0, "127.0.0.1");
@@ -466,6 +467,7 @@ test(
           );
         },
       );
+      await checkRelease({ t, request, pool, operator, student });
       await t.test(
         "current account role and activation take effect on an existing session",
         async () => {

@@ -1,6 +1,6 @@
 # Kiến trúc và dữ liệu nền tảng
 
-## T22 — snapshot và history riêng (25/10/2026, local chờ review)
+## T22 — snapshot và history riêng (đã tích hợp 27/10/2026)
 
 SimulationModule import HubsModule và MobilityModule; mobility export MobilitySnapshotService, dùng ChargingWorkflowService cho queue BR-07 và RentalChargingService cho projection xe read-only. Service mở readSnapshot chung và truyền cùng PoolClient xuống từng module. SimulationRepository chỉ đọc settings và đọc/ghi bảng history thuộc simulation; không truy vấn trực tiếp bảng vận hành của module khác.
 
@@ -198,7 +198,7 @@ erDiagram
   users ||--o{ mobility_idempotency : deduplicates
 ```
 
-charging_requests có đúng một trong vehicle_id/private_vehicle_id; partial unique index chặn hai yêu cầu active cho cùng xe. charging_sessions mới có schema/constraint cho tuần 2, chưa có scheduler hay API chạy phiên. parking_bookings có starts_at/ends_at và exclusion constraints theo chỗ/xe cho reserved/checked_in; lịch tương lai không cập nhật trạng thái parking_spaces.
+charging_requests có đúng một trong vehicle_id/private_vehicle_id; partial unique index chặn hai yêu cầu active cho cùng xe. charging_sessions có vòng đời T19/T20 và constraint tối đa một phiên active/point/request. parking_bookings có starts_at/ends_at và exclusion constraints theo chỗ/xe cho reserved/checked_in; lịch tương lai không cập nhật trạng thái parking_spaces.
 
 ```mermaid
 stateDiagram-v2
@@ -230,7 +230,7 @@ sequenceDiagram
 
 Trong triển khai HTTP thực, request đi qua global auth guard và controller/DTO trước service. Xem docs/api.md và docs/guides/CONTRIBUTING.md cho chính sách chỗ vật lý và điểm tích hợp AllocationPort.
 
-## Vòng đời dự kiến cho TV2
+## Vòng đời xe thuê và giới hạn
 
 ```mermaid
 stateDiagram-v2
@@ -239,14 +239,14 @@ stateDiagram-v2
   reserved --> in_use: nhận xe hợp lệ
   in_use --> available: trả xe và có chỗ
   available --> charging: bắt đầu sạc
-  charging --> available: hoàn thành sạc
+  charging --> available: hoàn thành / hủy / interrupted
   available --> redistributing: bắt đầu điều chuyển
   redistributing --> available: hoàn thành
   available --> maintenance: phát hiện hỏng
   maintenance --> available: xử lý xong và kiểm tra xe
 ```
 
-Các chuyển trạng thái trên là baseline thiết kế, chưa phải service đã chạy. Trường hợp sự cố khi reserved/in_use/charging cần chủ module thiết kế thêm; không cho phép cập nhật status tùy ý.
+Các chuyển reserve/cancel/expire/pickup/return, charging và redistributing đã có service. maintenance là trạng thái dữ liệu hỗ trợ, incident xe không tự chuyển sang maintenance. Trường hợp sự cố khi reserved/in_use/charging cần chủ module thiết kế thêm; không cho phép cập nhật status tùy ý.
 
 ## Thuê xe: reservation và trip (T06, migration 003)
 
@@ -273,7 +273,7 @@ stateDiagram-v2
   in_progress --> completed: kiểm tra lại, chuyển chỗ và Hub trong transaction
 ```
 
-T21 bổ sung hoàn tất điều chuyển: OperationsService khóa Hub theo ID, gọi AllocationPort để giải phóng chỗ nguồn và chiếm chỗ đích, rồi gọi RentalService cập nhật `hub_id` và trạng thái xe, tất cả dùng cùng PoolClient. Đích đầy hoặc điều kiện đổi thì transaction rollback. Lệnh `in_progress` không thể hủy; vị trí thực tế phải được xác nhận bằng hoàn tất. Incident xe/Hub giữ nhật ký open/resolved và chặn điều chuyển xe đang có sự cố mở; không tự chuyển Hub inactive hoặc xe maintenance. Incident cổng sạc đi qua ChargingFailureService của T20 để gián đoạn/phục hồi nguyên tử; actor xử lý được truyền sang nhật ký T37. Workflow reservation/trip/charging bị ảnh hưởng tiếp tục thuộc service chủ quản theo BR-08/BR-10. Chưa có Idempotency-Key cho T07/T12/T21; client không tự retry mutation.
+T21 bổ sung hoàn tất điều chuyển: OperationsService khóa Hub theo ID, gọi AllocationPort để giải phóng chỗ nguồn và chiếm chỗ đích, rồi gọi RentalService cập nhật `hub_id` và trạng thái xe, tất cả dùng cùng PoolClient. Đích đầy hoặc điều kiện đổi thì transaction rollback. Lệnh `in_progress` không thể hủy; vị trí thực tế phải được xác nhận bằng hoàn tất. Incident xe/Hub giữ nhật ký open/resolved và chặn điều chuyển xe đang có sự cố mở; không tự chuyển Hub inactive hoặc xe maintenance. Incident cổng sạc đi qua ChargingFailureService của T20 để gián đoạn/phục hồi nguyên tử; actor xử lý được truyền sang nhật ký T37. Workflow reservation/trip/charging bị ảnh hưởng tiếp tục thuộc service chủ quản theo BR-08/BR-10. T17 đã có Idempotency-Key cho thuê xe; điều chuyển và incident xe/Hub không có contract key; client không tự retry mutation.
 
 T37 thêm operation log append-only theo convention ứng dụng: mỗi lần tạo/resolve incident hoặc đổi trạng thái redistribution ghi loại/ID lệnh, actor, thời điểm và trạng thái trước/sau cùng transaction; không lưu payload/secret. Operator tra cứu sự cố, lệnh và lịch sử qua API và trang Vận hành.
 
@@ -310,7 +310,7 @@ sequenceDiagram
   end
 ```
 
-Đã có tự động hết hạn T16; chưa có kiểm tra pin sau khi đã giữ xe hoặc telemetry T17; không coi phạm vi T08 là toàn bộ hardening tuần 2.
+Đã có tự động hết hạn T16 và kiểm tra lại pin/sự cố T17. Telemetry/hao pin trong chuyến chưa có.
 
 ## T14 — ranh giới module trên một bản tích hợp
 
@@ -327,7 +327,10 @@ flowchart LR
   Trip --> Mobility
   Operations --> Rental[RentalService]
   Simulation --> Hubs
-  Simulation --> Engine[Engine thuần departures-v1]
+  Simulation --> Engine[Engine thuần departures-v1 / resource-flow-v1]
+  Simulation --> MobilitySnapshot[MobilitySnapshotService]
+  MobilitySnapshot --> Charging[ChargingWorkflowService / RentalChargingService]
+  Simulation --> History[SimulationRepository / simulation_runs]
   Hubs --> Repo[Repository từng module]
   HubManagement --> Repo
   Trip --> Repo
@@ -355,7 +358,7 @@ erDiagram
   vehicles ||--o{ redistribution_vehicles : assigned
 ```
 
-ERD trên bổ sung quan hệ các bảng migration 002 operations và 003 rental; cột/constraint chi tiết vẫn theo SQL đã chia sẻ. `incidents.resource_id` là tham chiếu đa hình được service kiểm tra theo resource_type, không phải FK trực tiếp tới một bảng duy nhất. Bảng charging_sessions đã có schema nhưng chưa có vòng đời chạy phiên; không suy từ ERD ra tính năng đã hoàn thành.
+ERD trên bổ sung quan hệ các bảng migration 002 operations và 003 rental; cột/constraint chi tiết vẫn theo SQL đã chia sẻ. `incidents.resource_id` là tham chiếu đa hình được service kiểm tra theo resource_type, không phải FK trực tiếp tới một bảng duy nhất. Bảng charging_sessions có vòng đời T19/T20; xem sơ đồ tổng hợp ngày 28/10 ở docs/diagrams/integrated-design.md.
 
 ## T19 — tích hợp trạng thái sạc xe thuê (20/10/2026)
 

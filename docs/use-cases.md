@@ -1,6 +1,6 @@
 # Đặc tả use case v1 — 15/10/2026
 
-Cập nhật tích hợp T14 ngày 20/10/2026, base main `435f7a0` sau PR #11. Danh mục dưới đây phản ánh code hiện có. Các bước ghi “mục tiêu” thuộc thiết kế mở rộng, chưa phải kết quả triển khai; không thay thế peer review của thành viên. Cập nhật 23/10: T35 đã merge PR #13, có API/UI và regression tích hợp; các kết quả 20/10 được giữ ở báo cáo lịch sử.
+Đối chiếu ngày 28/10/2026 với main `376b160` và bản ứng viên `codex/week2-week3-delivery`. T15–T22/T35–T37 đã tích hợp. Phạm vi dưới đây mô tả code hiện tại; các giới hạn và xác nhận con người nằm trong [bàn giao](reports/week2-week3-delivery.md).
 
 ## Ranh giới và actor
 
@@ -17,23 +17,23 @@ Nguồn UML use-case diagram: [sinh viên](diagrams/use-cases-student.puml), [v�
 
 ## Danh mục và trạng thái
 
-| UC    | Tên                          | Yêu cầu      | Owner                | Trạng thái                          |
-| ----- | ---------------------------- | ------------ | -------------------- | ----------------------------------- |
-| UC-01 | Đăng nhập / đăng xuất        | FR-13        | Leader               | Có code                             |
-| UC-02 | Xem danh sách / chi tiết Hub | FR-01        | Leader               | Có code                             |
-| UC-03 | Tìm xe thuê phù hợp          | FR-02        | TV2                  | Có code tìm xe T06                  |
-| UC-04 | Đặt / hủy đặt xe             | FR-03        | TV2                  | Có đặt/hủy T07; expiry chờ T16      |
-| UC-05 | Nhận xe                      | FR-04        | TV2 + TV3            | Có code T08, kiểm tra hạn giữ       |
-| UC-06 | Trả xe                       | FR-04        | TV2 + TV3            | Có code T08, allocation nguyên tử   |
-| UC-07 | Đăng ký xe cá nhân           | FR-05        | TV3                  | Có code đăng ký T09–T10             |
-| UC-08 | Đặt / sử dụng chỗ đỗ         | FR-05        | TV3                  | Có đặt/hủy/check-in/out T10–T11     |
-| UC-09 | Yêu cầu sạc                  | FR-06        | TV3                  | Có hàng chờ T11; chưa chạy phiên    |
-| UC-10 | Phân bổ / quản lý phiên sạc  | FR-06, FR-07 | TV3                  | Chờ T19–T20                         |
-| UC-11 | Giám sát mạng lưới           | FR-01        | Leader               | Có code dashboard cơ bản            |
-| UC-12 | Quản lý Hub / tài nguyên     | FR-08        | TV4                  | Đã có API/UI T35, xem phạm vi UC-12 |
-| UC-13 | Xử lý sự cố                  | FR-09        | TV4 + chủ tài nguyên | T12: ghi/đóng; tác động chờ T21     |
-| UC-14 | Điều chuyển xe               | FR-10        | TV4 + TV2 + TV3      | T12: tạo/start/cancel pending       |
-| UC-15 | Chạy What-if và xem đề xuất  | FR-11, FR-12 | TV5                  | T13 departures-v1; mở rộng chờ T22  |
+| UC    | Tên                          | Yêu cầu      | Owner                | Trạng thái                                            |
+| ----- | ---------------------------- | ------------ | -------------------- | ----------------------------------------------------- |
+| UC-01 | Đăng nhập / đăng xuất        | FR-13        | Leader               | Có code                                               |
+| UC-02 | Xem danh sách / chi tiết Hub | FR-01        | Leader               | Có code                                               |
+| UC-03 | Tìm xe thuê phù hợp          | FR-02        | TV2                  | Có code tìm xe T06                                    |
+| UC-04 | Đặt / hủy đặt xe             | FR-03        | TV2                  | Có đặt/hủy/hết hạn T16, idempotency T17               |
+| UC-05 | Nhận xe                      | FR-04        | TV2 + TV3            | Có code T08, kiểm tra hạn giữ                         |
+| UC-06 | Trả xe                       | FR-04        | TV2 + TV3            | Có code T08, allocation nguyên tử                     |
+| UC-07 | Đăng ký xe cá nhân           | FR-05        | TV3                  | Có code đăng ký T09–T10                               |
+| UC-08 | Đặt / sử dụng chỗ đỗ         | FR-05        | TV3                  | Có đặt/hủy/check-in/out T10–T11                       |
+| UC-09 | Yêu cầu sạc                  | FR-06        | TV3                  | Có hàng chờ và phân bổ T19                            |
+| UC-10 | Phân bổ / quản lý phiên sạc  | FR-06, FR-07 | TV3                  | Có phân bổ/start/complete/cancel và phục hồi T20      |
+| UC-11 | Giám sát mạng lưới           | FR-01        | Leader               | Có code dashboard cơ bản                              |
+| UC-12 | Quản lý Hub / tài nguyên     | FR-08        | TV4                  | Đã có API/UI T35, xem phạm vi UC-12                   |
+| UC-13 | Xử lý sự cố                  | FR-09        | TV4 + chủ tài nguyên | Có incident/log; cổng sạc T20; xe theo giới hạn UC-13 |
+| UC-14 | Điều chuyển xe               | FR-10        | TV4 + TV2 + TV3      | Có tạo/start/complete/cancel pending và UI/log        |
+| UC-15 | Chạy What-if và xem đề xuất  | FR-11, FR-12 | TV5                  | T13 và T22 ba kịch bản/history/đề xuất                |
 
 ## UC-01 — Đăng nhập / đăng xuất
 
@@ -114,7 +114,7 @@ Nguồn UML use-case diagram: [sinh viên](diagrams/use-cases-student.puml), [v�
 - Luồng chính: (1) validate khoảng UTC; (2) phân bổ lịch không xung đột nguyên tử; (3) tạo booking; (4) khi đến, kiểm tra điều kiện check-in và chiếm tài nguyên vật lý; (5) khi ra, kết thúc và giải phóng. Hủy trước sử dụng giải phóng lịch, không xóa history.
 - Ngoại lệ: trùng lịch/hết sức chứa → 409; sai quyền → 403; khoảng sai → 400; chỗ thực tế không còn phục vụ được → không báo check-in thành công, trả phương án vận hành.
 - Hậu điều kiện: lịch tương lai không trực tiếp giảm chỗ trống hiện tại; lịch tiếp giáp không trùng; chỗ đang chiếm có xe xác định.
-- Liên kết: BR-04/05/12; IT-18/19/20/21. Grace period, no-show và xử lý quá giờ cần TV3 review trước code.
+- Liên kết: BR-04/05/12; IT-18/19/20/21. Xe quá giờ chưa check-out tiếp tục occupied và chặn check-in sau; không tự xóa xe. No-show/thu phí ngoài phạm vi.
 
 ## UC-09 — Yêu cầu sạc
 
@@ -128,10 +128,10 @@ Nguồn UML use-case diagram: [sinh viên](diagrams/use-cases-student.puml), [v�
 
 ## UC-10 — Phân bổ / quản lý phiên sạc
 
-- Phạm vi tại T14: Chưa có scheduler/API phiên sạc T19–T20; luồng dưới đây là mục tiêu.
+- Phạm vi hiện tại: T19/T20 đã có UI/API phân bổ, start/complete/cancel, gián đoạn/requeue và repair. Operator chủ động chạy phân bổ; không có worker tự phân bổ hoặc tự tăng pin.
 
-- Actor: operator; thuật toán/scheduler thực thi nội bộ theo cấu hình.
-- Trigger: yêu cầu mới, có cổng trống, cập nhật pin/thời hạn hoặc lệnh vận hành.
+- Actor: operator; thuật toán ưu tiên chạy trong backend theo cấu hình.
+- Trigger: operator chọn phân bổ hoặc chuyển trạng thái phiên trên UI/API.
 - Tiền điều kiện: có request queued đủ điều kiện; policy hợp lệ.
 - Luồng chính: (1) xếp thứ tự theo BR-07; (2) cấp cổng phù hợp trong transaction; (3) tạo session, đổi request allocated; (4) bắt đầu charging; (5) cập nhật pin từ dữ liệu vận hành; (6) đạt mục tiêu thì completed/fulfilled và giải phóng cổng.
 - Ngoại lệ: không có cổng → tiếp tục queue; cổng lỗi trong phiên → UC-13/BR-08; request bị hủy hoặc xe không còn hợp lệ → không cấp mới; lỗi transaction → không để cổng occupied với session không tồn tại.
@@ -160,22 +160,22 @@ Nguồn UML use-case diagram: [sinh viên](diagrams/use-cases-student.puml), [v�
 
 ## UC-13 — Xử lý sự cố
 
-- Phạm vi tại T14: T12 có POST tạo incident và resolve qua API, lưu actor/time; chưa có UI quản trị và chưa tự đổi tài nguyên hay xử lý trip/charging. Luồng đầy đủ dưới đây là mục tiêu T21/T20.
+- Phạm vi hiện tại: UI Vận hành và log T37, T21 ghi/đóng sự cố xe/Hub, T20 gián đoạn/requeue/phục hồi cổng. Incident xe đang mở chặn cấp mới qua kiểm tra service. Không tự kết thúc chuyến, đổi xe sang maintenance hoặc cứu hộ xe đang thuê.
 
 - Actor: operator. Trigger: ghi nhận hoặc xử lý sự cố xe/cổng sạc.
 - Tiền điều kiện: tài nguyên tồn tại; actor có quyền.
-- Luồng chính: (1) ghi incident với thời gian/người báo; (2) chặn cấp mới tài nguyên hỏng; (3) xử lý reservation/trip/session liên quan theo service owner; (4) ghi tiến trình; (5) xác nhận sửa và kiểm tra điều kiện trước khi phục hồi.
-- Ngoại lệ: cổng đang sạc → interrupted/requeue theo BR-08; xe đang thuê → giữ trip/history và có xử lý vận hành; đóng incident không mặc định xe đủ pin/cổng đã sẵn sàng nếu kiểm tra chưa đạt.
+- Luồng chính: (1) ghi incident với thời gian/người báo; (2) chặn cấp mới tài nguyên hỏng; (3) cổng sạc xử lý session/request nguyên tử qua service owner; xe/Hub giữ lịch sử và kiểm tra sự cố khi cấp mới; (4) ghi tiến trình; (5) xác nhận sửa và kiểm tra điều kiện trước khi phục hồi.
+- Ngoại lệ: cổng đang sạc → interrupted/requeue theo BR-08; xe đang thuê → giữ trip/history, liên hệ operator ngoài hệ thống, chưa có workflow cứu hộ; đóng incident không mặc định xe đủ pin/cổng đã sẵn sàng nếu kiểm tra chưa đạt.
 - Hậu điều kiện: sự cố truy vết được; không mất nhu cầu đang chờ; resource state khớp trạng thái thực.
 - Liên kết: BR-08/10; IT-26/29.
 
 ## UC-14 — Điều chuyển xe
 
-- Phạm vi tại T14: T12 có API tạo pending, start in_progress, hủy khi pending; chưa có endpoint hoàn tất/hủy đang chạy hoặc UI theo dõi. Luồng đầy đủ dưới đây là mục tiêu T21/T37.
+- Phạm vi hiện tại: T21/T37 có tạo/start/complete, hủy pending, UI theo dõi và log actor/thời gian/trạng thái. Không hủy lệnh in_progress.
 
-- Actor: operator. Trigger: tạo lệnh trực tiếp hoặc từ đề xuất simulation.
+- Actor: operator. Trigger: tạo lệnh trực tiếp; có thể tham khảo đề xuất simulation rồi nhập lệnh riêng.
 - Tiền điều kiện: nguồn/đích active, khác nhau; xe available tại nguồn; quyền dùng xe chưa bị luồng khác chiếm.
-- Input: sourceHubId, targetHubId, vehicleIds và Idempotency-Key.
+- Input: sourceHubId, targetHubId, vehicleIds. Điều chuyển không có contract Idempotency-Key; sai trạng thái khi gửi lặp bị từ chối.
 - Luồng chính: (1) tạo/validate lệnh; (2) khi start kiểm tra lại và giữ xe; (3) ghi in_progress cùng thao tác tài nguyên nguồn; (4) khi xe đến, kiểm tra/chiếm chỗ đích; (5) cập nhật vị trí và completed trong transaction; (6) log/dashboard cập nhật.
 - Ngoại lệ: xe đã reserved/in_use → 409; đích đầy khi hoàn thành → không completed; lệnh hủy đang di chuyển cần ghi vị trí thực và phương án đưa xe về/Hub thay thế, không tự phục hồi về nguồn bằng dữ liệu cũ.
 - Hậu điều kiện: một xe không đồng thời cho thuê/điều chuyển; xe/chỗ ở đích nhất quán.
@@ -183,15 +183,15 @@ Nguồn UML use-case diagram: [sinh viên](diagrams/use-cases-student.puml), [v�
 
 ## UC-15 — Chạy What-if và xem đề xuất
 
-- Phạm vi tại T14: T13 đã có operator UI và engine departures-v1 tăng nhu cầu, snapshot chỉ đọc, so sánh baseline/scenario và TXT/xóa kết quả. Chưa có lưu lịch sử, ba kịch bản và recommendations T22; luồng đầy đủ dưới đây là mục tiêu.
+- Phạm vi hiện tại: T22 resource-flow-v1 có demand_surge, parking_full, charging_failure, timeline/impact/recommendations, history và TXT. T13 departures-v1 vẫn dùng riêng; xóa view không xóa history. Xem scenarios.md về giả định chưa hiệu chuẩn.
 
 - Actor: operator. Trigger: chọn kịch bản và tham số.
-- Input: ScenarioInput, horizonMinutes, stepMinutes, seed theo planned.ts.
+- Input: ScenarioParameters tại packages/contracts/scenarios.ts; horizonMinutes, stepMinutes, seed và tham số theo kịch bản. planned.ts không phải contract endpoint T22.
 - Tiền điều kiện: snapshot/policy đủ dữ liệu cho mô hình; operator có quyền; giả định và đơn vị đã được TV5 ghi rõ.
 - Luồng chính: (1) validate inputs; (2) lấy snapshot nhất quán; (3) chạy baseline và scenario cùng snapshot/seed; (4) mô phỏng event/state theo bước; (5) tính chỉ số; (6) tạo đề xuất có lý do/ràng buộc; (7) lưu cấu hình/kết quả và hiển thị so sánh. Nếu operator muốn áp dụng, sang UC-14 hoặc workflow sạc phù hợp và kiểm tra lại dữ liệu hiện tại.
 - Ngoại lệ: input sai hoặc quá số bước → 400; policy/model thiếu → lỗi rõ ràng, không điền kết quả giả; không có phương án khả thi → ghi không có đề xuất phù hợp; đề xuất cũ không còn hợp lệ → từ chối áp dụng, không ghi đè vận hành.
 - Hậu điều kiện: resource/trip/booking thực không đổi sau chạy; chỉ simulation run/result được lưu; kết quả có snapshot time, inputs, seed, phiên bản mô hình để tái lập.
-- Liên kết: BR-13/14/15; IT-32/33/34/35/36. Endpoint snapshot hiện tại chưa đủ dữ liệu booking/session/demand, phải mở rộng khi các module có code.
+- Liên kết: BR-13/14/15; IT-32/33/34/35/36. T22 ghép HubsService, MobilitySnapshotService và projection rental trong cùng read-only transaction; không lấy arrivals thực từ telemetry.
 
 ## Những điểm cần chốt cùng chủ module
 
@@ -199,4 +199,4 @@ TV2/TV3 chốt trạng thái xe sau trả và ngưỡng pin; TV3 chốt check-in
 
 ### Cập nhật UC-05/06 theo T08 ngày 20/10
 
-Nhận xe fulfilled và trả xe completed đã có controller/service/UI; chi tiết API và repeat semantics tại api.md. UC-04/05 đã có scheduler tự hết hạn T16. UC-05 chưa kiểm tra lại ngưỡng pin khi đã giữ xe (T17). UC-06 hiển thị mọi chuyến active, chọn đích riêng; không thêm giới hạn một chuyến mỗi người khi backend chưa có rule. Test trip.test.mjs gồm quyền, trạng thái, rollback, cạnh tranh chỗ, cấu hình gợi ý và thứ tự khóa Hub/xe; đây không phải xác nhận tất cả testcase IT-10–16 hoặc T17 đã đạt.
+Nhận xe fulfilled và trả xe completed đã có controller/service/UI; chi tiết API và repeat semantics tại api.md. UC-04/05 đã có scheduler tự hết hạn T16. T17 đã kiểm tra lại pin/sự cố khi nhận xe và lưu idempotency trong RentalTx. UC-06 hiển thị mọi chuyến active, chọn đích riêng; không thêm giới hạn một chuyến mỗi người khi backend chưa có rule. Test trip.test.mjs gồm quyền, trạng thái, rollback, cạnh tranh chỗ, cấu hình gợi ý và thứ tự khóa Hub/xe; đây không phải xác nhận tất cả testcase IT-10–16 hoặc T17 đã đạt.

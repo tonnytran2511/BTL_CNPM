@@ -21,7 +21,8 @@
     "format": "prettier --write apps packages scripts tests docs AGENTS.md README.md package.json compose.yaml .github/workflows",
     "format:check": "prettier --check apps packages scripts tests docs AGENTS.md README.md package.json compose.yaml .github/workflows",
     "test:api": "npm run build -w @emobility/api && node scripts/test-api.mjs",
-    "test:web": "npm run test -w @emobility/web"
+    "test:web": "npm run test -w @emobility/web",
+    "verify:delivery": "node scripts/verify-delivery.mjs"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",

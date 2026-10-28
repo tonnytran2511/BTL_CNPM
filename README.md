@@ -14,9 +14,9 @@ Nền tảng bài tập lớn CNPM HK261, nhóm 5 người. Frontend React/TypeS
 - Snapshot nhất quán chỉ đọc để TV5 xây simulation.
 - Seed giả lập từ JSON; migration, kiểm thử PostgreSQL riêng và kiểu API dùng chung.
 
-Đã tích hợp đăng ký xe cá nhân, tra cứu/đặt/hủy lịch đỗ, check-in/check-out, gửi/xem yêu cầu sạc và AllocationPort; thuê xe có tìm/đặt/hủy/nhận/trả và lịch sử. T12 có API nhật ký sự cố và tạo/start/cancel lệnh trước khi chạy; chưa có UI quản trị hoặc hoàn tất điều chuyển. Hợp đồng tại `docs/api.md`.
+Đã tích hợp thuê xe (tìm, đặt/hủy/hết hạn, nhận/trả, history, idempotency), xe cá nhân và lịch đỗ, phân bổ/phiên sạc và phục hồi cổng hỏng, Hub CRUD, sự cố/điều chuyển và operation log. Simulation có ba kịch bản, baseline/scenario, timeline, đề xuất và lịch sử lưu riêng. Mọi số liệu vận hành lấy từ API/database.
 
-Vòng đời thuê xe, quản trị tài nguyên và sự cố/điều chuyển chưa hoàn chỉnh. T13 đã có engine mô phỏng tăng nhu cầu và operator UI; mô hình giới hạn ở lượt rời Hub, xem docs/simulation.md. Scheduler và chạy phiên sạc thuộc tuần 2.
+Bản ứng viên tuần 2 và bàn giao leader tuần 3: [báo cáo](docs/reports/system-report.md), [kết quả tích hợp](docs/test-runs/2026-10-28-release.md), [gate và bộ nộp](docs/reports/week2-week3-delivery.md). Các xác nhận demo của thành viên, rehearsal và nộp bài ghi riêng; kiểm thử kỹ thuật không thay các xác nhận đó.
 
 ## Setup
 
@@ -109,7 +109,7 @@ Chạy production cần hosting, HTTPS/cookie Secure, cấu hình DB và chiến
 
 ## Simulation T13
 
-Có mô phỏng tăng nhu cầu cho operator: chạy db:seed để thêm settings, nhập tham số và xem baseline/scenario trên cùng snapshot/seed. Engine đầu tiên chỉ mô phỏng lượt xe rời Hub; các kịch bản đỗ/sạc, đề xuất và lịch sử thuộc T22. Xem [docs/simulation.md](docs/simulation.md).
+Có mô phỏng tăng nhu cầu cho operator: chạy db:seed để thêm settings, nhập tham số và xem baseline/scenario trên cùng snapshot/seed. Engine đầu tiên chỉ mô phỏng lượt xe rời Hub; T22 đã bổ sung ba kịch bản, đề xuất và lịch sử riêng. Xem [docs/simulation.md](docs/simulation.md).
 
 ## T20 — xử lý sự cố cổng sạc
 
@@ -148,3 +148,11 @@ Phụ trách: Mai Anh.
 Xe cá nhân: đăng ký → đặt chỗ → check-in đúng Hub → gửi yêu cầu sạc. Yêu cầu còn queued chưa giữ xe thuê; xe được đặt/di chuyển trước đó sẽ không được phân bổ khi không còn đủ điều kiện.
 
 Hạn chế: chưa tự tăng pin hoặc tự chạy phân bổ theo chu kỳ; người vận hành chủ động xác nhận. T20 đã bổ sung xử lý cổng hỏng, interrupted và đưa nhu cầu trở lại hàng chờ như mục phía trên. available vẫn phải đủ pin và ở Hub hoạt động mới thuê được.
+
+## Kiểm tra bộ bàn giao trong thư mục sạch
+
+```sh
+npm run verify:delivery
+```
+
+Script copy các file candidate do Git quản lý và file mới không bị ignore sang thư mục tạm, bỏ .env/cluster/build/node_modules cũ, chạy npm ci, tạo env riêng, format, build và test rồi dọn thư mục của chính nó. Có thể ghi kết quả máy đọc được bằng `DELIVERY_RESULT_FILE` trỏ tới file mong muốn. Không dùng DB vận hành. Đây là kiểm tra cô lập trên cùng host, chưa thay bước thành viên setup trên máy khác. Không đặt file kết quả vào vị trí có dữ liệu cần giữ vì script sẽ ghi file đó khi thành công.

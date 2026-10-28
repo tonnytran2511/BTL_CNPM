@@ -1,0 +1,22 @@
+# T23/T29 — đối chiếu kế hoạch với bằng chứng
+
+Người thực thi: Codex theo yêu cầu Minh Tường, 28/10/2026. Base `376b160` và working changes T23/T29. Đây là coverage map, không tuyên bố toàn bộ biến thể của từng IT đã pass. Tên file test là bằng chứng có thể chạy lại qua npm test; kết quả của suite tại [execution](2026-10-28-release.md).
+
+| IT    | Oracle được kiểm tra / nguồn                                                                                           | Phạm vi chưa chứng minh                                                                                     |
+| ----- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| 01–03 | foundation: login, token hash/cookie, role injection, active/role hiện tại, revoke, Origin, limit                      | Biên expiry đúng từng millisecond không có oracle clock chung cho HTTP                                      |
+| 04–05 | foundation/dashboard-check; dashboard.test; Chrome thuê/trả làm thay đổi Hub                                           | Chưa đo mọi latency/tab background hoặc tải đề xuất                                                         |
+| 06    | rental-search/rental-rules/rental-hardening: filter, pin, active/incident                                              | Không phân trang fleet                                                                                      |
+| 07–10 | reservation/reservation-expiry/rental-hardening: cạnh tranh, owner, hủy/hết hạn, pin khi pickup                        | Race HTTP hữu hạn; không chứng minh toàn interleaving                                                       |
+| 11–16 | trip/rental-hardening: source release, claim đích, rollback, đầy, concurrency, repeat; release-check cùng xe           | Không triển khai telemetry/hao pin                                                                          |
+| 17–21 | mobility-check/allocation-safety-check: register owner, lịch, capacity, check-in/out, holds/booking                    | Không tự checkout xe quá giờ; toàn bộ tổ hợp timezone/biên D cần owner đối chiếu thêm                       |
+| 22–25 | charging-workflow/rental-charging/allocation-safety/charging-priority: target, queue, owner, priority, lifecycle, race | Không hứa tự phân bổ theo timer hoặc năng lượng thực                                                        |
+| 26    | charging-failure-check; release-check: fail, interrupted/requeue, giữ pin, repair, session mới                         | Chưa kiểm thử phần cứng/IoT                                                                                 |
+| 27    | dashboard/foundation/release-check: student 403, inactive, đổi role; hooks stale/reset                                 | Chưa khảo sát usability độc lập                                                                             |
+| 28    | hub-management-check/test: capacity/booking/hold, point/session/incident, quyền và rollback                            | Hub inactive không tự giải quyết cam kết cũ; ghi giới hạn                                                   |
+| 29    | operations/rental-hardening: incident chặn start/reserve/pickup; charging-failure đầy đủ cổng                          | Incident xe đang in_use không có workflow cứu hộ, giữ trip; không đánh dấu toàn IT-29 pass                  |
+| 30–31 | operations: create/start/complete/log, source/target, rental race, rollback; release-check                             | Lệnh đang chạy không có cancel/re-route; race hữu hạn                                                       |
+| 32–35 | scenarios.test/scenarios-check: input limits, 60 seed, conservation, metrics/recommendation, history/retry/isolation   | Chưa hiệu chuẩn mô hình với nhu cầu thực; không coi 60 seed là toàn bộ không gian                           |
+| 36    | release-check: tạo lệnh từ dữ liệu cũ, xe bị đặt → start 409; đích đầy → complete 409/rollback; history không đổi      | Không có endpoint tự apply recommendation; chưa có test chuyển một recommendation cụ thể tự động thành lệnh |
+
+Bản đồ này liên kết với 13 FR và 15 UC ở report/use-cases. Bộ kiểm thử gồm unit, service–DB/HTTP và hook/jsdom; số assertion, subtest và test runner count không được cộng lẫn. Các test `*-check.mjs` được foundation gọi và fail toàn subtest nếu assertion fail; không báo chúng là những suite độc lập đã chạy bằng node --test.

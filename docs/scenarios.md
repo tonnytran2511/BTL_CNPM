@@ -1,6 +1,6 @@
 # T22 — ba kịch bản và lịch sử simulation
 
-Trạng thái: implementation local trên nền `8b93438`, chờ review/tích hợp. Đây là baseline mô hình để nhóm review, chưa hiệu chuẩn bằng nhu cầu thực tế. T19/T20/T21 cung cấp dữ liệu/workflow vận hành; simulation không gọi mutation của các workflow đó.
+Trạng thái: đã tích hợp qua PR #18 vào main `376b160` ngày 27/10/2026. Đây là baseline mô hình để nhóm review, chưa hiệu chuẩn bằng nhu cầu thực tế. T19/T20/T21 cung cấp dữ liệu/workflow vận hành; simulation không gọi mutation của các workflow đó.
 
 ## Luồng và snapshot
 
