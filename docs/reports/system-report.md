@@ -115,7 +115,7 @@ Dùng partition/decision table cho DTO/quyền; boundary cho pin/thời gian/cap
 
 ### 5.2 Kết quả thực
 
-[Execution ngày 28/10](../test-runs/2026-10-28-release.md) là nguồn số test và lệnh thực thi. Baseline trước thay đổi có 126 backend và 62 frontend tests pass. Ba regression T23/T29 mới đã pass riêng trong foundation suite. Kết quả cài mới qua `npm run verify:delivery` là 129 backend + 62 frontend pass, 0 fail; cài dependency/setup/format/build cũng pass. Thư mục sạch trên cùng host, không tuyên bố là máy vật lý khác.
+[Execution ngày 28/10](../test-runs/2026-10-28-release.md) là nguồn số test và lệnh thực thi. Baseline trước thay đổi có 126 backend và 62 frontend tests pass. Ba regression T23/T29 mới đã pass riêng trong foundation suite; bổ sung regression shutdown demo W23-R01 cũng pass. Kết quả cài mới qua `npm run verify:delivery` là 130 backend + 62 frontend pass, 0 fail; cài dependency/setup/format/build cũng pass. Thư mục sạch trên cùng host, không tuyên bố là máy vật lý khác.
 
 Bằng chứng chuỗi tích hợp kiểm tra một xe trở về đúng Hub, đúng một chỗ, pin quan sát 90% sau hoàn tất, charge request fulfilled, operation log đúng actor; gửi lặp không tạo hiệu ứng lần hai. Snapshot/history giữ nguyên, start dispatch khi xe đã reserved trả 409; complete khi đích đầy rollback và không log completed giả. Ma trận operator kiểm tra 32 method/path families × anonymous/student = 64 responses, đây là assertions trong một test, không tính thành 64 tests độc lập.
 

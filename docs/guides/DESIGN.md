@@ -154,3 +154,5 @@ PR #16 bổ sung kiểm tra pin/incident khi nhận xe và idempotency thuê xe;
 ## T23/T24/T29 — đối chiếu bản ứng viên ngày 28/10/2026
 
 Trên main `376b160`, các module tuần 2 đã tích hợp. Bản `codex/week2-week3-delivery` bổ sung regression một xe qua thuê/trả → sạc/gián đoạn/repair → điều chuyển, ma trận quyền 32 route families, history read-only và revalidation lệnh từ dữ liệu cũ. Không thêm feature hoặc đổi business rule/migration. README/use-cases/architecture/sơ đồ được đối chiếu lại với implementation; báo cáo tổng hợp tại `docs/reports/system-report.md`, gate/phần chờ sinh viên tại `docs/reports/week2-week3-delivery.md`. Kết quả kiểm tra ở execution ngày 28/10, không lấy test của Codex thay peer review/rehearsal/nộp bài.
+
+Bổ sung W23-R01 cùng ngày: runner demo chỉ phục vụ fixture cô lập, đóng Vite/HMR trước HTTP khi nhận tín hiệu dừng để tab còn mở không chặn dọn API/DB tạm. Regression kiểm tra socket/exit/cleanup; không đổi thứ tự transaction hoặc quy tắc vận hành của ứng dụng.

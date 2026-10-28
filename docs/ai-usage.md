@@ -68,3 +68,5 @@ T19: Codex hỗ trợ điều phối sạc xe cá nhân, UI operator, kiểm th�
 ## 28/10/2026 — T23/T24/T25 và phần leader tuần 3
 
 Theo yêu cầu Minh Tường, Codex đọc bảng Công việc qua Chrome và đối chiếu hai PDF local, AGENTS/DESIGN cùng code main 376b160. Codex bổ sung regression HTTP/PostgreSQL xuyên rental/charging/incident/redistribution/simulation và ma trận quyền; kiểm tra Chrome; sửa tài liệu lỗi thời; soạn báo cáo tổng hợp, sơ đồ, coverage map, phân vai/rehearsal/storyboard và slide. Script verify:delivery kiểm tra cài mới/build/test trong thư mục cô lập cùng host. Kết quả thực và giới hạn lưu trong execution 28/10. Không nhận là sinh viên đã peer review/test chéo, quay video, rehearsal, chạy máy khác hay nộp bài. Nhóm phải đọc, xác nhận, giải thích và chịu trách nhiệm về nội dung trước nộp.
+
+Bổ sung cùng ngày: Codex phát hiện demo runner treo khi shutdown còn HMR socket, sửa thứ tự đóng Vite/HTTP và bổ sung regression tiến trình/DB tạm thật. Giữ bằng chứng lỗi và retest ở execution/defect W23-R01.

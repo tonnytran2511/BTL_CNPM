@@ -27,3 +27,5 @@ Không xóa ghi nhận lịch sử 23/10. Base `376b160`; execution/coverage m�
 Trong tập test mới không tái hiện lỗi chặn hoặc làm sai dữ liệu. Đây là kết luận có giới hạn theo execution, không khẳng định không còn defect trong toàn hệ thống.
 
 W23-T01 / P2 — script verify:delivery của Minh Tường/Codex: lần đầu truyền DATABASE_URL rỗng khiến dotenv không đọc URL test .env, ba test file fail trước chạy. Đã sửa remove biến kế thừa theo tên trong env mẫu; cài mới retest pass 129 backend + 62 frontend lúc 17:29. Không sửa config runtime để chấp nhận URL rỗng.
+
+W23-R01 / P2 — demo runner / Minh Tường: gửi SIGTERM trong khi tab Chrome còn giữ kết nối HMR, runner treo tại HTTP close và không dọn PostgreSQL tạm. HTTP close không tự đóng upgraded WebSocket, trong khi Vite close đang đặt sau bước chờ đó. Đã chuyển Vite close lên trước HTTP close. Regression `tests/demo-shutdown.test.mjs` mở WebSocket HMR thật, gửi SIGTERM, assert exit0/socket đóng/state file bị xóa; pass 1 test trong 3.74 giây. Cluster demo cũ bị kẹt đã được dừng riêng và dọn đúng thư mục tạm. Không đổi vòng đời backend vận hành.
