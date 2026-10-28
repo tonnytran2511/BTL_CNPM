@@ -79,7 +79,7 @@ Trước quay: kiểm tra đủ xe/chỗ/cổng và policy trong DB tạm. Sau q
 
 ## Manifest và nộp bài T33/T34
 
-Source: apps/, packages/, database/migrations/, seed.example.json, scripts/, tests/, package/lockfile, .env.example và README. Docs: system-report, use-cases/2 sơ đồ, architecture/integrated-design, business-rules, api/scenarios, test plan/execution/traceability/defects/AI. Evidence: demo/evidence/week23 và lịch sử T14. Slides: Page `page_90a327fd6f808191bce51c0737bd988a`, “Smart E-Mobility Hub — Bảo vệ CNPM HK261”, 10 slide với speaker notes và phân vai. Trang video ghi rõ cần nhóm bổ sung bản quay sẵn. Video: cần nhóm quay/ghép/xác nhận theo T31.
+Source: apps/, packages/, database/migrations/, seed.example.json, scripts/, tests/, package/lockfile, .env.example và README. Docs: system-report, use-cases/2 sơ đồ, architecture/integrated-design, business-rules, api/scenarios, test plan/execution/traceability/defects/AI. Evidence: demo/evidence/week23 và lịch sử T14. Slides: [PowerPoint cục bộ](../../demo/delivery/Smart-E-Mobility-Hub.pptx), 10 slide chỉnh sửa được với speaker notes và phân vai, đã cập nhật 130 backend + 62 frontend. Phiên mới không còn quyền mở Page slide nên bản cục bộ là bản bàn giao hiện tại. Trang video ghi rõ cần nhóm bổ sung bản quay sẵn. Video: cần nhóm quay/ghép/xác nhận theo T31.
 
 Chỉ nhận hướng dẫn cổng nộp chính thức từ giảng viên. Trước nộp đối chiếu định dạng/tên file/link/quyền xem và deadline, xuất báo cáo/slide sang định dạng yêu cầu nếu cần; không gửi PDF đề bài hoặc .env/DB credentials vào bộ source. Mở mọi link bằng chế độ người nhận để xác minh quyền sau khi người nộp thiết lập. Không tự mở public sharing hoặc nộp vào nơi suy đoán.
 
