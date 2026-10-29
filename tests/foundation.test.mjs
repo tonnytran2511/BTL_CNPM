@@ -174,6 +174,12 @@ test(
         },
       );
       await t.test(
+        "T26 cross-check of parking and charging boundaries",
+        async () => {
+          await command("tests/cross-parking-charging-check.mjs", env);
+        },
+      );
+      await t.test(
         "T14/T35 Hub management integration and incident race",
         async () => {
           await command("tests/hub-management-check.mjs", env);
