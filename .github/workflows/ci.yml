@@ -14,3 +14,14 @@ jobs:
       - run: npm run format:check
       - run: npm run build
       - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - name: Verify recorded UI workflows on a disposable database
+        run: node scripts/record-demo.mjs
+        env:
+          DEMO_TIMING_SCALE: "0.05"
+          DEMO_OUTPUT_DIR: .local/demo-ci
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recorded-ui-verification
+          path: .local/demo-ci

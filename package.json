@@ -15,6 +15,7 @@
     "db:migrate": "node scripts/migrate.mjs",
     "db:seed": "node scripts/seed.mjs",
     "demo:t14": "npm run build && node scripts/demo-t14.mjs",
+    "demo:record": "npm run build && node scripts/record-demo.mjs",
     "build": "npm run build -w @emobility/api && npm run build -w @emobility/web",
     "dev": "npm run build -w @emobility/api && concurrently -k -n api,types,web \"npm run dev -w @emobility/api\" \"npm run watch -w @emobility/api\" \"npm run dev -w @emobility/web\"",
     "test": "npm run test:api && npm run test:web",
@@ -32,6 +33,7 @@
     "async-exit-hook": "^2.0.1",
     "concurrently": "^10.0.6",
     "embedded-postgres": "^18.4.0-beta.17",
+    "playwright": "^1.62.1",
     "prettier": "^3.9.10",
     "typescript": "^5.9.3"
   },

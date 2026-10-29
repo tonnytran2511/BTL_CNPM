@@ -1,0 +1,73 @@
+﻿BÁO CÁO MÔ PHỎNG
+Tình huống: Chỗ đỗ bị chiếm thêm
+Hub: Hub ký túc xá
+Lưu lúc (UTC): 2026-10-29T12:11:43.412Z
+Dữ liệu Hub được lấy lúc (UTC): 2026-10-29T12:11:43.403Z
+
+THIẾT LẬP LẦN CHẠY
+Thời gian mô phỏng: 60 phút
+Khoảng cập nhật kết quả: 5 phút
+Mã ngẫu nhiên: 42
+Số xe đến đỗ trung bình ban đầu: 0,2 yêu cầu mỗi khoảng 5 phút
+Số chỗ đỗ bị chiếm thêm: 1 chỗ
+
+SO SÁNH KẾT QUẢ (ban đầu | khi có thay đổi)
+Tổng số xe đến đỗ: 6 | 6
+Xe được nhận vào đỗ: 6 | 5
+Chỗ đỗ còn có thể nhận xe lúc bắt đầu: 6 | 5
+Chỗ đỗ còn có thể nhận xe khi kết thúc: 0 | 0
+Xe không tìm được chỗ đỗ: 0 | 1
+Số chỗ đỗ được sử dụng nhiều nhất: 8 | 8
+
+MỨC THAY ĐỔI SO VỚI BAN ĐẦU
+Yêu cầu được phục vụ: Giảm 1
+Yêu cầu không được phục vụ: Tăng 1
+
+DIỄN BIẾN BAN ĐẦU
+Phút	Yêu cầu mới	Được phục vụ	Không phục vụ	Chỗ đỗ còn có thể nhận xe	Chỗ đang dùng/giữ
+5	1	1	0	5	3
+10	1	1	0	4	4
+15	1	1	0	3	5
+20	1	1	0	2	6
+25	0	0	0	2	6
+30	0	0	0	2	6
+35	0	0	0	2	6
+40	1	1	0	1	7
+45	0	0	0	1	7
+50	0	0	0	1	7
+55	1	1	0	0	8
+60	0	0	0	0	8
+
+DIỄN BIẾN KHI CÓ THAY ĐỔI
+Phút	Yêu cầu mới	Được phục vụ	Không phục vụ	Chỗ đỗ còn có thể nhận xe	Chỗ đang dùng/giữ
+5	1	1	0	4	4
+10	1	1	0	3	5
+15	1	1	0	2	6
+20	1	1	0	1	7
+25	0	0	0	1	7
+30	0	0	0	1	7
+35	0	0	0	1	7
+40	1	1	0	0	8
+45	0	0	0	0	8
+50	0	0	0	0	8
+55	1	0	1	0	8
+60	0	0	0	0	8
+
+GỢI Ý XỬ LÝ
+1. Kịch bản còn 1 yêu cầu chưa được phục vụ. dữ liệu tại thời điểm mô phỏng ghi nhận tối đa 1 tài nguyên có thể xem xét với Hub Hub ga Metro; chưa tính thời gian di chuyển hoặc giữ tài nguyên.
+   Có thể xem xét: 1 chỗ đỗ.
+   Cần kiểm tra lại tình trạng Hub và tài nguyên trước khi thực hiện. Gợi ý chưa được áp dụng.
+
+PHẠM VI VÀ LƯU Ý
+Hai trường hợp dùng cùng dữ liệu ban đầu và mã ngẫu nhiên. Số yêu cầu được tạo ngẫu nhiên quanh mức trung bình đã nhập, không phải số khách cố định. Mô phỏng không thay đổi hoạt động thực tế của Hub.
+Xe được nhận vào đỗ giữ chỗ đến hết thời gian mô phỏng. Chỗ đã có lịch hẹn trong khoảng này không được cấp thêm.
+Kết quả phụ thuộc dữ liệu và giả định tại thời điểm chạy; chưa phải dự báo nhu cầu thực tế.
+
+THÔNG TIN ĐỐI CHIẾU
+Mã báo cáo: df47bfa8-e61f-4f00-afe0-b8a36c9e7155
+Mã Hub: 4818d640-9fef-49c5-b8d5-af5c98187848
+Phiên bản tính toán: resource-flow-v1
+Số lần cập nhật tối đa: 288
+Thời gian mô phỏng tối đa: 10080 phút
+Nhu cầu trung bình tối đa mỗi khoảng cập nhật: 1000 yêu cầu
+Giới hạn tổng số yêu cầu: 100000

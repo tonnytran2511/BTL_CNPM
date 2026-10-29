@@ -1,0 +1,73 @@
+﻿BÁO CÁO MÔ PHỎNG
+Tình huống: Tăng nhu cầu lấy xe
+Hub: Hub ký túc xá
+Lưu lúc (UTC): 2026-10-29T12:11:38.853Z
+Dữ liệu Hub được lấy lúc (UTC): 2026-10-29T12:11:38.839Z
+
+THIẾT LẬP LẦN CHẠY
+Thời gian mô phỏng: 60 phút
+Khoảng cập nhật kết quả: 5 phút
+Mã ngẫu nhiên: 42
+Số lượt thuê trung bình ban đầu: 0,2 yêu cầu mỗi khoảng 5 phút
+Số lượt thuê trung bình khi tăng nhu cầu: 2 yêu cầu mỗi khoảng 5 phút
+Pin tối thiểu để nhận thuê: 20%
+
+SO SÁNH KẾT QUẢ (ban đầu | khi có thay đổi)
+Tổng lượt yêu cầu thuê xe: 6 | 27
+Lượt thuê được phục vụ: 1 | 1
+Xe sẵn sàng lúc bắt đầu: 1 | 1
+Xe sẵn sàng khi kết thúc: 0 | 0
+Lượt thuê không có xe phục vụ: 5 | 26
+
+MỨC THAY ĐỔI SO VỚI BAN ĐẦU
+Yêu cầu được phục vụ: Không thay đổi
+Yêu cầu không được phục vụ: Tăng 21
+
+DIỄN BIẾN BAN ĐẦU
+Phút	Yêu cầu mới	Được phục vụ	Không phục vụ	Xe sẵn sàng
+5	1	1	0	0
+10	1	0	1	0
+15	1	0	1	0
+20	1	0	1	0
+25	0	0	0	0
+30	0	0	0	0
+35	0	0	0	0
+40	1	0	1	0
+45	0	0	0	0
+50	0	0	0	0
+55	1	0	1	0
+60	0	0	0	0
+
+DIỄN BIẾN KHI CÓ THAY ĐỔI
+Phút	Yêu cầu mới	Được phục vụ	Không phục vụ	Xe sẵn sàng
+5	1	1	0	0
+10	3	0	3	0
+15	2	0	2	0
+20	2	0	2	0
+25	3	0	3	0
+30	3	0	3	0
+35	2	0	2	0
+40	3	0	3	0
+45	0	0	0	0
+50	3	0	3	0
+55	3	0	3	0
+60	2	0	2	0
+
+GỢI Ý XỬ LÝ
+1. Kịch bản còn 26 yêu cầu chưa được phục vụ. dữ liệu tại thời điểm mô phỏng ghi nhận tối đa 1 tài nguyên có thể xem xét với Hub Hub ga Metro; chưa tính thời gian di chuyển hoặc giữ tài nguyên.
+   Có thể xem xét: 1 xe.
+   Cần kiểm tra lại tình trạng Hub và tài nguyên trước khi thực hiện. Gợi ý chưa được áp dụng.
+
+PHẠM VI VÀ LƯU Ý
+Hai trường hợp dùng cùng dữ liệu ban đầu và mã ngẫu nhiên. Số yêu cầu được tạo ngẫu nhiên quanh mức trung bình đã nhập, không phải số khách cố định. Mô phỏng không thay đổi hoạt động thực tế của Hub.
+Mỗi xe chỉ phục vụ một lượt rời Hub; chưa tính xe quay về hoặc được bổ sung trong thời gian mô phỏng.
+Kết quả phụ thuộc dữ liệu và giả định tại thời điểm chạy; chưa phải dự báo nhu cầu thực tế.
+
+THÔNG TIN ĐỐI CHIẾU
+Mã báo cáo: 1fb72c77-256a-4f62-bfc4-9aa03e2cfb67
+Mã Hub: 4818d640-9fef-49c5-b8d5-af5c98187848
+Phiên bản tính toán: resource-flow-v1
+Số lần cập nhật tối đa: 288
+Thời gian mô phỏng tối đa: 10080 phút
+Nhu cầu trung bình tối đa mỗi khoảng cập nhật: 1000 yêu cầu
+Giới hạn tổng số yêu cầu: 100000

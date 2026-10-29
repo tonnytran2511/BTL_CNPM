@@ -1,0 +1,71 @@
+{
+  "recordedAt": "2026-10-29T12:09:12.689Z",
+  "timingScale": 1,
+  "scenes": [
+    {
+      "name": "01-rental",
+      "targetSeconds": 30,
+      "pageErrors": []
+    },
+    {
+      "name": "02-private-parking",
+      "targetSeconds": 30,
+      "pageErrors": []
+    },
+    {
+      "name": "03-charging",
+      "targetSeconds": 40,
+      "pageErrors": []
+    },
+    {
+      "name": "04-redistribution",
+      "targetSeconds": 30,
+      "pageErrors": []
+    },
+    {
+      "name": "05-simulation",
+      "targetSeconds": 50,
+      "pageErrors": []
+    }
+  ],
+  "rental": {
+    "vehicleCode": "DORM-B01",
+    "from": "Hub ký túc xá",
+    "to": "Hub ga Metro",
+    "completed": true
+  },
+  "privateParking": {
+    "registered": true,
+    "checkInAndOut": true,
+    "waitedForRealBookingStart": true
+  },
+  "charging": {
+    "interruptedAndRequeued": true,
+    "repaired": true,
+    "completed": true,
+    "observedBatteryPercent": 100
+  },
+  "redistribution": {
+    "completed": true,
+    "audit": true
+  },
+  "simulations": [
+    {
+      "kind": "demand_surge",
+      "downloaded": true,
+      "bytes": 2777
+    },
+    {
+      "kind": "parking_full",
+      "downloaded": true,
+      "bytes": 2946
+    },
+    {
+      "kind": "charging_failure",
+      "downloaded": true,
+      "bytes": 3772
+    }
+  ],
+  "historyReopened": true,
+  "hubsUnchangedAfterSimulation": true
+}

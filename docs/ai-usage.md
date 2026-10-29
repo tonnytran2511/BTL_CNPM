@@ -72,3 +72,7 @@ Theo yêu cầu Minh Tường, Codex đọc bảng Công việc qua Chrome và �
 Bổ sung cùng ngày: Codex phát hiện demo runner treo khi shutdown còn HMR socket, sửa thứ tự đóng Vite/HTTP và bổ sung regression tiến trình/DB tạm thật. Giữ bằng chứng lỗi và retest ở execution/defect W23-R01.
 
 Codex tiếp tục đọc diagnostics CI và sửa teardown fixture T16 (W23-T02), chạy lại 12 test. Khi Page không còn mở được trong phiên mới, xuất lại bộ slide cục bộ từ layout đã review, cập nhật count và kiểm tra package/layout/font/import; bản cục bộ thay bản Page trong manifest.
+
+## 29/10/2026 — video và bộ bàn giao
+
+Codex dùng Playwright trên Chromium/DB tạm theo ủy quyền Minh Tường để quay luồng thật, kiểm tra TXT/history và dữ liệu Hub không đổi. Có hỗ trợ dựng báo cáo PDF/UML, slide final, lời dẫn/phụ đề và gói ZIP/checksum. Video dùng giọng đọc tổng hợp macOS Linh, không clone giọng hoặc mạo danh người trình bày; rút ngắn đoạn chờ đến lịch đặt đỗ, không đổi đồng hồ/DB vượt điều kiện. Review kỹ thuật và CI không thay xác nhận kiểm thử chéo, rehearsal hoặc biên nhận nộp bài của sinh viên.

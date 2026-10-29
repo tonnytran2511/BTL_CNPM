@@ -1,6 +1,6 @@
 # Smart E-Mobility Hub — báo cáo hệ thống
 
-Bản bàn giao kỹ thuật ngày 28/10/2026, đối chiếu main `376b160` và ứng viên `codex/week2-week3-delivery`. Thành viên: Minh Tường (lead/nền tảng/tích hợp), Duy Tân (thuê xe), Mai Anh (đỗ/sạc), Quỳnh Anh (Hub/vận hành), Minh Khuê (simulation). Báo cáo này tổng hợp công việc T24, cung cấp nội dung cho T30; không ghi nhận thay xác nhận đọc/giải thích của từng thành viên.
+Bản bàn giao kỹ thuật ngày 29/10/2026, đối chiếu main `376b160` và ứng viên `codex/week2-week3-delivery`. Thành viên: Minh Tường (lead/nền tảng/tích hợp), Duy Tân (thuê xe), Mai Anh (đỗ/sạc), Quỳnh Anh (Hub/vận hành), Minh Khuê (simulation). Báo cáo này tổng hợp công việc T24, cung cấp nội dung cho T30; không ghi nhận thay xác nhận đọc/giải thích của từng thành viên.
 
 ## 1. Bối cảnh, mục tiêu và ranh giới
 
@@ -119,7 +119,7 @@ Dùng partition/decision table cho DTO/quyền; boundary cho pin/thời gian/cap
 
 Bằng chứng chuỗi tích hợp kiểm tra một xe trở về đúng Hub, đúng một chỗ, pin quan sát 90% sau hoàn tất, charge request fulfilled, operation log đúng actor; gửi lặp không tạo hiệu ứng lần hai. Snapshot/history giữ nguyên, start dispatch khi xe đã reserved trả 409; complete khi đích đầy rollback và không log completed giả. Ma trận operator kiểm tra 32 method/path families × anonymous/student = 64 responses, đây là assertions trong một test, không tính thành 64 tests độc lập.
 
-Chrome kiểm tra sinh viên đặt/nhận/trả, operator điều chuyển và đọc simulation/history/TXT theo execution. Chưa chạy load target NFR-03, pentest, thử nhiều thiết bị hoặc chứng minh toàn bộ tổ hợp trong 36 case. [Coverage map](../test-runs/2026-10-28-traceability.md) ghi các phần được kiểm chứng và phần chưa đủ oracle.
+Ngày 29/10, Playwright Chromium trên DB tạm đã xác minh năm luồng UI: thuê/trả, đăng ký/đặt đỗ/check-in/out đúng giờ thật, sạc gián đoạn/requeue/repair/phiên mới/hoàn tất, điều chuyển và ba scenario. Đã đọc cả ba TXT tải xuống, mở history và đối chiếu Hub không đổi. Bằng chứng tại demo/evidence/week23/recorded-ui-verification.json; W23-E01 đã đóng. Build và 130 backend + 62 frontend tests pass khi chạy lại cùng ngày. CI Ubuntu/Node 22 của commit 5ae8381 cũng pass; bước UI mới có artifact riêng trong workflow. Chưa chạy load target NFR-03, pentest, thử nhiều thiết bị hoặc chứng minh toàn bộ tổ hợp trong 36 case. [Coverage map](../test-runs/2026-10-28-traceability.md) ghi các phần được kiểm chứng và phần chưa đủ oracle.
 
 ### 5.3 Defect và giới hạn kiểm chứng
 
@@ -129,11 +129,11 @@ Chrome kiểm tra sinh viên đặt/nhận/trả, operator điều chuyển và 
 
 Các luồng cốt lõi đã có trong bản tích hợp, gồm ba kịch bản What-if và service revalidation khi tài nguyên thay đổi. Ranh giới module với transaction chung giúp giữ tính nhất quán và kiểm thử trên HTTP/DB. Đánh đổi chính là simulation đơn giản, deployment local và operator chủ động xác nhận sạc/di chuyển.
 
-Giới hạn còn công khai: không hao pin/telemetry; không tự phân bổ sạc theo thời gian; chưa cứu hộ trip hoặc tự hủy cam kết khi Hub inactive; incident xe/Hub không tự đổi maintenance/inactive; lệnh đang chạy không hủy; chưa audit mọi CRUD Hub; chưa phân trang mọi danh sách; model chưa hiệu chuẩn; chưa đo tải NFR-03; chưa kiểm tra cài trên máy vật lý khác. Không đưa các mục này thành feature mới trong gate freeze, trừ sửa lỗi chặn có bằng chứng và regression.
+Giới hạn còn công khai: không hao pin/telemetry; không tự phân bổ sạc theo thời gian; chưa cứu hộ trip hoặc tự hủy cam kết khi Hub inactive; incident xe/Hub không tự đổi maintenance/inactive; lệnh đang chạy không hủy; chưa audit mọi CRUD Hub; chưa phân trang mọi danh sách; model chưa hiệu chuẩn; chưa đo tải NFR-03; đã có build/test trên CI Ubuntu riêng, chưa có nghiệm thu sử dụng trên máy vật lý của thành viên khác. Không đưa các mục này thành feature mới trong gate freeze, trừ sửa lỗi chặn có bằng chứng và regression.
 
 Bài học kỹ thuật rút từ log tích hợp: khóa theo thứ tự chung giữa module, kiểm tra lại sau chờ lock, không giữ form pin cũ khi đổi phiên, và không đánh đồng seed với state vận hành. Hướng cải tiến sau phạm vi bài: telemetry, workflow cứu hộ/Hub ngưng hoạt động, đo tải và hiệu chuẩn mô hình, rollout production có HTTPS/backup/monitoring.
 
-Bộ trình bày và lịch rehearsal nằm trong [bàn giao tuần 2–3](week2-week3-delivery.md). Tổng trình bày khoảng 20 phút gồm video demo quay sẵn khoảng 3 phút theo rubric. Video, rehearsal, từng người hiểu phần mình và xác nhận nộp cần nhóm thực hiện; không lấy test của Codex thay cho các bằng chứng đó.
+Bộ trình bày và lịch rehearsal nằm trong [bàn giao tuần 2–3](week2-week3-delivery.md). Tổng trình bày khoảng 20 phút gồm video demo quay sẵn khoảng 3 phút theo rubric. Video 180 giây và phụ đề đã được tạo từ các luồng UI thật, giọng đọc tổng hợp macOS Linh; lời dẫn tại demo-narration.md. Slide final gồm 10 trang và speaker notes. Báo cáo PDF có UML/ERD vector; các SVG chi tiết nằm trong docs/diagrams/rendered. Rehearsal, từng người hiểu phần mình và xác nhận nộp vẫn cần nhóm thực hiện, không lấy test của Codex thay cho các bằng chứng đó.
 
 ### 6.1 Khai báo Generative AI
 
