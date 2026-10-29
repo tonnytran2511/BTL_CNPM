@@ -85,6 +85,8 @@ test(
       return { status: r.status, body: await r.json() };
     };
     let server, pool;
+    let stopping = false;
+    let unexpectedPoolError;
     try {
       await db.initialise();
       await db.start();
@@ -92,6 +94,9 @@ test(
       await command("scripts/migrate.mjs", env);
       await command("scripts/seed.mjs", env);
       pool = new pg.Pool({ connectionString: env.DATABASE_URL });
+      pool.on("error", (error) => {
+        if (!stopping || error.code !== "57P01") unexpectedPoolError ??= error;
+      });
       server = spawn(process.execPath, ["apps/api/dist/main.js"], {
         cwd: root,
         env,
@@ -838,10 +843,16 @@ test(
         },
       );
     } finally {
-      server?.kill();
+      stopping = true;
+      if (server && server.exitCode === null && server.signalCode === null) {
+        const exited = once(server, "exit");
+        server.kill("SIGTERM");
+        await exited;
+      }
       await pool?.end();
       await db.stop().catch(() => {});
       await rm(directory, { recursive: true, force: true });
+      assert.ifError(unexpectedPoolError);
     }
   },
 );

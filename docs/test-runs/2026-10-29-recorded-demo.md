@@ -22,3 +22,7 @@ Video H.264/AAC 1280×720, khoảng 180 giây; có giọng đọc tổng hợp m
 Báo cáo PDF có sáu sơ đồ tích hợp và hai use case, nguồn chỉnh sửa Markdown/Mermaid/PlantUML cùng SVG vector chi tiết. Slide final 10 trang với speaker notes, ở slide 9 phát MP4 đi kèm. Kiểm tra package/layout/import bằng artifact-tool và xem ảnh render; không tuyên bố đã kiểm tra bằng native PowerPoint.
 
 CI Ubuntu/Node 22 của head 5ae8381 đã pass build/format/130 backend/62 frontend trên host riêng. Workflow mới thêm Chromium và runner năm luồng, artifact ghi hình giữ riêng. Kết quả máy CI không thay buổi rehearsal, peer review của sinh viên hoặc nghiệm thu máy chiếu. Không có biên nhận nộp chính thức.
+
+## CI và sửa teardown sau lần quay
+
+Head 478d3d7 có CI Ubuntu pass cả build/test và năm luồng Chromium. Head e47870a chỉ đổi phân trang PDF nhưng một job tái hiện race teardown của fixture T17: 12 ca con pass, sau đó idle pg.Pool phát 57P01 khi dừng cluster. W23-R03 sửa chờ API exit trước pool/DB, chỉ chấp nhận mã administrative shutdown sau bắt đầu cleanup; mọi idle error khác vẫn làm fixture fail. T05/T07/T08 cùng mẫu được chỉnh tương ứng. Bốn suite liên quan chạy đồng thời có 49 tests pass, 0 fail. Bản video không cần quay lại vì thay đổi chỉ ở fixture, không thay hành vi runtime.
