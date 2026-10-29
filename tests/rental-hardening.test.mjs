@@ -86,11 +86,23 @@ async function startStack(name, sweepSeconds) {
     return { status: r.status, body: await r.json() };
   };
   const stack = { call, env, pool: undefined, server: undefined };
+  let stopping = false;
+  let unexpectedPoolError;
   stack.stop = async () => {
-    stack.server?.kill();
+    stopping = true;
+    if (
+      stack.server &&
+      stack.server.exitCode === null &&
+      stack.server.signalCode === null
+    ) {
+      const exited = once(stack.server, "exit");
+      stack.server.kill("SIGTERM");
+      await exited;
+    }
     await stack.pool?.end();
     await db.stop().catch(() => {});
     await rm(directory, { recursive: true, force: true });
+    assert.ifError(unexpectedPoolError);
   };
   try {
     await db.initialise();
@@ -99,6 +111,11 @@ async function startStack(name, sweepSeconds) {
     await command("scripts/migrate.mjs", env);
     await command("scripts/seed.mjs", env);
     stack.pool = new pg.Pool({ connectionString: env.DATABASE_URL });
+    // Idle-client errors are emitted outside query promises. Only PostgreSQL's
+    // administrative disconnect after teardown begins is expected.
+    stack.pool.on("error", (error) => {
+      if (!stopping || error.code !== "57P01") unexpectedPoolError ??= error;
+    });
     // Scheduler đọc chu kỳ từ settings lúc khởi động: đặt trước khi chạy API.
     await stack.pool.query(
       "UPDATE settings SET value=$1::jsonb WHERE key='reservationExpirySweepSeconds'",

@@ -1,0 +1,80 @@
+﻿BÁO CÁO MÔ PHỎNG
+Tình huống: Cổng sạc bị hỏng
+Hub: Hub ký túc xá
+Lưu lúc (UTC): 2026-10-29T12:11:48.280Z
+Dữ liệu Hub được lấy lúc (UTC): 2026-10-29T12:11:48.269Z
+
+THIẾT LẬP LẦN CHẠY
+Thời gian mô phỏng: 60 phút
+Khoảng cập nhật kết quả: 5 phút
+Mã ngẫu nhiên: 42
+Số yêu cầu sạc trung bình ban đầu: 0,2 yêu cầu mỗi khoảng 5 phút
+Số cổng giả định bị hỏng: 1 cổng
+Thời gian sạc ước tính cho mỗi lượt: 15 phút
+
+SO SÁNH KẾT QUẢ (ban đầu | khi có thay đổi)
+Tổng yêu cầu sạc (gồm yêu cầu đã có): 6 | 6
+Yêu cầu đã bắt đầu sạc: 4 | 0
+Cổng sạc còn trống lúc bắt đầu: 1 | 0
+Cổng sạc còn trống khi kết thúc: 1 | 0
+Yêu cầu còn chờ khi kết thúc: 2 | 6
+Lượt sạc đã hoàn thành: 4 | 0
+Mức sử dụng cổng sạc (%): 50 | 0
+Chờ trung bình trước khi bắt đầu sạc (phút): 15 | Chưa có dữ liệu
+Thời gian đã chờ của các yêu cầu còn lại (phút): 17,5 | 40,83
+
+MỨC THAY ĐỔI SO VỚI BAN ĐẦU
+Yêu cầu được phục vụ: Giảm 4
+Yêu cầu còn chờ: Tăng 4
+Thời gian chờ trung bình (phút): Chưa đủ dữ liệu để so sánh
+
+DIỄN BIẾN BAN ĐẦU
+Phút	Yêu cầu mới	Bắt đầu sạc	Còn chờ	Sạc xong	Cổng sạc còn trống	Cổng đang dùng
+5	1	1	0	0	0	1
+10	1	0	1	0	0	1
+15	1	0	2	1	1	1
+20	1	1	2	0	0	1
+25	0	0	2	0	0	1
+30	0	0	2	1	1	1
+35	0	1	1	0	0	1
+40	1	0	2	0	0	1
+45	0	0	2	1	1	1
+50	0	1	1	0	0	1
+55	1	0	2	0	0	1
+60	0	0	2	1	1	1
+
+DIỄN BIẾN KHI CÓ THAY ĐỔI
+Phút	Yêu cầu mới	Bắt đầu sạc	Còn chờ	Sạc xong	Cổng sạc còn trống	Cổng đang dùng
+5	1	0	1	0	0	0
+10	1	0	2	0	0	0
+15	1	0	3	0	0	0
+20	1	0	4	0	0	0
+25	0	0	4	0	0	0
+30	0	0	4	0	0	0
+35	0	0	4	0	0	0
+40	1	0	5	0	0	0
+45	0	0	5	0	0	0
+50	0	0	5	0	0	0
+55	1	0	6	0	0	0
+60	0	0	6	0	0	0
+
+GỢI Ý XỬ LÝ
+1. Kịch bản còn 6 yêu cầu chưa được phục vụ. dữ liệu tại thời điểm mô phỏng ghi nhận tối đa 1 tài nguyên có thể xem xét với Hub Hub ga Metro; chưa tính thời gian di chuyển hoặc giữ tài nguyên.
+   Có thể xem xét: 1 cổng sạc.
+   Cần kiểm tra lại tình trạng Hub và tài nguyên trước khi thực hiện. Gợi ý chưa được áp dụng.
+
+PHẠM VI VÀ LƯU Ý
+Hai trường hợp dùng cùng dữ liệu ban đầu và mã ngẫu nhiên. Số yêu cầu được tạo ngẫu nhiên quanh mức trung bình đã nhập, không phải số khách cố định. Mô phỏng không thay đổi hoạt động thực tế của Hub.
+Thời gian sạc là ước tính để so sánh, không phải tính toán công suất hay tăng pin thật. Lượt sạc đã có được giả định còn đủ thời gian sạc ước tính; nếu cổng hỏng, yêu cầu quay về hàng chờ.
+Chờ trung bình chỉ tính yêu cầu đã bắt đầu sạc, không gồm lượt sạc đã chạy từ trước. Thời gian đã chờ của các yêu cầu còn lại chưa phải thời gian đến lúc được phục vụ. Chưa có dữ liệu nghĩa là không có mẫu để tính.
+Mức sử dụng được tính trên tổng số cổng lắp đặt, kể cả cổng hỏng.
+Kết quả phụ thuộc dữ liệu và giả định tại thời điểm chạy; chưa phải dự báo nhu cầu thực tế.
+
+THÔNG TIN ĐỐI CHIẾU
+Mã báo cáo: 924c3b5b-2ecf-457a-bcd6-99a342127cd5
+Mã Hub: 4818d640-9fef-49c5-b8d5-af5c98187848
+Phiên bản tính toán: resource-flow-v1
+Số lần cập nhật tối đa: 288
+Thời gian mô phỏng tối đa: 10080 phút
+Nhu cầu trung bình tối đa mỗi khoảng cập nhật: 1000 yêu cầu
+Giới hạn tổng số yêu cầu: 100000

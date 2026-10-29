@@ -150,3 +150,9 @@ Nhánh Quỳnh Anh cập nhật main `0f1a10a`: giữ hoàn tất điều chuy�
 ## T17/T22/T36 — tích hợp ngày 27/10/2026
 
 PR #16 bổ sung kiểm tra pin/incident khi nhận xe và idempotency thuê xe; SQL nằm trong RentalTx. PR #18 kế thừa main đã có T17, thêm ba kịch bản, lịch sử và TXT cùng engine thuần; snapshot chỉ đọc qua service chủ module với cùng PoolClient. Thời gian snapshot do HubsRepository lấy từ transaction DB. Migration được nhận diện theo toàn bộ tên file; hai file tiền tố 007 độc lập, không đổi migration đã chia sẻ. Hạn chế retry phía web T17 và các giả định mô hình tại docs/scenarios.md vẫn giữ nguyên. Kết quả kỹ thuật không thay xác nhận demo/nghiệm thu của thành viên.
+
+## T23/T24/T29 — đối chiếu bản ứng viên ngày 28/10/2026
+
+Trên main `376b160`, các module tuần 2 đã tích hợp. Bản `codex/week2-week3-delivery` bổ sung regression một xe qua thuê/trả → sạc/gián đoạn/repair → điều chuyển, ma trận quyền 32 route families, history read-only và revalidation lệnh từ dữ liệu cũ. Không thêm feature hoặc đổi business rule/migration. README/use-cases/architecture/sơ đồ được đối chiếu lại với implementation; báo cáo tổng hợp tại `docs/reports/system-report.md`, gate/phần chờ sinh viên tại `docs/reports/week2-week3-delivery.md`. Kết quả kiểm tra ở execution ngày 28/10, không lấy test của Codex thay peer review/rehearsal/nộp bài.
+
+Bổ sung W23-R01 cùng ngày: runner demo chỉ phục vụ fixture cô lập, đóng Vite/HMR trước HTTP khi nhận tín hiệu dừng để tab còn mở không chặn dọn API/DB tạm. Regression kiểm tra socket/exit/cleanup; không đổi thứ tự transaction hoặc quy tắc vận hành của ứng dụng.

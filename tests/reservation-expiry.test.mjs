@@ -84,8 +84,19 @@ async function startStack(name, sweepSeconds) {
     return { status: r.status, body: await r.json() };
   };
   const stack = { call, env, pool: undefined, server: undefined };
+  let stopping = false;
+  let unexpectedPoolError;
   stack.stop = async () => {
-    stack.server?.kill();
+    stopping = true;
+    if (
+      stack.server &&
+      stack.server.exitCode === null &&
+      stack.server.signalCode === null
+    ) {
+      const exited = once(stack.server, "exit");
+      stack.server.kill("SIGTERM");
+      await exited;
+    }
     await stack.pool?.end();
     await db.stop().catch(() => {});
     // Windows can briefly retain a PostgreSQL file handle after process exit.
@@ -95,6 +106,7 @@ async function startStack(name, sweepSeconds) {
       maxRetries: 10,
       retryDelay: 100,
     });
+    assert.ifError(unexpectedPoolError);
   };
   try {
     await db.initialise();
@@ -103,6 +115,12 @@ async function startStack(name, sweepSeconds) {
     await command("scripts/migrate.mjs", env);
     await command("scripts/seed.mjs", env);
     stack.pool = new pg.Pool({ connectionString: env.DATABASE_URL });
+    // pg emits idle-client disconnects outside query promises. PostgreSQL fast
+    // shutdown may deliver 57P01 while cleanup is in flight; every other idle
+    // error, including 57P01 before shutdown, must still fail this fixture.
+    stack.pool.on("error", (error) => {
+      if (!stopping || error.code !== "57P01") unexpectedPoolError ??= error;
+    });
     // Scheduler đọc chu kỳ từ settings lúc khởi động: đặt trước khi chạy API.
     await stack.pool.query(
       "UPDATE settings SET value=$1::jsonb WHERE key='reservationExpirySweepSeconds'",

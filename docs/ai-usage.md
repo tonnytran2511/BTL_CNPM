@@ -64,3 +64,15 @@ T19: Codex hỗ trợ điều phối sạc xe cá nhân, UI operator, kiểm th�
 24/10/2026: Theo yêu cầu Minh Tường, Codex tích hợp main `0f1a10a` vào PR #17 của Quỳnh Anh, giải quyết conflict operations/rental/CSS và duplicate import. Codex nối actor của T20 sang operation log T37, bổ sung regression log đúng một lần và khóa Hub không chặn FK của reservation, cập nhật tài liệu và kiểm tra build/test/format. Giữ commit gốc thành viên; phần sửa tích hợp cần được thành viên hiểu và giải thích.
 
 27/10/2026: Theo yêu cầu Minh Tường, Codex rà PR #16 và #18, kiểm tra bản sửa SQL idempotency của Duy Tân, tích hợp main vào nhánh Minh Khuê và chuyển truy vấn thời gian snapshot xuống HubsRepository. Codex review ranh giới module/snapshot, chạy build, format và test trên bản tích hợp; cập nhật bằng chứng và sheet theo kết quả đã merge. Không thay demo/nghiệm thu hoặc giải thích phần việc của thành viên.
+
+## 28/10/2026 — T23/T24/T25 và phần leader tuần 3
+
+Theo yêu cầu Minh Tường, Codex đọc bảng Công việc qua Chrome và đối chiếu hai PDF local, AGENTS/DESIGN cùng code main 376b160. Codex bổ sung regression HTTP/PostgreSQL xuyên rental/charging/incident/redistribution/simulation và ma trận quyền; kiểm tra Chrome; sửa tài liệu lỗi thời; soạn báo cáo tổng hợp, sơ đồ, coverage map, phân vai/rehearsal/storyboard và slide. Script verify:delivery kiểm tra cài mới/build/test trong thư mục cô lập cùng host. Kết quả thực và giới hạn lưu trong execution 28/10. Không nhận là sinh viên đã peer review/test chéo, quay video, rehearsal, chạy máy khác hay nộp bài. Nhóm phải đọc, xác nhận, giải thích và chịu trách nhiệm về nội dung trước nộp.
+
+Bổ sung cùng ngày: Codex phát hiện demo runner treo khi shutdown còn HMR socket, sửa thứ tự đóng Vite/HTTP và bổ sung regression tiến trình/DB tạm thật. Giữ bằng chứng lỗi và retest ở execution/defect W23-R01.
+
+Codex tiếp tục đọc diagnostics CI và sửa teardown fixture T16 (W23-T02), chạy lại 12 test. Khi Page không còn mở được trong phiên mới, xuất lại bộ slide cục bộ từ layout đã review, cập nhật count và kiểm tra package/layout/font/import; bản cục bộ thay bản Page trong manifest.
+
+## 29/10/2026 — video và bộ bàn giao
+
+Codex dùng Playwright trên Chromium/DB tạm theo ủy quyền Minh Tường để quay luồng thật, kiểm tra TXT/history và dữ liệu Hub không đổi. Có hỗ trợ dựng báo cáo PDF/UML, slide final, lời dẫn/phụ đề và gói ZIP/checksum. Video dùng giọng đọc tổng hợp macOS Linh, không clone giọng hoặc mạo danh người trình bày; rút ngắn đoạn chờ đến lịch đặt đỗ, không đổi đồng hồ/DB vượt điều kiện. Review kỹ thuật và CI không thay xác nhận kiểm thử chéo, rehearsal hoặc biên nhận nộp bài của sinh viên.

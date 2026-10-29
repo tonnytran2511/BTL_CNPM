@@ -1,0 +1,116 @@
+1
+00:00:00,000 --> 00:00:06,000
+Đây là bản demo Smart E-Mobility Hub trên dữ liệu giả lập riêng.
+
+2
+00:00:06,000 --> 00:00:11,000
+Sinh viên chọn xe còn trống, đặt giữ rồi nhận xe.
+
+3
+00:00:11,000 --> 00:00:21,000
+Khi trả tại Hub khác, backend kiểm tra sức chứa và cập nhật chuyến đi cùng chỗ đỗ trong một transaction.
+
+4
+00:00:21,000 --> 00:00:26,000
+Lịch sử hiển thị đúng nguồn, đích và pin của xe.
+
+5
+00:00:26,000 --> 00:00:30,000
+Mọi dữ liệu trên màn hình được đọc qua API.
+
+6
+00:00:30,000 --> 00:00:36,000
+Sinh viên đăng ký xe cá nhân rồi chọn Hub và khoảng thời gian đỗ.
+
+7
+00:00:36,000 --> 00:00:38,000
+Lịch phải ở tương lai.
+
+8
+00:00:38,000 --> 00:00:47,000
+Đoạn chờ đến giờ đã đặt được rút ngắn trong video; hệ thống chỉ cho check-in khi đến giờ thật.
+
+9
+00:00:47,000 --> 00:00:55,000
+Check-in xác nhận xe chiếm chỗ vật lý; check-out giải phóng chỗ và kết thúc lịch.
+
+10
+00:00:55,000 --> 00:01:00,000
+Backend kiểm tra chủ sở hữu và xung đột tài nguyên.
+
+11
+00:01:00,000 --> 00:01:05,000
+Người vận hành gửi yêu cầu sạc cho chính chiếc xe vừa trả.
+
+12
+00:01:05,000 --> 00:01:12,000
+Bộ điều phối xếp hàng theo cấu hình, giữ cổng và tạm ngừng cấp xe thuê.
+
+13
+00:01:12,000 --> 00:01:21,000
+Khi báo hỏng cổng, phiên bị gián đoạn; pin quan sát được giữ và nhu cầu chưa đạt quay lại hàng chờ.
+
+14
+00:01:21,000 --> 00:01:25,000
+Sau xác nhận sửa xong, hệ thống tạo phiên mới.
+
+15
+00:01:25,000 --> 00:01:33,000
+Hoàn tất với pin thực tế đạt mục tiêu sẽ giải phóng cổng và xe trong cùng transaction.
+
+16
+00:01:33,000 --> 00:01:40,000
+Pin được nhập từ dữ liệu quan sát của demo, không tự tăng theo thời gian.
+
+17
+00:01:40,000 --> 00:01:46,000
+Người vận hành chọn Hub nguồn, Hub đích và xe khả dụng để tạo lệnh.
+
+18
+00:01:46,000 --> 00:01:51,000
+Bắt đầu lệnh giữ xe ở trạng thái đang điều chuyển.
+
+19
+00:01:51,000 --> 00:01:59,000
+Hoàn tất sẽ kiểm tra lại nguồn, sự cố và chỗ đích trước khi cập nhật xe cùng nhật ký.
+
+20
+00:01:59,000 --> 00:02:03,000
+Mỗi sự kiện ghi người thực hiện và thời điểm.
+
+21
+00:02:03,000 --> 00:02:10,000
+Regression còn kiểm tra đích đầy phải rollback và không tạo nhật ký hoàn tất giả.
+
+22
+00:02:10,000 --> 00:02:20,000
+Cuối cùng, người vận hành so sánh ba tình huống: nhu cầu lấy xe tăng, chỗ đỗ bị chiếm thêm và cổng sạc hỏng.
+
+23
+00:02:20,000 --> 00:02:27,000
+Mỗi lần chạy lưu snapshot, seed, tham số, phiên bản mô hình và kết quả riêng.
+
+24
+00:02:27,000 --> 00:02:34,000
+Bảng so sánh thể hiện số phục vụ, từ chối hoặc hàng chờ theo từng tài nguyên.
+
+25
+00:02:34,000 --> 00:02:37,000
+Có thể mở lịch sử và tải báo cáo TXT.
+
+26
+00:02:37,000 --> 00:02:44,000
+Runner đọc lại cả ba file tải xuống và xác minh dữ liệu Hub không đổi sau mô phỏng.
+
+27
+00:02:44,000 --> 00:02:52,000
+Đề xuất chỉ để tham khảo; muốn thực hiện phải tạo lệnh vận hành và kiểm tra trạng thái hiện tại.
+
+28
+00:02:52,000 --> 00:02:56,000
+Mô hình chưa hiệu chuẩn theo nhu cầu thực tế.
+
+29
+00:02:56,000 --> 00:03:00,000
+Video và báo cáo có khai báo việc dùng AI.
+

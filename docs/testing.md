@@ -1,5 +1,9 @@
 # Kiểm chứng nền tảng — 14/10/2026
 
+## Bản ứng viên tuần 2/leader tuần 3 — 28/10/2026
+
+Cài mới candidate trong thư mục sạch cùng host qua `npm run verify:delivery`: npm ci/setup:env/format/build pass, 130 backend + 62 frontend pass, 0 fail. Bổ sung ba regression T23/T29 và Chrome smoke thuê/trả/dispatch/ba kịch bản/history. Execution và lịch sử verifier fail/retest tại [28/10 release](test-runs/2026-10-28-release.md), coverage có giới hạn tại [traceability](test-runs/2026-10-28-traceability.md). Không cộng số các lần chạy hoặc nhận là toàn bộ biến thể 36 IT đã pass. Bằng chứng tải TXT còn cần xác minh; video final, rehearsal/máy khác/nộp bài chưa có xác nhận.
+
 ## T22/T36 — 25/10/2026, local chờ review
 
 Build frontend/backend pass; 113 backend + 62 frontend tests pass. Ba kịch bản/history/retry/role/DTO và snapshot không ghi vận hành được kiểm tra trên PostgreSQL/HTTP riêng. T36 kiểm tra 60 seeds × 3 kinds, bất biến, wait/utilization tính tay và recommendation theo tài nguyên. Regression frontend bảo vệ key retry, session cũ, clear, saved params/report và history race. Chi tiết/giới hạn tại [execution T22/T36](test-runs/2026-10-25-t22-t36.md); chưa xác minh walkthrough trình duyệt, chưa peer review/commit/push phần mới. Các giả định baseline tại [scenarios.md](scenarios.md).
@@ -151,3 +155,7 @@ Bản ghép nhánh Quỳnh Anh với main `0f1a10a` đã chạy `npm run build`,
 ## T17/T22/T36 — bản tích hợp 27/10/2026
 
 PR #16 đã tích hợp thành main `de65b75`; PR #18 ghép main đó và chuyển truy vấn thời gian snapshot từ HubsService xuống HubsRepository. `npm run format:check`, `npm run build`, `npm test` pass trên bản ghép: 126 backend + 62 frontend tests. Bao gồm hardening/idempotency thuê xe, ba kịch bản và 60 seed cho bất biến mô hình, snapshot không đổi dữ liệu vận hành, lịch sử/replay/pagination và đồng bộ UI. Hai migration `007_rental_idempotency.sql` và `007_simulation_runs.sql` cùng chạy được vì migration runner dùng toàn bộ tên file. Chưa xác nhận demo/nghiệm thu nhóm, kiểm thử chéo đủ năm thành viên hoặc đóng băng chức năng. Giới hạn mô hình tại docs/scenarios.md; web T17 chưa giữ key khi thử lại sau timeout.
+
+## Kiểm tra UI có ghi hình và đóng gói
+
+`npx playwright install chromium`, sau đó `npm run demo:record`. Runner luôn tạo DB/tài khoản và browser context riêng; output mặc định `.local/demo-recording`. `DEMO_OUTPUT_DIR` đổi thư mục, `DEMO_TIMING_SCALE` trong (0,1] rút ngắn các pause minh họa cho CI; thời gian chờ lịch đỗ vẫn dùng đồng hồ thật. Không dùng profile Chrome cá nhân. Workflow CI giữ video/ảnh/TXT và verification.json bằng upload-artifact. Năm luồng là smoke có oracle, không cộng vào con số 130/62. Đóng gói bản đã commit với `python3 scripts/package-delivery.py`; cần đủ PDF/PPTX/MP4/SRT trước khi chạy.

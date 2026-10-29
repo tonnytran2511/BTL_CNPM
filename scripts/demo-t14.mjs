@@ -88,12 +88,14 @@ function checkCancelled() {
 async function stop(exitCode = 0) {
   if (stopping) return;
   stopping = true;
+  // HTTP close waits for upgraded HMR sockets too. Close Vite's websocket
+  // server first so an open browser cannot block disposable DB cleanup.
+  await web?.close();
   if (http.listening) {
     const closed = new Promise((done) => http.close(done));
     http.closeAllConnections();
     await closed;
   }
-  await web?.close();
   if (api && api.exitCode === null && api.signalCode === null) {
     const exited = once(api, "exit");
     api.kill("SIGTERM");

@@ -1,6 +1,10 @@
 # Review và bàn giao của nhóm trưởng
 
-## Tình trạng thực tế
+## Trạng thái bàn giao 28/10/2026
+
+Các module tuần 2 đã tích hợp trong main `376b160`; xem [báo cáo](reports/system-report.md), [execution T23/T29](test-runs/2026-10-28-release.md) và [gate/bàn giao](reports/week2-week3-delivery.md). Nội dung bên dưới giữ lịch sử review nền tảng, không thay trạng thái mới. Diff candidate vẫn cần peer review sinh viên.
+
+## Tình trạng thực tế (lịch sử nền tảng)
 
 - Nền tảng có code và đã kiểm chứng local; auth, dữ liệu Hub, dashboard, snapshot, migration/seed hoạt động.
 - AuthModule/HubsModule đã tách file và export service; AppModule chỉ lắp ráp các module.
