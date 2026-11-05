@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import { checkT38 } from "./t38-check.mjs";
 import { OperationsRepository } from "../apps/api/dist/operations/operations.repository.js";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -9,6 +10,7 @@ import { resolve } from "node:path";
 import { createServer } from "node:net";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
+import { performance } from "node:perf_hooks";
 import EmbeddedPostgres from "embedded-postgres";
 import pg from "pg";
 import { root } from "../scripts/env.mjs";
@@ -73,9 +75,10 @@ test(
       SEED_DATA_FILE: "database/seed.example.json",
     };
     const base = `http://127.0.0.1:${apiPort}/api`;
-    const call = async (method, path, cookie, body) => {
+    const call = async (method, path, cookie, body, extraHeaders = {}) => {
       const headers =
         body === undefined ? {} : { "Content-Type": "application/json" };
+      Object.assign(headers, extraHeaders);
       if (cookie) {
         headers.Cookie = cookie;
         if (method !== "GET") headers.Origin = env.WEB_ORIGIN;
@@ -101,17 +104,34 @@ test(
         stdio: ["ignore", "pipe", "pipe"],
       });
       let serverLog = "";
-      server.stdout.on("data", (c) => (serverLog += c));
-      server.stderr.on("data", (c) => (serverLog += c));
+      const appendLog = (chunk) => {
+        serverLog = (serverLog + chunk).slice(-16_000);
+      };
+      server.stdout.on("data", appendLog);
+      server.stderr.on("data", appendLog);
       let exited = null;
-      server.on("exit", (code) => (exited = code));
+      let spawnError;
+      server.on("error", (error) => (spawnError = error));
+      server.on("exit", (code, signal) => {
+        exited = signal ?? code;
+      });
       let ready = false;
       let lastProbe = "chưa gọi được /health";
-      for (let i = 0; i < 300 && !ready && exited === null; i++) {
+      // Allow cold dependency imports while bounding the whole readiness wait.
+      const startupDeadline = performance.now() + 60_000;
+      while (
+        !ready &&
+        exited === null &&
+        !spawnError &&
+        performance.now() < startupDeadline
+      ) {
         try {
-          const probe = await call("GET", "/health");
+          const probe = await fetch(`${base}/health`, {
+            signal: AbortSignal.timeout(1000),
+          });
           lastProbe = `/health trả ${probe.status}`;
           ready = probe.status === 200;
+          await probe.body?.cancel();
         } catch (error) {
           lastProbe = `gọi /health lỗi: ${error?.cause?.code ?? error?.message}`;
         }
@@ -119,7 +139,7 @@ test(
       }
       assert.ok(
         ready,
-        `API did not start (exit code: ${exited}; ${lastProbe}; port ${apiPort}).\n${serverLog}`,
+        `API did not start within 60s (exit: ${exited}; spawn: ${spawnError?.message ?? "ok"}; ${lastProbe}; port ${apiPort}).\n${serverLog || "No startup output: the process may still be loading dependencies before Nest bootstrap. On macOS, ensure node_modules files are downloaded locally (not cloud placeholders). Reinstall locked dependencies with npm ci if needed. Rerun with NODE_DEBUG=module to trace imports."}`,
       );
       const login = async (email, pw) => {
         const r = await fetch(base + "/auth/login", {
@@ -633,6 +653,17 @@ test(
           }
         },
       );
+      await checkT38({
+        t,
+        pool,
+        fleet,
+        order,
+        post,
+        call,
+        operator,
+        student,
+        states,
+      });
     } finally {
       server?.kill();
       await pool?.end();

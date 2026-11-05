@@ -355,3 +355,41 @@ test("T36 empty fleet, minimum battery, zero charger service samples and invalid
     simulateScenario(snapshot, { ...parameters, seed: 4294967295 }, limits),
   );
 });
+
+test("T38 redistribution advice respects scarce source fleet and full destination independently", () => {
+  for (const sourceCount of [0, 1, 2]) {
+    for (const destinationCount of [0, 1, 3]) {
+      const input = structuredClone(snapshot);
+      input.resources[1].eligibleVehicleIds = Array.from(
+        { length: sourceCount },
+        (_, i) => `source-${i}`,
+      );
+      input.resources[0].parkingSpaceIds = Array.from(
+        { length: destinationCount },
+        (_, i) => `destination-${i}`,
+      );
+      const before = structuredClone(input);
+      const result = simulateScenario(input, parameters, limits);
+      const recommendation = result.recommendations[0];
+      const quantity = Math.min(
+        sourceCount,
+        destinationCount,
+        result.scenario.unserved,
+      );
+      assert.ok(result.scenario.unserved > 0);
+      assert.equal(recommendation.requiresRevalidation, true);
+      assert.equal(recommendation.snapshotCapturedAt, input.capturedAt);
+      if (quantity) {
+        assert.equal(recommendation.kind, "review_redistribution");
+        assert.equal(recommendation.quantity, quantity);
+        assert.equal(recommendation.sourceHubId, "b");
+        assert.equal(recommendation.targetHubId, "a");
+      } else {
+        assert.equal(recommendation.kind, "review_capacity");
+        assert.equal(recommendation.targetHubId, null);
+        assert.equal(recommendation.quantity, result.scenario.unserved);
+      }
+      assert.deepEqual(input, before);
+    }
+  }
+});

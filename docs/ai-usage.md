@@ -76,3 +76,7 @@ Codex tiếp tục đọc diagnostics CI và sửa teardown fixture T16 (W23-T02
 ## 29/10/2026 — video và bộ bàn giao
 
 Codex dùng Playwright trên Chromium/DB tạm theo ủy quyền Minh Tường để quay luồng thật, kiểm tra TXT/history và dữ liệu Hub không đổi. Có hỗ trợ dựng báo cáo PDF/UML, slide final, lời dẫn/phụ đề và gói ZIP/checksum. Video dùng giọng đọc tổng hợp macOS Linh, không clone giọng hoặc mạo danh người trình bày; rút ngắn đoạn chờ đến lịch đặt đỗ, không đổi đồng hồ/DB vượt điều kiện. Review kỹ thuật và CI không thay xác nhận kiểm thử chéo, rehearsal hoặc biên nhận nộp bài của sinh viên.
+
+05/11/2026: Codex hỗ trợ Minh Khuê T38 trên baseline 91c4308: bổ sung ma trận biên recommendation và regression HTTP nối simulation với điều chuyển khi nguồn/đích thay đổi. Engine T13/T22/T36/T38 10/10 pass qua dist có sẵn; build và HTTP/PostgreSQL bị chặn ở dependency/runtime chưa hoàn tất. Chưa sửa production, chưa xác nhận T38 hoàn thành hoặc peer review. Chi tiết tại `docs/test-runs/2026-11-05-t38-cross-test.md`.
+
+05/11/2026 (kiểm tra lại T38): Codex phục hồi dependency cloud placeholder từ npm cache có kiểm tra integrity; import runtime thành công. Targeted suite: 10 simulation pass, operations setup bị sandbox chặn listen 127.0.0.1 (EPERM). Build chưa hoàn tất khi đọc type dependency. Bổ sung checklist manual M01–M08; chưa tự xác nhận kết quả HTTP hoặc thao tác của Minh Khuê.
