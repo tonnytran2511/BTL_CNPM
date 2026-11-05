@@ -116,6 +116,13 @@ for (const signal of ["SIGINT", "SIGTERM"])
     cancelled = true;
     if (!initializing) void stop();
   });
+// Windows child.kill terminates immediately rather than delivering SIGTERM
+// to JS handlers. A parent with a private IPC channel can request cleanup.
+process.on("message", (message) => {
+  if (message?.type !== "shutdown") return;
+  cancelled = true;
+  if (!initializing) void stop();
+});
 async function command(file) {
   const child = spawn(process.execPath, [file], {
     cwd: root,

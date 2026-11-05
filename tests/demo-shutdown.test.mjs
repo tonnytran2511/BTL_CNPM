@@ -13,7 +13,7 @@ test(
     const child = spawn(process.execPath, ["scripts/demo-t14.mjs"], {
       cwd: root,
       detached: process.platform !== "win32",
-      stdio: ["ignore", "pipe", "pipe"],
+      stdio: ["ignore", "pipe", "pipe", "ipc"],
     });
     const exited = once(child, "exit");
     let session, socket, timeout;
@@ -54,7 +54,8 @@ test(
       const closed = once(socket, "close", {
         signal: AbortSignal.timeout(10_000),
       });
-      child.kill("SIGTERM");
+      if (process.platform === "win32") child.send({ type: "shutdown" });
+      else child.kill("SIGTERM");
       const [code] = await Promise.race([
         exited,
         once(AbortSignal.timeout(10_000), "abort").then(() => {

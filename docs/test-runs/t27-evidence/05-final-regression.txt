@@ -1,0 +1,184 @@
+
+> smart-e-mobility-hub@0.1.0 test
+> npm run test:api && npm run test:web
+
+
+> smart-e-mobility-hub@0.1.0 test:api
+> npm run build -w @emobility/api && node scripts/test-api.mjs
+
+
+> @emobility/api@0.1.0 build
+> tsc -p tsconfig.json
+
+✔ BR-07 long waiting requests lead with FIFO, even ahead of urgent/low battery (3.7121ms)
+✔ BR-07 urgency, low battery, deadlines and stable IDs break ties (0.3199ms)
+✔ Priority is deterministic and does not mutate caller data (0.3783ms)
+✔ Changing configured urgency and waiting thresholds changes order at the boundary (0.24ms)
+✔ disposable demo shuts down with an open Vite HMR websocket and removes its cluster (16984.0285ms)
+✔ T15 all server failures redact internal messages in responses and logs (1.4383ms)
+✔ T08 safe client error details survive the shared filter (0.8848ms)
+✔ T15 validation messages remain actionable and client errors keep their status (0.4837ms)
+▶ Foundation against isolated PostgreSQL and real HTTP server
+  ✔ T20 charging failure, recovery and incident integration (4806.6958ms)
+  ✔ T19 rental charging lifecycle and cross-module races (3770.4129ms)
+  ✔ T19 private charging workflow (1283.2573ms)
+  ✔ Mai Anh parking and charging integration (3192.906ms)
+  ✔ T18 concurrent parking and charging allocation safety (3155.0267ms)
+  ✔ T26 cross-check of parking and charging boundaries (4510.0442ms)
+  ✔ T14/T35 Hub management integration and incident race (3032.3238ms)
+  ✔ shared transaction commits, rolls back and enforces read-only snapshots (1132.1704ms)
+  ✔ config uses environment and unauthenticated routes are protected (9.0459ms)
+  ✔ invalid credentials, role injection and invalid DTO rejected (132.6294ms)
+  ✔ T15 integrated routes enforce authentication and operator permissions with consistent errors (481.1801ms)
+  ✔ T15 rental mutations update overview, Hub detail and student Hub list through real APIs (259.8286ms)
+  ✔ sessions do not expose credentials; authorization is server-side (23.889ms)
+  ✔ T13 operator simulation validates requests and leaves operational tables unchanged (335.9094ms)
+  ✔ T22 scenarios, persisted history, permissions, retries and operational isolation (670.8625ms)
+  ✔ seed is idempotent; Hub counts match actual database resources (23.0366ms)
+  ✔ resource mutations and configured threshold affect dashboard dynamically (29.3865ms)
+  ✔ inactive Hub excluded for students; expired holds free capacity; empty Hub supported (247.6576ms)
+  ✔ snapshot is consistent and read-only; database constraints enforce valid core data (26.8505ms)
+  ✔ T29 all operator route families reject anonymous/student before mutation (384.1146ms)
+  ✔ T23 rental return, charging interruption/recovery and redistribution share the same vehicle (680.0943ms)
+  ✔ T29 saved simulation remains read-only and stale dispatch is revalidated (933.8638ms)
+T27 operational tables=19; before/after SHA256=88d14b6a11a84ad947403d768ea0fbbfbe58f912455516671de0f7f2c86e9cbe
+  ✔ T27 IT-33/35: HTTP projection excludes bookings, live holds and failed/open-incident chargers; all operational tables unchanged (285.6083ms)
+  ✔ T27 IT-32: HTTP invalid resources/time rejected without simulation history or operational writes (206.3084ms)
+  ✔ T27 IT-33/35: old report remains immutable after real booking consumes a modeled free space (147.3753ms)
+  ✔ T27 IT-36: dispatch from actual recommendation revalidates reserved source and full destination (623.5305ms)
+  ✔ current account role and activation take effect on an existing session (164.0846ms)
+  ✔ login rotates the current session and stores only a token hash (145.5226ms)
+  ✔ login rate limit and Secure cookie config enforced on an isolated API instance (2088.4185ms)
+  ✔ cross-origin mutations rejected; logout revokes existing token immediately (53.2231ms)
+  ✔ API survives closed idle connections and reconnects (139.1402ms)
+✔ Foundation against isolated PostgreSQL and real HTTP server (49855.7213ms)
+✔ T35 DTOs validate Hub, capacity and charging point input (6.9075ms)
+✔ T35 rejects capacity above persisted configuration or occupied/held resources (1.656ms)
+✔ T35 reduces only removable spaces and creates unique DB-backed space codes (0.5784ms)
+✔ T35 protects Hub and charging point records with open incidents (0.5793ms)
+✔ T35 locks a charging point before checking incidents and deleting it (0.4414ms)
+✔ Mobility DTO rejects missing nested vehicle, spoofed owner, invalid pin and time without timezone (9.8643ms)
+✔ Parking service enforces ownership, configured duration, active Hub and capacity (1.4491ms)
+✔ Charging requires ownership, physical presence and a higher target; students cannot charge rental vehicles (0.8707ms)
+✔ Allocation reuses the caller transaction and rejects missing source or full target (1.3576ms)
+▶ Operations and rental integration against real PostgreSQL
+  ✔ operators only; invalid/blank/spoofed payloads rejected before writes (198.6584ms)
+  ✔ incident actor/time, revalidation at start, resolve and terminal-state guards (655.7282ms)
+  ✔ pending/cancel does not move vehicles; active Hub/source/duplicate checks (1047.9203ms)
+  ✔ start rejects changed Hub or one busy vehicle without partial writes (427.7771ms)
+  ✔ two orders race for the same fleet: one start succeeds (315.3176ms)
+  ✔ completion moves a vehicle and its parking allocation atomically (614.3317ms)
+  ✔ redistribution Hub locks allow concurrent reservation foreign-key checks (146.5967ms)
+  ✔ rental reservation and redistribution start cannot both claim a vehicle (209.7356ms)
+  ✔ failure after claiming vehicles rolls back the complete start (90.0732ms)
+  ✔ T38 stale recommendation: source resources change before execution (817.0579ms)
+  ✔ T38 stale recommendation: destination resources change before execution (564.7426ms)
+✔ Operations and rental integration against real PostgreSQL (19036.9563ms)
+▶ T17 rental error handling and Idempotency-Key against real PostgreSQL
+  ✔ pickup is refused when the held vehicle's battery fell below the minimum (292.4208ms)
+  ✔ pickup is refused while the vehicle has an open incident, then allowed once resolved (324.8175ms)
+  ✔ pickup is refused when the source hub is inactive (60.157ms)
+  ✔ return to a full hub keeps the trip active and suggests other hubs (462.3422ms)
+  ✔ Idempotency-Key validation (53.4128ms)
+  ✔ reserve: same key and payload replays, different payload is 409 (364.0517ms)
+  ✔ reserve: 8 concurrent requests with one key create one reservation (613.6479ms)
+  ✔ a failed request does not burn its key (89.0429ms)
+  ✔ cancel: repeating with the same key returns the same result (89.4823ms)
+  ✔ pickup: repeated and concurrent requests create exactly one trip (194.5788ms)
+  ✔ return: repeated and concurrent requests complete the trip once (256.8141ms)
+  ✔ return blocked by a full hub is retryable with the same key (87.5412ms)
+✔ T17 rental error handling and Idempotency-Key against real PostgreSQL (18401.2689ms)
+✔ reservation: only active can move, final states never return (1.4152ms)
+✔ trip: active -> completed only (0.2118ms)
+✔ vehicle status changes follow the rental lifecycle (0.9522ms)
+✔ isRentable blocks broken, busy, low-battery and inactive-Hub vehicles (0.2391ms)
+✔ user filter can only raise the configured minimum battery (0.1603ms)
+✔ search DTO converts numbers and rejects bad or unknown input (7.2506ms)
+▶ T06 schema constraints and GET /vehicles against real PostgreSQL
+  ✔ anonymous request is rejected (4.7981ms)
+  ✔ only available, sufficiently charged vehicles in active Hubs are listed (16.522ms)
+  ✔ filters by Hub, type and battery; user filter cannot go below the configured minimum (156.0777ms)
+  ✔ inactive Hub, reserved or low-battery vehicles disappear (32.1533ms)
+  ✔ schema: one active reservation per vehicle, one trip per reservation, state checks (306.963ms)
+✔ T06 schema constraints and GET /vehicles against real PostgreSQL (17243.7853ms)
+▶ T16 anti double booking and lazy expiry against real PostgreSQL
+  ✔ 10 simultaneous requests for one vehicle: exactly one reservation (699.5895ms)
+  ✔ simultaneous requests on two different vehicles do not block each other (315.2146ms)
+  ✔ listing my reservations expires overdue ones and releases the vehicle (48.1517ms)
+  ✔ a not-yet-due reservation is left alone (53.9379ms)
+  ✔ vehicle search shows an expired-held vehicle again (37.2035ms)
+  ✔ another user can reserve a vehicle whose hold expired (36.3423ms)
+  ✔ cancelling an overdue reservation returns 409 but still releases the vehicle (16.7531ms)
+  ✔ only the owner can trigger cancel on overdue (9.8366ms)
+  ✔ expiry never overwrites a vehicle moved to another state (26.3167ms)
+  ✔ expiry racing with cancel, list and reserve keeps data consistent (804.1519ms)
+✔ T16 anti double booking and lazy expiry against real PostgreSQL (17643.2247ms)
+✔ T16 background scheduler releases overdue reservations without any request (15753.848ms)
+▶ T07 reserve / cancel vehicle against real PostgreSQL
+  ✔ anonymous requests are rejected (8.1362ms)
+  ✔ request validation and unknown vehicle (124.044ms)
+  ✔ reserving saves the hold, marks the vehicle reserved and uses the configured hold time (124.0319ms)
+  ✔ a held vehicle cannot be reserved again (12.0951ms)
+  ✔ my list only contains my own reservations (87.1541ms)
+  ✔ low battery, maintenance and inactive-Hub vehicles are refused (222.7017ms)
+  ✔ two users reserving the same vehicle at once: exactly one succeeds (149.7156ms)
+  ✔ a failed reservation rolls the vehicle status back (36.8244ms)
+  ✔ cancel: ownership, state, vehicle release (767.943ms)
+  ✔ cancel never overwrites a vehicle that was moved to another state (34.4641ms)
+✔ T07 reserve / cancel vehicle against real PostgreSQL (17819.9975ms)
+✔ T22 three scenarios produce dynamic results without modifying their snapshot (5.2891ms)
+✔ T22 validates scenario-specific resources and workload before simulation (0.6189ms)
+✔ T36 known charging queue produces correct completion, utilization, served-only wait and censored wait (0.698ms)
+✔ T36 failure interrupts an initial session only in copied state and preserves its outstanding demand (0.5392ms)
+✔ T36 60 seeds preserve determinism, immutability, capacity and demand conservation across all scenarios (21.7512ms)
+✔ T36 recommendations stay bounded by source/target snapshot resources and disappear without a deficit (0.5492ms)
+✔ T36 empty fleet, minimum battery, zero charger service samples and invalid edge inputs (1.409ms)
+✔ T38 redistribution advice respects scarce source fleet and full destination independently (1.4872ms)
+✔ T13 is reproducible, immutable, conserves vehicles and demand; higher demand cannot reduce unmet demand (4.5095ms)
+✔ T13 zero demand, empty fleet, minimum battery and invalid parameters (0.7869ms)
+✔ T27 IT-34/35: independent charging oracle includes active session, queue age, failed port and completion at horizon (4.6495ms)
+✔ T27 IT-35: parking/charging advice excludes inactive, occupied and failed resources and has explicit fallback (0.8729ms)
+▶ T08 pickup / return trip against real PostgreSQL
+  ✔ anonymous requests are rejected (31.7459ms)
+  ✔ validation: bad ids, unknown ids, missing or extra fields (515.5876ms)
+  ✔ pickup: one transaction fulfils the reservation, starts the trip, frees the source space (193.345ms)
+  ✔ return: claims a target space, completes the trip and moves the vehicle (96.772ms)
+  ✔ repeated pickup and return do not duplicate or corrupt data (139.0924ms)
+  ✔ two parallel pickups of the same reservation create exactly one trip (249.5ms)
+  ✔ only the owner may pick up or return (106.7561ms)
+  ✔ pickup refused for cancelled, expired or broken reservations; nothing changes (464.0655ms)
+  ✔ pickup rolls everything back when the vehicle does not occupy its source space (197.3403ms)
+  ✔ return to a full Hub keeps the trip active and suggests other Hubs (508.5118ms)
+  ✔ return to an inactive Hub is refused and the trip stays active (212.5835ms)
+  ✔ a space promised to a future parking booking is not given to a returning rental (393.813ms)
+  ✔ two vehicles racing for the last space: exactly one return succeeds (242.8409ms)
+  ✔ return refused when the vehicle was taken out of in_use (incident) (66.5443ms)
+  ✔ all active trips remain listed even when older than the history window (267.4448ms)
+  ✔ return suggestions use validated operational configuration (561.6434ms)
+  ✔ pickup and return wait for a Hub without holding the vehicle lock (247.3361ms)
+  ✔ pickup rechecks expiry after waiting for resource locks (1063.9677ms)
+✔ T08 pickup / return trip against real PostgreSQL (19213.3128ms)
+ℹ tests 140
+ℹ suites 0
+ℹ pass 140
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 107479.8524
+
+> smart-e-mobility-hub@0.1.0 test:web
+> npm run test -w @emobility/web
+
+
+> @emobility/web@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.11 C:/Users/Mai Anh/Downloads/BTL_T27_Work/BTL_CNPM/apps/web
+
+
+ Test Files  10 passed (10)
+      Tests  62 passed (62)
+   Start at  21:43:13
+   Duration  3.07s (transform 2.48s, setup 0ms, import 5.55s, tests 1.13s, environment 14.09s)

@@ -1,0 +1,20 @@
+▶ T07 reserve / cancel vehicle against real PostgreSQL
+  ✔ anonymous requests are rejected (26.3291ms)
+  ✔ request validation and unknown vehicle (171.9287ms)
+  ✔ reserving saves the hold, marks the vehicle reserved and uses the configured hold time (172.3327ms)
+  ✔ a held vehicle cannot be reserved again (21.3641ms)
+  ✔ my list only contains my own reservations (74.8476ms)
+  ✔ low battery, maintenance and inactive-Hub vehicles are refused (262.0405ms)
+  ✔ two users reserving the same vehicle at once: exactly one succeeds (138.3175ms)
+  ✔ a failed reservation rolls the vehicle status back (29.3438ms)
+  ✔ cancel: ownership, state, vehicle release (568.7048ms)
+  ✔ cancel never overwrites a vehicle that was moved to another state (54.0374ms)
+✔ T07 reserve / cancel vehicle against real PostgreSQL (14149.8436ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14427.681

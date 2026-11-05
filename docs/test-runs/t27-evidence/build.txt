@@ -1,0 +1,22 @@
+
+> smart-e-mobility-hub@0.1.0 build
+> npm run build -w @emobility/api && npm run build -w @emobility/web
+
+
+> @emobility/api@0.1.0 build
+> tsc -p tsconfig.json
+
+
+> @emobility/web@0.1.0 build
+> tsc -b && vite build
+
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 76 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.46 kB │ gzip:   0.30 kB
+dist/assets/index-B0HXUNgc.css   19.11 kB │ gzip:   4.53 kB
+dist/assets/index-B5EQOb7q.js   352.50 kB │ gzip: 100.15 kB
+
+✓ built in 186ms

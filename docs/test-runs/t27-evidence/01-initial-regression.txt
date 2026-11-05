@@ -1,0 +1,236 @@
+
+> smart-e-mobility-hub@0.1.0 test
+> npm run test:api && npm run test:web
+
+
+> smart-e-mobility-hub@0.1.0 test:api
+> npm run build -w @emobility/api && node scripts/test-api.mjs
+
+
+> @emobility/api@0.1.0 build
+> tsc -p tsconfig.json
+
+✔ BR-07 long waiting requests lead with FIFO, even ahead of urgent/low battery (4.6606ms)
+✔ BR-07 urgency, low battery, deadlines and stable IDs break ties (0.4326ms)
+✔ Priority is deterministic and does not mutate caller data (0.3373ms)
+✔ Changing configured urgency and waiting thresholds changes order at the boundary (0.2315ms)
+✖ disposable demo shuts down with an open Vite HMR websocket and removes its cluster (25637.8818ms)
+✔ T15 all server failures redact internal messages in responses and logs (1.608ms)
+✔ T08 safe client error details survive the shared filter (1.1285ms)
+✔ T15 validation messages remain actionable and client errors keep their status (0.5607ms)
+▶ Foundation against isolated PostgreSQL and real HTTP server
+  ✔ T20 charging failure, recovery and incident integration (11455.2298ms)
+  ✔ T19 rental charging lifecycle and cross-module races (5164.6868ms)
+  ✔ T19 private charging workflow (1520.2317ms)
+  ✔ Mai Anh parking and charging integration (3393.0903ms)
+  ✔ T18 concurrent parking and charging allocation safety (2799.6825ms)
+  ✔ T26 cross-check of parking and charging boundaries (3908.1037ms)
+  ✔ T14/T35 Hub management integration and incident race (2021.0822ms)
+  ✔ shared transaction commits, rolls back and enforces read-only snapshots (546.892ms)
+  ✔ config uses environment and unauthenticated routes are protected (9.9892ms)
+  ✔ invalid credentials, role injection and invalid DTO rejected (120.6535ms)
+  ✔ T15 integrated routes enforce authentication and operator permissions with consistent errors (366.8908ms)
+  ✔ T15 rental mutations update overview, Hub detail and student Hub list through real APIs (259.4304ms)
+  ✔ sessions do not expose credentials; authorization is server-side (22.7697ms)
+  ✔ T13 operator simulation validates requests and leaves operational tables unchanged (270.1961ms)
+  ✔ T22 scenarios, persisted history, permissions, retries and operational isolation (636.8873ms)
+  ✔ seed is idempotent; Hub counts match actual database resources (27.4786ms)
+  ✔ resource mutations and configured threshold affect dashboard dynamically (34.4143ms)
+  ✔ inactive Hub excluded for students; expired holds free capacity; empty Hub supported (140.9613ms)
+  ✔ snapshot is consistent and read-only; database constraints enforce valid core data (28.3048ms)
+  ✔ T29 all operator route families reject anonymous/student before mutation (431.5386ms)
+  ✔ T23 rental return, charging interruption/recovery and redistribution share the same vehicle (556.6086ms)
+  ✔ T29 saved simulation remains read-only and stale dispatch is revalidated (360.0507ms)
+T27 operational tables=19; before/after SHA256=44da5417881b6007fc36ee2b344285d3c9c54231f9e40888451e6f7916a5c55c
+  ✔ T27 IT-33/35: HTTP projection excludes bookings, live holds and failed/open-incident chargers; all operational tables unchanged (273.4107ms)
+  ✔ T27 IT-32: HTTP invalid resources/time rejected without simulation history or operational writes (186.0898ms)
+  ✔ T27 IT-33/35: old report remains immutable after real booking consumes a modeled free space (149.4586ms)
+  ✔ T27 IT-36: dispatch from actual recommendation revalidates reserved source and full destination (361.482ms)
+  ✔ current account role and activation take effect on an existing session (128.7643ms)
+  ✔ login rotates the current session and stores only a token hash (169.8107ms)
+  ✔ login rate limit and Secure cookie config enforced on an isolated API instance (1178.0982ms)
+  ✔ cross-origin mutations rejected; logout revokes existing token immediately (64.7818ms)
+  ✔ API survives closed idle connections and reconnects (70.93ms)
+✖ Foundation against isolated PostgreSQL and real HTTP server (57494.7346ms)
+C:\Users\Mai Anh\Downloads\BTL_T27_Work\BTL_CNPM\apps\api\dist\config.js:13
+        throw new Error(`Configure ${name} in .env`);
+              ^
+
+Error: Configure COOKIE_SECURE in .env
+    at required (C:\Users\Mai Anh\Downloads\BTL_T27_Work\BTL_CNPM\apps\api\dist\config.js:13:15)
+    at Object.<anonymous> (C:\Users\Mai Anh\Downloads\BTL_T27_Work\BTL_CNPM\apps\api\dist\config.js:22:16)
+    at Module._compile (node:internal/modules/cjs/loader:1929:14)
+    at Object..js (node:internal/modules/cjs/loader:2060:10)
+    at Module.load (node:internal/modules/cjs/loader:1651:32)
+    at Module._load (node:internal/modules/cjs/loader:1443:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.require (node:internal/modules/cjs/loader:1674:12)
+    at require (node:internal/modules/helpers:157:16)
+    at Object.<anonymous> (C:\Users\Mai Anh\Downloads\BTL_T27_Work\BTL_CNPM\apps\api\dist\database\database.module.js:15:18)
+
+Node.js v24.20.0
+✖ tests\hub-management.test.mjs (1933.8276ms)
+C:\Users\Mai Anh\Downloads\BTL_T27_Work\BTL_CNPM\apps\api\dist\config.js:13
+        throw new Error(`Configure ${name} in .env`);
+              ^
+
+Error: Configure COOKIE_SECURE in .env
+    at required (C:\Users\Mai Anh\Downloads\BTL_T27_Work\BTL_CNPM\apps\api\dist\config.js:13:15)
+    at Object.<anonymous> (C:\Users\Mai Anh\Downloads\BTL_T27_Work\BTL_CNPM\apps\api\dist\config.js:22:16)
+    at Module._compile (node:internal/modules/cjs/loader:1929:14)
+    at Object..js (node:internal/modules/cjs/loader:2060:10)
+    at Module.load (node:internal/modules/cjs/loader:1651:32)
+    at Module._load (node:internal/modules/cjs/loader:1443:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.require (node:internal/modules/cjs/loader:1674:12)
+    at require (node:internal/modules/helpers:157:16)
+    at Object.<anonymous> (C:\Users\Mai Anh\Downloads\BTL_T27_Work\BTL_CNPM\apps\api\dist\database\database.module.js:15:18)
+
+Node.js v24.20.0
+✖ tests\mobility-unit.test.mjs (1879.4638ms)
+C:\Users\Mai Anh\Downloads\BTL_T27_Work\BTL_CNPM\apps\api\dist\config.js:13
+        throw new Error(`Configure ${name} in .env`);
+              ^
+
+Error: Configure COOKIE_SECURE in .env
+    at required (C:\Users\Mai Anh\Downloads\BTL_T27_Work\BTL_CNPM\apps\api\dist\config.js:13:15)
+    at Object.<anonymous> (C:\Users\Mai Anh\Downloads\BTL_T27_Work\BTL_CNPM\apps\api\dist\config.js:22:16)
+    at Module._compile (node:internal/modules/cjs/loader:1929:14)
+    at Object..js (node:internal/modules/cjs/loader:2060:10)
+    at Module.load (node:internal/modules/cjs/loader:1651:32)
+    at Module._load (node:internal/modules/cjs/loader:1443:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.require (node:internal/modules/cjs/loader:1674:12)
+    at require (node:internal/modules/helpers:157:16)
+    at Object.<anonymous> (C:\Users\Mai Anh\Downloads\BTL_T27_Work\BTL_CNPM\apps\api\dist\database\database.module.js:15:18)
+
+Node.js v24.20.0
+✖ tests\operations.test.mjs (1562.0884ms)
+▶ T17 rental error handling and Idempotency-Key against real PostgreSQL
+  ✔ pickup is refused when the held vehicle's battery fell below the minimum (264.2566ms)
+  ✔ pickup is refused while the vehicle has an open incident, then allowed once resolved (205.4267ms)
+  ✔ pickup is refused when the source hub is inactive (51.7326ms)
+  ✔ return to a full hub keeps the trip active and suggests other hubs (382.4092ms)
+  ✔ Idempotency-Key validation (31.0522ms)
+  ✔ reserve: same key and payload replays, different payload is 409 (550.8994ms)
+  ✔ reserve: 8 concurrent requests with one key create one reservation (1580.9231ms)
+  ✔ a failed request does not burn its key (63.1642ms)
+  ✔ cancel: repeating with the same key returns the same result (84.9661ms)
+  ✔ pickup: repeated and concurrent requests create exactly one trip (164.2302ms)
+  ✔ return: repeated and concurrent requests complete the trip once (514.9458ms)
+  ✔ return blocked by a full hub is retryable with the same key (103.2744ms)
+✔ T17 rental error handling and Idempotency-Key against real PostgreSQL (32387.6676ms)
+✔ reservation: only active can move, final states never return (1.2387ms)
+✔ trip: active -> completed only (0.1668ms)
+✔ vehicle status changes follow the rental lifecycle (0.8262ms)
+✔ isRentable blocks broken, busy, low-battery and inactive-Hub vehicles (0.2178ms)
+✔ user filter can only raise the configured minimum battery (0.1347ms)
+✔ search DTO converts numbers and rejects bad or unknown input (5.0008ms)
+▶ T06 schema constraints and GET /vehicles against real PostgreSQL
+  ✔ anonymous request is rejected (19.4334ms)
+  ✔ only available, sufficiently charged vehicles in active Hubs are listed (17.5027ms)
+  ✔ filters by Hub, type and battery; user filter cannot go below the configured minimum (286.4447ms)
+  ✔ inactive Hub, reserved or low-battery vehicles disappear (34.2833ms)
+  ✔ schema: one active reservation per vehicle, one trip per reservation, state checks (1300.1826ms)
+✔ T06 schema constraints and GET /vehicles against real PostgreSQL (32044.0961ms)
+▶ T16 anti double booking and lazy expiry against real PostgreSQL
+  ✔ 10 simultaneous requests for one vehicle: exactly one reservation (2291.0678ms)
+  ✔ simultaneous requests on two different vehicles do not block each other (348.9448ms)
+  ✔ listing my reservations expires overdue ones and releases the vehicle (21.7216ms)
+  ✔ a not-yet-due reservation is left alone (27.8814ms)
+  ✔ vehicle search shows an expired-held vehicle again (23.5103ms)
+  ✔ another user can reserve a vehicle whose hold expired (41.698ms)
+  ✔ cancelling an overdue reservation returns 409 but still releases the vehicle (19.8151ms)
+  ✔ only the owner can trigger cancel on overdue (15.6649ms)
+  ✔ expiry never overwrites a vehicle moved to another state (23.8602ms)
+  ✔ expiry racing with cancel, list and reserve keeps data consistent (3984.3177ms)
+✔ T16 anti double booking and lazy expiry against real PostgreSQL (32277.2838ms)
+✔ T16 background scheduler releases overdue reservations without any request (15456.3747ms)
+▶ T07 reserve / cancel vehicle against real PostgreSQL
+  ✔ anonymous requests are rejected (19.0831ms)
+  ✔ request validation and unknown vehicle (244.0012ms)
+  ✔ reserving saves the hold, marks the vehicle reserved and uses the configured hold time (351.6919ms)
+  ✔ a held vehicle cannot be reserved again (17.2219ms)
+  ✔ my list only contains my own reservations (423.066ms)
+  ✔ low battery, maintenance and inactive-Hub vehicles are refused (653.011ms)
+  ✔ two users reserving the same vehicle at once: exactly one succeeds (536.8822ms)
+  ✔ a failed reservation rolls the vehicle status back (20.1199ms)
+  ✔ cancel: ownership, state, vehicle release (2408.8171ms)
+  ✔ cancel never overwrites a vehicle that was moved to another state (72.2824ms)
+✔ T07 reserve / cancel vehicle against real PostgreSQL (32077.9632ms)
+✔ T22 three scenarios produce dynamic results without modifying their snapshot (3.3447ms)
+✔ T22 validates scenario-specific resources and workload before simulation (0.3973ms)
+✔ T36 known charging queue produces correct completion, utilization, served-only wait and censored wait (0.3692ms)
+✔ T36 failure interrupts an initial session only in copied state and preserves its outstanding demand (0.3197ms)
+✔ T36 60 seeds preserve determinism, immutability, capacity and demand conservation across all scenarios (15.5452ms)
+✔ T36 recommendations stay bounded by source/target snapshot resources and disappear without a deficit (0.4155ms)
+✔ T36 empty fleet, minimum battery, zero charger service samples and invalid edge inputs (0.9261ms)
+✔ T38 redistribution advice respects scarce source fleet and full destination independently (0.9755ms)
+✔ T13 is reproducible, immutable, conserves vehicles and demand; higher demand cannot reduce unmet demand (2.6647ms)
+✔ T13 zero demand, empty fleet, minimum battery and invalid parameters (0.4907ms)
+✔ T27 IT-34/35: independent charging oracle includes active session, queue age, failed port and completion at horizon (2.9234ms)
+✔ T27 IT-35: parking/charging advice excludes inactive, occupied and failed resources and has explicit fallback (0.6616ms)
+▶ T08 pickup / return trip against real PostgreSQL
+  ✔ anonymous requests are rejected (29.8187ms)
+  ✔ validation: bad ids, unknown ids, missing or extra fields (1256.7889ms)
+  ✔ pickup: one transaction fulfils the reservation, starts the trip, frees the source space (383.3121ms)
+  ✔ return: claims a target space, completes the trip and moves the vehicle (151.1629ms)
+  ✔ repeated pickup and return do not duplicate or corrupt data (134.6809ms)
+  ✔ two parallel pickups of the same reservation create exactly one trip (548.7238ms)
+  ✔ only the owner may pick up or return (66.4325ms)
+  ✔ pickup refused for cancelled, expired or broken reservations; nothing changes (2730.0585ms)
+  ✔ pickup rolls everything back when the vehicle does not occupy its source space (481.8899ms)
+  ✔ return to a full Hub keeps the trip active and suggests other Hubs (1629.6531ms)
+  ✔ return to an inactive Hub is refused and the trip stays active (514.9366ms)
+  ✔ a space promised to a future parking booking is not given to a returning rental (368.4198ms)
+  ✔ two vehicles racing for the last space: exactly one return succeeds (309.4806ms)
+  ✔ return refused when the vehicle was taken out of in_use (incident) (56.5173ms)
+  ✔ all active trips remain listed even when older than the history window (268.3191ms)
+  ✔ return suggestions use validated operational configuration (530.4352ms)
+  ✔ pickup and return wait for a Hub without holding the vehicle lock (160.6823ms)
+  ✔ pickup rechecks expiry after waiting for resource locks (1048.6583ms)
+✔ T08 pickup / return trip against real PostgreSQL (33745.282ms)
+ℹ tests 122
+ℹ suites 0
+ℹ pass 117
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 57978.7865
+
+✖ failing tests:
+
+test at tests\demo-shutdown.test.mjs:9:1
+✖ disposable demo shuts down with an open Vite HMR websocket and removes its cluster (25637.8818ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  null !== 0
+
+      at TestContext.<anonymous> (file:///C:/Users/Mai%20Anh/Downloads/BTL_T27_Work/BTL_CNPM/tests/demo-shutdown.test.mjs:64:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\foundation.test.mjs:41:1
+✖ Foundation against isolated PostgreSQL and real HTTP server (57494.7346ms)
+  [Error: EBUSY: resource busy or locked, rmdir 'C:\Users\MAIANH~1\AppData\Local\Temp\emobility-test-TccBVx'] { errno: -4082, code: 'EBUSY', syscall: 'rmdir', path: 'C:\\Users\\MAIANH~1\\AppData\\Local\\Temp\\emobility-test-TccBVx' }
+
+test at tests\hub-management.test.mjs:1:1
+✖ tests\hub-management.test.mjs (1933.8276ms)
+  'test failed'
+
+test at tests\mobility-unit.test.mjs:1:1
+✖ tests\mobility-unit.test.mjs (1879.4638ms)
+  'test failed'
+
+test at tests\operations.test.mjs:1:1
+✖ tests\operations.test.mjs (1562.0884ms)
+  'test failed'

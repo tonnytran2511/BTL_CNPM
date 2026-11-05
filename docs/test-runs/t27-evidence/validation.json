@@ -1,0 +1,42 @@
+{
+  "execution": "T27-20261105",
+  "timezone": "Asia/Saigon",
+  "baseCommit": "3478f56ed49ca08310ec652be41b3414cc309464",
+  "branch": "t27/simulation-cross-testing",
+  "node": "v24.20.0",
+  "npm": "11.19.0",
+  "build": "pass",
+  "api": {
+    "tests": 140,
+    "pass": 140,
+    "fail": 0
+  },
+  "web": {
+    "tests": 62,
+    "pass": 62,
+    "fail": 0
+  },
+  "newT27Cases": 6,
+  "operationalTablesCompared": 19,
+  "operationalBeforeAfterHash": "88d14b6a11a84ad947403d768ea0fbbfbe58f912455516671de0f7f2c86e9cbe",
+  "changedFilesPrettier": "pass",
+  "wholeRepoPrettier": "fail - 233 pre-existing files; see format.txt",
+  "businessEngineDefectsFound": 0,
+  "committed": false,
+  "merged": false,
+  "pushed": false,
+  "evidenceSha256": {
+    "01-initial-regression.txt": "137b48160f991ee2a5c2db4039f4d1c575c2fbb3f634e13f04402cd27833c3ab",
+    "02-initial-web-build.txt": "1793017cd73cc1e267070e5e70c9e421b72107e9422bd9c16036959d9e832a0f",
+    "03-unbounded-regression.txt": "05b079681fe2c95224b2d2cb9b0e83f9db333a5a763072eb15d89af335d0e422",
+    "04-bounded-regression.txt": "962deb26712163bc31ee0bd04be80029731575169aacf901d824482f0d3b5590",
+    "05-final-regression.txt": "8b1c6db35b1d3872b2e53e290c336e66cb28fec5f109dac9be73502ce4b60495",
+    "build.txt": "85df72506687a0616109937dfbb23c0d1eaae54650b7a8c104d3b2bacb7c6d7c",
+    "changed-format.txt": "f20510a9da4717c51c4cffee6d0dd88d6c9a723d0a83711d01216f5b48961283",
+    "demo-retest.txt": "3d8cd2d7fc27f41c3718d8a803132b21598b52e533f21f7c9a1320b6b635ccec",
+    "engine.txt": "2d6cb8ccd6818d8596894b7cc43162cf3a6d2e0c078251c3beff4c4788d27380",
+    "format.txt": "a988432afe96ff0699411bc354f2e9b1dd2ae16d2a537199430b443274743978",
+    "reservation-retest.txt": "09af8cafbf851ff36033dd5a4f86793be6e3f1afaf930e512705293b8a696df5"
+  },
+  "evidenceNormalization": "UTF-8 LF; trailing whitespace and blank EOF lines removed; original .log retained locally"
+}

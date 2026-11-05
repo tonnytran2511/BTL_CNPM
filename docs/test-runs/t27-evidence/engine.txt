@@ -1,0 +1,20 @@
+✔ T22 three scenarios produce dynamic results without modifying their snapshot (5.5661ms)
+✔ T22 validates scenario-specific resources and workload before simulation (0.6662ms)
+✔ T36 known charging queue produces correct completion, utilization, served-only wait and censored wait (0.5508ms)
+✔ T36 failure interrupts an initial session only in copied state and preserves its outstanding demand (0.5104ms)
+✔ T36 60 seeds preserve determinism, immutability, capacity and demand conservation across all scenarios (22.1862ms)
+✔ T36 recommendations stay bounded by source/target snapshot resources and disappear without a deficit (0.6494ms)
+✔ T36 empty fleet, minimum battery, zero charger service samples and invalid edge inputs (1.2347ms)
+✔ T38 redistribution advice respects scarce source fleet and full destination independently (1.4464ms)
+✔ T13 is reproducible, immutable, conserves vehicles and demand; higher demand cannot reduce unmet demand (3.006ms)
+✔ T13 zero demand, empty fleet, minimum battery and invalid parameters (0.798ms)
+✔ T27 IT-34/35: independent charging oracle includes active session, queue age, failed port and completion at horizon (4.7963ms)
+✔ T27 IT-35: parking/charging advice excludes inactive, occupied and failed resources and has explicit fallback (0.8369ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 208.8497
