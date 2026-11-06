@@ -83,7 +83,22 @@ function HubEditor({
   return (
     <article className="hub-admin-card">
       <form onSubmit={(event) => model.submitUpdate(hub.id, event)}>
-        <h2>{hub.name}</h2>
+        <div className="hub-admin-title-row">
+          <h2>{hub.name}</h2>
+          <div className="hub-admin-title-actions">
+            <button type="submit" className="text-button" disabled={model.busy}>
+              Lưu thông tin
+            </button>
+            <button
+              type="button"
+              className="text-button hub-admin-delete-action"
+              disabled={model.busy}
+              onClick={() => model.removeHub(hub.id)}
+            >
+              Xóa Hub
+            </button>
+          </div>
+        </div>
         <label>
           Tên Hub
           <input
@@ -124,46 +139,76 @@ function HubEditor({
             <option value="inactive">Ngừng hoạt động</option>
           </select>
         </label>
-        <button className="secondary" disabled={model.busy}>
-          Lưu thông tin
-        </button>
-        <button
-          type="button"
-          className="danger"
-          disabled={model.busy}
-          onClick={() => model.removeHub(hub.id)}
-        >
-          Xóa Hub
-        </button>
       </form>
-      <form onSubmit={(event) => model.submitCapacity(hub.id, event)}>
-        <h3>Chỗ đỗ</h3>
-        <p>
-          {hub.parking.occupied} đang có xe · {hub.parking.held} đang được giữ
-        </p>
-        <label>
-          Sức chứa
-          <input
-            type="number"
-            min="0"
-            required
-            value={form.capacity}
-            onChange={(event) =>
-              model.changeHubField(
-                hub.id,
-                "capacity",
-                event.currentTarget.value,
-              )
-            }
-          />
-        </label>
-        <button className="secondary" disabled={model.busy}>
-          Cập nhật sức chứa
-        </button>
-      </form>
-      <div>
+      <div className="hub-admin-resource-column">
+        <form onSubmit={(event) => model.submitCapacity(hub.id, event)}>
+          <div className="hub-admin-resource-heading">
+            <h3>Chỗ đỗ</h3>
+            <p className="hub-admin-resource-value">
+              {hub.parking.occupied} đang có xe · {hub.parking.held} đang được
+              giữ
+            </p>
+          </div>
+          <div className="hub-admin-field">
+            <div className="hub-admin-field-title">
+              <label htmlFor={`hub-capacity-${hub.id}`}>Sức chứa</label>
+              <button
+                type="submit"
+                className="text-button"
+                disabled={model.busy}
+              >
+                Cập nhật sức chứa
+              </button>
+            </div>
+            <input
+              id={`hub-capacity-${hub.id}`}
+              type="number"
+              min="0"
+              required
+              value={form.capacity}
+              onChange={(event) =>
+                model.changeHubField(
+                  hub.id,
+                  "capacity",
+                  event.currentTarget.value,
+                )
+              }
+            />
+          </div>
+        </form>
+        <form onSubmit={(event) => model.submitChargingPoint(hub.id, event)}>
+          <div className="hub-admin-field">
+            <div className="hub-admin-field-title">
+              <label htmlFor={`hub-charging-point-${hub.id}`}>
+                Mã cổng sạc
+              </label>
+              <button
+                type="submit"
+                className="text-button"
+                disabled={model.busy}
+              >
+                Thêm cổng sạc
+              </button>
+            </div>
+            <input
+              id={`hub-charging-point-${hub.id}`}
+              required
+              maxLength={32}
+              value={form.chargingPointCode}
+              onChange={(event) =>
+                model.changeHubField(
+                  hub.id,
+                  "chargingPointCode",
+                  event.currentTarget.value,
+                )
+              }
+            />
+          </div>
+        </form>
+      </div>
+      <div className="hub-admin-charging-points">
         <h3>Cổng sạc</h3>
-        <ul>
+        <ul className="hub-admin-resource-list">
           {hub.chargingPoints.map((point) => (
             <li key={point.id}>
               {point.code} · {point.status}
@@ -178,26 +223,6 @@ function HubEditor({
             </li>
           ))}
         </ul>
-        <form onSubmit={(event) => model.submitChargingPoint(hub.id, event)}>
-          <label>
-            Mã cổng sạc
-            <input
-              required
-              maxLength={32}
-              value={form.chargingPointCode}
-              onChange={(event) =>
-                model.changeHubField(
-                  hub.id,
-                  "chargingPointCode",
-                  event.currentTarget.value,
-                )
-              }
-            />
-          </label>
-          <button className="secondary" disabled={model.busy}>
-            Thêm cổng sạc
-          </button>
-        </form>
       </div>
     </article>
   );
