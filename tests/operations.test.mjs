@@ -624,6 +624,54 @@ test(
         },
       );
       await t.test(
+        "expired rental reservation releases its vehicle for redistribution",
+        async () => {
+          const f = await fleet();
+          const vehicleIds = [f.vehicleIds[0]];
+          const pending = await order({ ...f, vehicleIds });
+          const reservation = await post(
+            "/vehicle-reservations",
+            { vehicleId: vehicleIds[0] },
+            student,
+          );
+          assert.equal(reservation.status, 201, JSON.stringify(reservation));
+
+          await pool.query(
+            "UPDATE vehicle_reservations SET created_at=now()-interval '2 minutes', expires_at=now()-interval '1 minute' WHERE id=$1",
+            [reservation.body.id],
+          );
+
+          const reservations = await call(
+            "GET",
+            "/vehicle-reservations",
+            student,
+          );
+          assert.equal(reservations.status, 200);
+          assert.equal(
+            reservations.body.find((item) => item.id === reservation.body.id)
+              ?.status,
+            "expired",
+          );
+          assert.deepEqual(await states(vehicleIds), [
+            {
+              id: vehicleIds[0],
+              status: "available",
+              hub_id: f.sourceHubId,
+            },
+          ]);
+
+          const started = await post(`/redistributions/${pending.id}/start`);
+          assert.equal(started.status, 201, JSON.stringify(started));
+          assert.deepEqual(await states(vehicleIds), [
+            {
+              id: vehicleIds[0],
+              status: "redistributing",
+              hub_id: f.sourceHubId,
+            },
+          ]);
+        },
+      );
+      await t.test(
         "failure after claiming vehicles rolls back the complete start",
         async () => {
           const f = await fleet(),
