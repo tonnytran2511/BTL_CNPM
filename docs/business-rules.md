@@ -62,3 +62,10 @@ TV4 triển khai lưu/resolve sự cố với actor và thời gian; lệnh đi�
 ## T20 — áp dụng BR-08 ở nhánh local
 
 Phiên ở cổng hỏng chuyển interrupted; scheduled không tăng pin, charging cần pin quan sát và đúng sessionId. Chưa đạt mục tiêu: request queued giữ created_at; đạt: fulfilled. Cổng giữ failed tới xác nhận sửa; recovery không chạy lại phiên cũ. Xe thuê trả về available theo chính sách queued chưa giữ xe của T19, vẫn phải vượt điều kiện thuê/Hub hoạt động. API incidents cũ xử lý cùng transaction cho charging_point. Xem charging-failure-recovery.md về retry, stale form và giới hạn.
+
+## T26 — quy tắc hủy lại lịch đỗ đã hủy
+
+- Lịch đỗ đã ở trạng thái `cancelled` mà bị hủy lại (kể cả với Idempotency-Key khác) là thao tác không có tác dụng: hệ thống trả 201 với trạng thái `cancelled`.
+- Hủy lần hai giữ nguyên bản ghi hủy lần đầu (người hủy, thời điểm), không ghi thêm lịch sử và không đổi chỗ đỗ hay cổng sạc.
+- Người không phải chủ lịch vẫn nhận 403 như thông thường.
+- Quy tắc do Duy Tân (T26) và Mai Anh thống nhất ngày [ngày chốt]. Mã 201 cho thao tác không làm gì hơi lệch so với 200, nhóm giữ nguyên để không đổi code sau khi đóng băng chức năng.
