@@ -672,6 +672,113 @@ test(
         },
       );
       await t.test(
+        "T28 incidents on reserved and rented vehicles preserve rental history",
+        async () => {
+          const f = await fleet();
+          await pool.query(
+            "INSERT INTO parking_spaces(hub_id,code,status) VALUES($1,'return','available')",
+            [f.targetHubId],
+          );
+
+          const reservedVehicleId = f.vehicleIds[0];
+          const reservation = await post(
+            "/vehicle-reservations",
+            { vehicleId: reservedVehicleId },
+            student,
+          );
+          assert.equal(reservation.status, 201, JSON.stringify(reservation));
+
+          const reservedIncident = await post("/incidents", {
+            resourceType: "vehicle",
+            resourceId: reservedVehicleId,
+            description: "T28: incident after reservation",
+          });
+          assert.equal(reservedIncident.status, 201);
+          assert.equal(
+            (
+              await post(
+                `/vehicle-reservations/${reservation.body.id}/pickup`,
+                undefined,
+                student,
+              )
+            ).status,
+            409,
+          );
+          assert.equal(
+            (
+              await pool.query(
+                "SELECT status FROM vehicle_reservations WHERE id=$1",
+                [reservation.body.id],
+              )
+            ).rows[0].status,
+            "active",
+          );
+          assert.equal(
+            (await states([reservedVehicleId]))[0].status,
+            "reserved",
+          );
+          assert.equal(
+            (await post(`/incidents/${reservedIncident.body.id}/resolve`))
+              .status,
+            201,
+          );
+          const pickedUp = await post(
+            `/vehicle-reservations/${reservation.body.id}/pickup`,
+            undefined,
+            student,
+          );
+          assert.equal(pickedUp.status, 200, JSON.stringify(pickedUp));
+
+          const activeVehicleId = f.vehicleIds[1];
+          const activeReservation = await post(
+            "/vehicle-reservations",
+            { vehicleId: activeVehicleId },
+            student,
+          );
+          assert.equal(activeReservation.status, 201);
+          const trip = await post(
+            `/vehicle-reservations/${activeReservation.body.id}/pickup`,
+            undefined,
+            student,
+          );
+          assert.equal(trip.status, 200, JSON.stringify(trip));
+
+          const activeIncident = await post("/incidents", {
+            resourceType: "vehicle",
+            resourceId: activeVehicleId,
+            description: "T28: incident during active rental",
+          });
+          assert.equal(activeIncident.status, 201);
+          const trips = await call("GET", "/trips", student);
+          assert.ok(
+            trips.body.some(
+              (item) => item.id === trip.body.id && item.status === "active",
+            ),
+          );
+          assert.equal((await states([activeVehicleId]))[0].status, "in_use");
+
+          const returned = await post(
+            `/trips/${trip.body.id}/return`,
+            { targetHubId: f.targetHubId },
+            student,
+          );
+          assert.equal(returned.status, 200, JSON.stringify(returned));
+          assert.equal(returned.body.status, "completed");
+          assert.equal(
+            (await states([activeVehicleId]))[0].hub_id,
+            f.targetHubId,
+          );
+          assert.equal(
+            (
+              await pool.query("SELECT status FROM incidents WHERE id=$1", [
+                activeIncident.body.id,
+              ])
+            ).rows[0].status,
+            "open",
+          );
+        },
+      );
+      await t.test(
         "failure after claiming vehicles rolls back the complete start",
         async () => {
           const f = await fleet(),
