@@ -40,7 +40,8 @@ export function useOperations(
   const [incidentForm, setIncidentForm] = useState(emptyIncident);
   const [redistributionForm, setRedistributionForm] =
     useState(emptyRedistribution);
-  const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
+  const [actionError, setActionError] = useState("");
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   ownerRef.current = operator;
@@ -56,7 +57,8 @@ export function useOperations(
     setLog([]);
     setIncidentForm(emptyIncident);
     setRedistributionForm(emptyRedistribution);
-    setError("");
+    setLoadError("");
+    setActionError("");
     setLoading(false);
     setBusy(false);
   }, []);
@@ -76,7 +78,7 @@ export function useOperations(
       enabledRef.current &&
       !controller.signal.aborted;
     setLoading(true);
-    setError("");
+    setLoadError("");
     try {
       const current = await api.me(controller.signal);
       if (!active()) return;
@@ -110,7 +112,7 @@ export function useOperations(
         clear();
         onAccessRevoked();
       } else {
-        setError(
+        setLoadError(
           cause instanceof Error
             ? cause.message
             : "Không thể tải dữ liệu vận hành.",
@@ -156,7 +158,7 @@ export function useOperations(
         (mutationCount.current.get(owner) ?? 0) + 1,
       );
       setBusy(true);
-      setError("");
+      setActionError("");
       try {
         const current = await api.me();
         if (ownerRef.current !== owner || !enabledRef.current) return false;
@@ -181,7 +183,7 @@ export function useOperations(
           clear();
           onAccessRevoked();
         } else if (enabledRef.current) {
-          setError(
+          setActionError(
             cause instanceof Error
               ? cause.message
               : "Thao tác không thành công.",
@@ -301,10 +303,13 @@ export function useOperations(
     log,
     incidentForm,
     redistributionForm,
-    error,
+    error: actionError || loadError,
     loading,
     busy,
-    refresh,
+    refresh: () => {
+      setActionError("");
+      return refresh();
+    },
     changeIncident,
     changeRedistribution,
     toggleVehicle,
