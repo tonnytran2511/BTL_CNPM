@@ -33,3 +33,7 @@ W23-R01 / P2 — demo runner / Minh Tường: gửi SIGTERM trong khi tab Chrome
 W23-T02 / P2 — test fixture T16 / Minh Tường phối hợp Duy Tân: CI push ở ab93e49 fail khi teardown phát idle connection error 57P01 ngoài promise; 10 subtest nghiệp vụ đã pass, PR workflow cùng head pass. Sửa fixture chờ API exit trước dọn pool/DB, xử lý riêng 57P01 chỉ sau khi bắt đầu stop; idle error khác vẫn fail. Local T16 retest 12/12 pass. Full CI head mới được kiểm tra riêng, không đánh đồng một workflow pass với mọi check đã pass.
 
 W23-R03 / P2 — fixture T17: CI PR head e47870a (job 123441763352) pass 12 ca con nhưng fail lúc teardown vì idle pool phát 57P01 (terminating connection due to administrator command). Chờ API exit trước pool/DB stop, ghi mọi idle error để fail fixture trừ 57P01 khi teardown đã bắt đầu. Áp dụng cùng thứ tự cho T05/T07/T08 có cùng mẫu cleanup. Không đổi production code hoặc bỏ assertion nghiệp vụ. Chạy đồng thời bốn suite liên quan: 49 tests pass, 0 fail ngày 29/10.
+
+## T38 — 23/11/2026
+
+T38-UI01 / P2 — trang Vận hành. Khi hai chỗ Hub đích đều bị chiếm, complete trả `409` và lệnh còn `in_progress`. Polling có thể xóa cảnh báo trước khi operator đọc được. Bản sửa cục bộ giữ cảnh báo qua các lần polling. Regression hook tái hiện trên baseline rồi pass sau sửa. Chrome xác minh cảnh báo qua hai lần polling và hoàn tất lại sau khi giải phóng chỗ. Chi tiết tại [execution T38](test-runs/2026-11-23-t38-cross-test.md).
