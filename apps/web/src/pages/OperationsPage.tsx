@@ -129,25 +129,29 @@ export function OperationsPage({ model }: { model: OperationsModel }) {
               ))}
             </select>
           </label>
-          <fieldset>
-            <legend>Xe available tại nguồn</legend>
-            {model.availableVehicles.length ? (
-              model.availableVehicles.map((vehicle) => (
-                <label className="operation-checkbox" key={vehicle.id}>
-                  <input
-                    type="checkbox"
-                    checked={model.redistributionForm.vehicleIds.includes(
-                      vehicle.id,
-                    )}
-                    onChange={() => model.toggleVehicle(vehicle.id)}
-                  />
-                  {vehicle.code} · {vehicle.type}
-                </label>
-              ))
-            ) : (
-              <p className="muted">Chọn Hub nguồn có xe khả dụng.</p>
-            )}
-          </fieldset>
+          <div className="operation-vehicle-picker">
+            <span className="operation-vehicle-title">
+              Xe available tại nguồn
+            </span>
+            <fieldset aria-label="Xe available tại nguồn">
+              {model.availableVehicles.length ? (
+                model.availableVehicles.map((vehicle) => (
+                  <label className="operation-checkbox" key={vehicle.id}>
+                    <input
+                      type="checkbox"
+                      checked={model.redistributionForm.vehicleIds.includes(
+                        vehicle.id,
+                      )}
+                      onChange={() => model.toggleVehicle(vehicle.id)}
+                    />
+                    {vehicle.code} · {vehicle.type}
+                  </label>
+                ))
+              ) : (
+                <p className="muted">Chọn Hub nguồn có xe khả dụng.</p>
+              )}
+            </fieldset>
+          </div>
           <button
             className="primary"
             disabled={
@@ -164,7 +168,6 @@ export function OperationsPage({ model }: { model: OperationsModel }) {
       <section className="operations-section">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">WORK QUEUE</p>
             <h2>Lệnh điều chuyển</h2>
           </div>
         </div>
@@ -181,7 +184,6 @@ export function OperationsPage({ model }: { model: OperationsModel }) {
       <section className="operations-section">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">INCIDENTS</p>
             <h2>Sự cố</h2>
           </div>
         </div>
@@ -198,7 +200,6 @@ export function OperationsPage({ model }: { model: OperationsModel }) {
       <section className="operations-section">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">AUDIT TRAIL</p>
             <h2>Lịch sử vận hành</h2>
           </div>
         </div>
